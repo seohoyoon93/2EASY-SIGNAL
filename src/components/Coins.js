@@ -4,6 +4,22 @@ import { connect } from "react-redux";
 import { selectCoin } from "../store/actions/coinActions";
 
 class Coins extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      sym: ""
+    };
+  }
+  onChangeFollower = (e, data) => {
+    const symbol = e.target.innerText
+      .match(/\([A-Z]\w+\)/)[0]
+      .match(/[A-Z]\w+/)[0];
+    console.log(symbol);
+    this.setState({ sym: symbol }, () => {
+      this.props.selectCoin(this.state);
+    });
+  };
+
   render() {
     const { coins } = this.props;
     const coinOptions = coins.map(coin => {
@@ -17,6 +33,7 @@ class Coins extends Component {
         selection
         className="coins"
         options={coinOptions}
+        onChange={this.onChangeFollower}
       />
     );
   }
