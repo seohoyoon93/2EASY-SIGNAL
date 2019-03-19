@@ -1,14 +1,38 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { selectExchange } from "../store/actions/exchangeActions";
 
 import ExchangeList from "./ExchangeList";
 
 class Exchanges extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedExchange: ""
+    };
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+  handleClick(e, data) {
+    this.setState(
+      {
+        selectedExchange: data.content
+      },
+      () => {
+        this.props.selectExchange(this.state.selectedExchange);
+      }
+    );
+  }
+
   render() {
-    const { exchanges } = this.props;
+    const { exchanges, selectedExchange } = this.props;
     return (
       <div className="exchanges">
-        <ExchangeList exchanges={exchanges} />
+        <ExchangeList
+          exchanges={exchanges}
+          selectedExchange={selectedExchange}
+          handleClick={this.handleClick}
+        />
         <div className="exchanges-lower-section">
           <img src="/images/icon_announcement.svg" alt="announcement" />
         </div>
@@ -19,8 +43,18 @@ class Exchanges extends Component {
 
 const mapStateToProps = state => {
   return {
-    exchanges: state.exchange.exchanges
+    selectedExchange: state.exchange.selectedExchange,
+    exchanges: state.coin.exchanges
   };
 };
 
-export default connect(mapStateToProps)(Exchanges);
+const mapDispatch = dispatch => {
+  return {
+    selectExchange: exchange => dispatch(selectExchange(exchange))
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatch
+)(Exchanges);

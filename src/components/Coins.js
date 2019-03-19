@@ -39,7 +39,7 @@ class Coins extends Component {
       const symbol = firstCoin.symbol;
       console.log(symbol);
       this.setState({ sym: symbol }, () => {
-        this.props.selectCoin(this.state);
+        this.props.selectCoin(this.state.sym);
       });
     }
   };
@@ -51,7 +51,7 @@ class Coins extends Component {
         .match(/[A-Z]\w+/)[0];
       console.log(symbol);
       this.setState({ sym: symbol }, () => {
-        this.props.selectCoin(this.state);
+        this.props.selectCoin(this.state.sym);
       });
     }
   };
