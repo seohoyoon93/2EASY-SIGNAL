@@ -11,7 +11,9 @@ const exchangeReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedExchange: action.data.exchange,
-        exchangeData: action.data.exchangeData
+        exchangeData: action.data.exchangeData,
+        orderbookData: action.data.orderbookData,
+        bidAskData: action.data.bidAskData
       };
 
     case SELECT_EXCHANGE_ERROR:

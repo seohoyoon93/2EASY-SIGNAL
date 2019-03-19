@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { Icon } from "semantic-ui-react";
 
 class BidAsk extends Component {
@@ -14,6 +15,8 @@ class BidAsk extends Component {
     }));
   }
   render() {
+    const { bidAskData } = this.props;
+
     return (
       <div className="bidask content-wrapper">
         <div className="content-header" onClick={this.handleClick}>
@@ -25,14 +28,21 @@ class BidAsk extends Component {
           )}
         </div>
         <div className={this.state.isHidden ? "content hidden" : "content"}>
-          <h4>1호가 = 0.1</h4>
           <div className="best-offer">
-            <p className="price">최고 매수 호가 = 35.1</p>
-            <p className="amount">잔량 123.125</p>
+            <p className="price">{`최고 매수 호가 = ${
+              bidAskData ? bidAskData.highestBidPrice : 0
+            }`}</p>
+            <p className="amount">{`잔량 ${
+              bidAskData ? bidAskData.highestBidQuantity : 0
+            }`}</p>
           </div>
           <div className="best-offer">
-            <p className="price">최저 매도 호가 = 39.1</p>
-            <p className="amount">잔량 246.000</p>
+            <p className="price">{`최저 매도 호가 = ${
+              bidAskData ? bidAskData.lowestAskPrice : 0
+            }`}</p>
+            <p className="amount">{`잔량 ${
+              bidAskData ? bidAskData.lowestAskQuantity : 0
+            }`}</p>
           </div>
         </div>
       </div>
@@ -40,4 +50,10 @@ class BidAsk extends Component {
   }
 }
 
-export default BidAsk;
+const mapStateToProps = state => {
+  return {
+    bidAskData: state.exchange.bidAskData
+  };
+};
+
+export default connect(mapStateToProps)(BidAsk);

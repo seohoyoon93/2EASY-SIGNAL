@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { Icon } from "semantic-ui-react";
 
 class Orderbook extends Component {
@@ -14,8 +15,13 @@ class Orderbook extends Component {
     }));
   }
   render() {
-    let bidWidth = { width: "33%" };
-    let askWidth = { width: "67%" };
+    const { orderbookData } = this.props;
+    let ask = orderbookData ? orderbookData.aggAsks : 1;
+    let bid = orderbookData ? orderbookData.aggBids : 1;
+
+    let total = ask + bid;
+    let bidWidth = { width: `${Math.round((bid / total) * 100)}%` };
+    let askWidth = { width: `${Math.round((ask / total) * 100)}%` };
     return (
       <div className="orderbook content-wrapper">
         <div className="content-header" onClick={this.handleClick}>
@@ -28,14 +34,13 @@ class Orderbook extends Component {
         </div>
         <div className={this.state.isHidden ? "content hidden" : "content"}>
           <h4>매수 : 매도</h4>
-          <p>1 : 2</p>
           <div className="orderbook-chart">
             <div className="bars">
               <div className="bid bar" style={bidWidth}>
-                2,300
+                {bid}
               </div>
               <div className="ask bar" style={askWidth}>
-                4,600
+                {ask}
               </div>
             </div>
           </div>
@@ -45,4 +50,10 @@ class Orderbook extends Component {
   }
 }
 
-export default Orderbook;
+const mapStateToProps = state => {
+  return {
+    orderbookData: state.exchange.orderbookData
+  };
+};
+
+export default connect(mapStateToProps)(Orderbook);

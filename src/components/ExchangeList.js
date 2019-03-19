@@ -6,7 +6,7 @@ const ExchangeList = props => {
   const btns =
     exchanges.length > 0 ? (
       exchanges.map(exchange => {
-        const divClass = selectedExchange == exchange.name ? "selected" : "";
+        const divClass = selectedExchange === exchange.name ? "selected" : "";
         return (
           <Button
             content={exchange.name}
