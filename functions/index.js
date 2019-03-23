@@ -60,15 +60,17 @@ exports.setUpbitMarkets = functions.https.onRequest((req, res) => {
 //TODO: this function should finish when the last base data has received.
 //      currently, it does not finish but goes on forever
 exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
+  let count = 0;
+  let length;
   admin
     .firestore()
     .doc("exchanges/upbit")
     .get()
     .then(snapshot => {
       const data = snapshot.data();
+      length = data.bases.length;
       data.bases.delayedForEach(
         (base, index, array) => {
-          console.log(base, ", ", new Date());
           const options = {
             method: "GET",
             url: "https://api.upbit.com/v1/candles/minutes/1",
@@ -81,7 +83,6 @@ exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
               return;
             }
             const obj = JSON.parse(result);
-            console.log(obj);
             const currentData = obj[0];
             const lastData = obj[1];
 
@@ -111,6 +112,11 @@ exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
                   base,
                   " market of Upbit"
                 );
+                if (++count == length * 2) {
+                  console.log("length: ", length);
+                  console.log("count: ", count);
+                  res.send("Done");
+                }
               })
               .catch(err => {
                 console.error(
@@ -137,6 +143,11 @@ exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
                   base,
                   " market of Upbit"
                 );
+                if (++count == length * 2) {
+                  console.log("length: ", length);
+                  console.log("count: ", count);
+                  res.send("Done");
+                }
               })
               .catch(err => {
                 console.error(
