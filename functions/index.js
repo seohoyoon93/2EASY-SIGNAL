@@ -57,8 +57,39 @@ exports.setUpbitMarkets = functions.https.onRequest((req, res) => {
   );
 });
 
-//TODO: this function should finish when the last base data has received.
-//      currently, it does not finish but goes on forever
+exports.setBithumbMarkets = functions.https.onRequest((req, res) => {
+  request(
+    {
+      method: "GET",
+      url: "https://api.bithumb.com/public/ticker/ALL"
+    },
+    (err, response, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      const obj = JSON.parse(result);
+      const bases = Object.keys(obj.data);
+      admin
+        .firestore()
+        .doc("exchanges/bithumb")
+        .set({
+          name: "Bithumb",
+          link: "https://www.bithumb.com/",
+          bases: bases
+        })
+        .then(() => {
+          console.log("Successfully updated bithumb!");
+          res.send("Done!");
+        })
+        .catch(err => {
+          console.error("Error updating bithumb");
+          res.status(500).send(err);
+        });
+    }
+  );
+});
+
 exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
   let count = 0;
   let length;
@@ -71,6 +102,7 @@ exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
       length = data.bases.length;
       data.bases.delayedForEach(
         (base, index, array) => {
+          const now = new Date();
           const options = {
             method: "GET",
             url: "https://api.upbit.com/v1/candles/minutes/1",
@@ -87,6 +119,9 @@ exports.setUpbitMarketData = functions.https.onRequest((req, res) => {
             const lastData = obj[1];
 
             //currentData saving
+            const currentCandleTime = Math.floor(a / 60000) * 60000;
+            const lastCandleTime = currentCandleTime - 60000;
+
             const currentStartTime =
               new Date(currentData.candle_date_time_utc).getUnixTime() * 1000;
             //lastData to update

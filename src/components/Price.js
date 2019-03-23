@@ -18,27 +18,7 @@ class Price extends Component {
     }));
   }
   render() {
-    const { exchangeData } = this.props;
-    exchangeData.sort(compareTime);
-    const oneMinuteData =
-      exchangeData.length > 0
-        ? Math.round(
-            ((exchangeData[1].price - exchangeData[0].price) /
-              exchangeData[0].price) *
-              100
-          )
-        : 0;
-    const twoMinuteData =
-      exchangeData.length > 0
-        ? Math.round(
-            ((exchangeData[3].price +
-              exchangeData[2].price -
-              exchangeData[1].price -
-              exchangeData[0].price) /
-              (exchangeData[1].price + exchangeData[0].price)) *
-              100
-          )
-        : 0;
+    const { candleData } = this.props;
     return (
       <div className="price content-wrapper">
         <div className="content-header" onClick={this.handleClick}>
@@ -49,54 +29,78 @@ class Price extends Component {
             <Icon name="triangle down" />
           )}
         </div>
-        <div className={this.state.isHidden ? "content hidden" : "content"}>
-          <h4>현재시세</h4>
-          <p>₩1.29</p>
-          <div className="charts">
-            <div className="chart">
-              <div className="percent">{`${oneMinuteData}%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={oneMinuteData} />
+        {candleData.isFetching ? (
+          <div>Loading</div>
+        ) : (
+          <div className={this.state.isHidden ? "content hidden" : "content"}>
+            <h4>현재시세</h4>
+            <p>{`₩${candleData.priceChanges.currentPrice}`}</p>
+            <div className="charts">
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.minPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart options={candleData.priceChanges.minPriceChange} />
+                </div>
+                <div className="time">1분</div>
               </div>
-              <div className="time">1분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${twoMinuteData}%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={twoMinuteData} />
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.threeMinPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart
+                    options={candleData.priceChanges.threeMinPriceChange}
+                  />
+                </div>
+                <div className="time">3분</div>
               </div>
-              <div className="time">3분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">35%</div>
-              <div className="bar-wrapper">
-                <BarChart options={35} />
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.fiveMinPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart
+                    options={candleData.priceChanges.fiveMinPriceChange}
+                  />
+                </div>
+                <div className="time">5분</div>
               </div>
-              <div className="time">5분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">50%</div>
-              <div className="bar-wrapper">
-                <BarChart options={50} />
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.fifteenMinPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart
+                    options={candleData.priceChanges.fifteenMinPriceChange}
+                  />
+                </div>
+                <div className="time">15분</div>
               </div>
-              <div className="time">15분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">50%</div>
-              <div className="bar-wrapper">
-                <BarChart options={50} />
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.thirtyMinPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart
+                    options={candleData.priceChanges.thirtyMinPriceChange}
+                  />
+                </div>
+                <div className="time">30분</div>
               </div>
-              <div className="time">30분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">90%</div>
-              <div className="bar-wrapper">
-                <BarChart options={90} />
+              <div className="chart">
+                <div className="percent">{`${
+                  candleData.priceChanges.hourPriceChange
+                }%`}</div>
+                <div className="bar-wrapper">
+                  <BarChart options={candleData.priceChanges.hourPriceChange} />
+                </div>
+                <div className="time">1시간</div>
               </div>
-              <div className="time">1시간</div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -104,7 +108,7 @@ class Price extends Component {
 
 const mapStateToProps = state => {
   return {
-    exchangeData: state.exchange.exchangeData
+    candleData: state.exchange.candleData
   };
 };
 

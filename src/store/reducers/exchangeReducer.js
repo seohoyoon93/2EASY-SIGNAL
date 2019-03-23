@@ -1,8 +1,22 @@
-import { SELECT_EXCHANGE, SELECT_EXCHANGE_ERROR } from "../actionTypes";
+import {
+  SELECT_EXCHANGE,
+  SELECT_EXCHANGE_ERROR,
+  RECEIVE_CANDLE_DATA,
+  RECEIVE_ORDERBOOK_DATA
+} from "../actionTypes";
 
 const initialState = {
   selectedExchange: "",
-  exchangeData: []
+  candleData: {
+    isFetching: false,
+    volumeChanges: {},
+    priceChanges: {}
+  },
+  orderbookData: {
+    isFetching: false,
+    aggOrders: {},
+    bidAsk: {}
+  }
 };
 
 const exchangeReducer = (state = initialState, action) => {
@@ -10,10 +24,29 @@ const exchangeReducer = (state = initialState, action) => {
     case SELECT_EXCHANGE:
       return {
         ...state,
-        selectedExchange: action.data.exchange,
-        exchangeData: action.data.exchangeData,
-        orderbookData: action.data.orderbookData,
-        bidAskData: action.data.bidAskData
+        selectedExchange: action.exchange,
+        candleData: { ...state.candleData, isFetching: true },
+        orderbookData: { ...state.orderbookData, isFetching: true }
+      };
+
+    case RECEIVE_CANDLE_DATA:
+      return {
+        ...state,
+        candleData: {
+          isFetching: false,
+          volumeChanges: action.volumeChanges,
+          priceChanges: action.priceChanges
+        }
+      };
+
+    case RECEIVE_ORDERBOOK_DATA:
+      return {
+        ...state,
+        orderbookData: {
+          isFetching: false,
+          aggOrders: action.aggOrders,
+          bidAsk: action.bidAsk
+        }
       };
 
     case SELECT_EXCHANGE_ERROR:
