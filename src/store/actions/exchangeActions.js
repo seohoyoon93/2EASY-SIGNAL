@@ -7,7 +7,7 @@ import {
 const request = require("request");
 
 const getUpbitCandleSticks = coin => {
-  return dispatch => {
+  return new Promise((resolve, reject) => {
     const now = Math.floor(new Date() / 60000) * 60000;
     const twoHoursAgo = now - 7200000;
     const hourAgo = now - 3600000;
@@ -58,8 +58,7 @@ const getUpbitCandleSticks = coin => {
 
     request(options, (err, response, result) => {
       if (err) {
-        console.log("Error retrieving upbit candle data: ", err);
-        return;
+        reject(new Error("Error retrieving upbit candle data: ", err));
       }
       const obj = JSON.parse(result);
 
@@ -102,7 +101,7 @@ const getUpbitCandleSticks = coin => {
             currentPrice: lastPrice
           };
 
-          dispatch({ type: RECEIVE_CANDLE_DATA, volumeChanges, priceChanges });
+          resolve({ volumeChanges, priceChanges });
         });
       } else {
         // when obj.length > 0
@@ -264,22 +263,24 @@ const getUpbitCandleSticks = coin => {
           currentPrice
         };
 
-        dispatch({ type: RECEIVE_CANDLE_DATA, volumeChanges, priceChanges });
+        resolve({ volumeChanges, priceChanges });
       }
     });
-  };
+  });
 };
 
 const getUpbitOrderbook = coin => {
-  return dispatch => {
+  return new Promise((resolve, reject) => {
     const options = {
       method: "GET",
       url: "https://api.upbit.com/v1/orderbook",
       qs: { markets: `KRW-${coin}` }
     };
 
-    request(options, function(error, response, body) {
-      if (error) throw new Error(error);
+    request(options, function(err, response, body) {
+      if (err) {
+        reject(new Error("Error retrieving upbit orderbook data: ", err));
+      }
       const obj = JSON.parse(body);
 
       const aggAsks = obj[0].total_ask_size;
@@ -298,15 +299,15 @@ const getUpbitOrderbook = coin => {
         lowestAskQuantity
       };
 
-      dispatch({ type: RECEIVE_ORDERBOOK_DATA, aggOrders, bidAsk });
+      resolve({ aggOrders, bidAsk });
     });
-  };
+  });
 };
 
 const getUpbitTrades = coin => {};
 
 const getBithumbCandleSticks = coin => {
-  return dispatch => {
+  return new Promise((resolve, reject) => {
     const now = new Date();
     const from = Math.floor((now - 7200000) / 60000) * 60 - 1;
     const to = Math.ceil(now / 60000) * 60;
@@ -327,7 +328,9 @@ const getBithumbCandleSticks = coin => {
       url: `https://www.bithumb.com/resources/chart/${coin}_xcoinTrade_01M.json?symbol=BTC&resolution=0.5&from=${from}&to=${to}&strTime=${now}`
     };
     request(options, (err, res, result) => {
-      if (err) throw new Error(err);
+      if (err) {
+        reject(new Error("Error retrieving bithumb chart data: ", err));
+      }
 
       const obj = JSON.parse(result);
       console.log(obj);
@@ -340,8 +343,7 @@ const getBithumbCandleSticks = coin => {
         };
         request(subOptions, (err, response, result) => {
           if (err) {
-            console.log("Error retrieving bithumb ticker data: ", err);
-            return;
+            reject(new Error("Error retrieving bithumb ticker data: ", err));
           }
           const obj = JSON.parse(result);
           const lastPrice = obj.data.closing_price;
@@ -370,7 +372,7 @@ const getBithumbCandleSticks = coin => {
             currentPrice: lastPrice
           };
 
-          dispatch({ type: RECEIVE_CANDLE_DATA, volumeChanges, priceChanges });
+          resolve(volumeChanges, priceChanges);
         });
       } else {
         // when obj.length > 0
@@ -531,21 +533,23 @@ const getBithumbCandleSticks = coin => {
           minPriceChange,
           currentPrice
         };
-        dispatch({ type: RECEIVE_CANDLE_DATA, volumeChanges, priceChanges });
+        resolve(volumeChanges, priceChanges);
       }
     });
-  };
+  });
 };
 
 const getBithumbOrderbook = coin => {
-  return dispatch => {
+  return new Promise((resolve, reject) => {
     const options = {
       method: "GET",
       uri: `https://api.bithumb.com/public/orderbook/${coin}`,
       qs: { count: 50 }
     };
     request(options, (err, res, result) => {
-      if (err) throw new Error(err);
+      if (err) {
+        reject(new Error("Error retrieving bithumb orderbook data: ", err));
+      }
 
       const obj = JSON.parse(result);
       let aggBids = 0,
@@ -573,9 +577,9 @@ const getBithumbOrderbook = coin => {
         lowestAskQuantity
       };
 
-      dispatch({ type: RECEIVE_ORDERBOOK_DATA, aggOrders, bidAsk });
+      resolve({ aggOrders, bidAsk });
     });
-  };
+  });
 };
 
 const getBithumbTrades = coin => {};
@@ -587,11 +591,35 @@ export const selectExchange = exchange => {
     dispatch({ type: SELECT_EXCHANGE, exchange });
 
     if (exchange === "Upbit") {
-      getUpbitCandleSticks(selectedCoin);
-      getUpbitOrderbook(selectedCoin);
+      return getUpbitCandleSticks(selectedCoin).then(candleData => {
+        dispatch({
+          type: RECEIVE_CANDLE_DATA,
+          volumeChanges: candleData.volumeChanges,
+          priceChanges: candleData.priceChanges
+        });
+        getUpbitOrderbook(selectedCoin).then(orderbookData => {
+          dispatch({
+            type: RECEIVE_ORDERBOOK_DATA,
+            aggOrders: orderbookData.aggOrders,
+            bidAsk: orderbookData.bidAsk
+          });
+        });
+      });
     } else if (exchange === "Bithumb") {
-      getBithumbCandleSticks(selectedCoin);
-      getBithumbOrderbook(selectedCoin);
+      return getBithumbCandleSticks(selectedCoin).then(candleData => {
+        dispatch({
+          type: RECEIVE_CANDLE_DATA,
+          volumeChanges: candleData.volumeChanges,
+          priceChanges: candleData.priceChanges
+        });
+        getBithumbOrderbook(selectedCoin).then(orderbookData => {
+          dispatch({
+            type: RECEIVE_ORDERBOOK_DATA,
+            aggOrders: orderbookData.aggOrders,
+            bidAsk: orderbookData.bidAsk
+          });
+        });
+      });
     }
   };
 };
