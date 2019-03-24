@@ -15,7 +15,7 @@ class BidAsk extends Component {
     }));
   }
   render() {
-    const { bidAskData } = this.props;
+    const { orderbookData } = this.props;
 
     return (
       <div className="bidask content-wrapper">
@@ -30,18 +30,18 @@ class BidAsk extends Component {
         <div className={this.state.isHidden ? "content hidden" : "content"}>
           <div className="best-offer">
             <p className="price">{`최고 매수 호가 = ${
-              bidAskData ? bidAskData.highestBidPrice : 0
+              orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
             }`}</p>
             <p className="amount">{`잔량 ${
-              bidAskData ? bidAskData.highestBidQuantity : 0
+              orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
             }`}</p>
           </div>
           <div className="best-offer">
             <p className="price">{`최저 매도 호가 = ${
-              bidAskData ? bidAskData.lowestAskPrice : 0
+              orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
             }`}</p>
             <p className="amount">{`잔량 ${
-              bidAskData ? bidAskData.lowestAskQuantity : 0
+              orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
             }`}</p>
           </div>
         </div>
@@ -52,7 +52,7 @@ class BidAsk extends Component {
 
 const mapStateToProps = state => {
   return {
-    bidAskData: state.exchange.bidAskData
+    orderbookData: state.exchange.orderbookData
   };
 };
 

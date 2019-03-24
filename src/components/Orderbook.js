@@ -16,8 +16,8 @@ class Orderbook extends Component {
   }
   render() {
     const { orderbookData } = this.props;
-    let ask = orderbookData ? orderbookData.aggAsks : 1;
-    let bid = orderbookData ? orderbookData.aggBids : 1;
+    let ask = orderbookData ? orderbookData.aggOrders.aggAsks : 1;
+    let bid = orderbookData ? orderbookData.aggOrders.aggBids : 1;
 
     let total = ask + bid;
     let bidWidth = { width: `${Math.round((bid / total) * 100)}%` };
