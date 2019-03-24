@@ -3,7 +3,6 @@ import { Icon } from "semantic-ui-react";
 import { connect } from "react-redux";
 
 import BarChart from "./BarChart";
-import { compareTime } from "../helper/helper";
 
 class Price extends Component {
   constructor(props) {

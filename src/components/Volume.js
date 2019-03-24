@@ -3,7 +3,6 @@ import { Icon } from "semantic-ui-react";
 import { connect } from "react-redux";
 
 import BarChart from "./BarChart";
-import { compareTime } from "../helper/helper";
 
 class Volume extends Component {
   constructor(props) {
@@ -34,7 +33,7 @@ class Volume extends Component {
         ) : (
           <div className={this.state.isHidden ? "content hidden" : "content"}>
             <h4>24H 거래대금</h4>
-            <p>₩1,242,500</p>
+            <p>{`₩${candleData.volumeChanges.accTradeVol24h}`}</p>
             <div className="charts">
               <div className="chart">
                 <div className="percent">{`${
@@ -64,7 +63,7 @@ class Volume extends Component {
                 }%`}</div>
                 <div className="bar-wrapper">
                   <BarChart
-                    options={candleData.volumeChanges.minVolumeChange}
+                    options={candleData.volumeChanges.fiveMinVolumeChange}
                   />
                 </div>
                 <div className="time">5분</div>
