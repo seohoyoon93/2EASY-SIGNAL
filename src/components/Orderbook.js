@@ -37,10 +37,10 @@ class Orderbook extends Component {
           <div className="orderbook-chart">
             <div className="bars">
               <div className="bid bar" style={bidWidth}>
-                {bid}
+                {bid ? bid.toFixed(4) : null}
               </div>
               <div className="ask bar" style={askWidth}>
-                {ask}
+                {ask ? ask.toFixed(4) : null}
               </div>
             </div>
           </div>
