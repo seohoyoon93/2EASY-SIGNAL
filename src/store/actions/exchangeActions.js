@@ -614,13 +614,13 @@ const getBitsonicCandleSticks = coin => {
 
     rp({
       method: "GET",
-      url: `https://bitsonic.co.kr/front/exchange/${coin}-krw`
+      url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
     })
       .then(function(html) {
         //success!
 
         const accTradeVol24hText = $(html)
-          .find("div.coin-text-group")
+          .find("div.coin-text-group div.coin-text-item")
           .last()
           .find("p")
           .text()
@@ -628,12 +628,14 @@ const getBitsonicCandleSticks = coin => {
         const accTradeVol24hInt = parseFloat(
           accTradeVol24hText[0].match(/\d/g).join("")
         );
+        console.log("Bitsonic 24h vol int: ", accTradeVol24hInt);
         let accTradeVol24hBlah = 0;
         if (accTradeVol24hText.length === 2) {
           accTradeVol24hBlah = parseFloat(
             "0." + accTradeVol24hText[1].match(/\d/g).join("")
           );
         }
+        console.log("Bitsonic 24h vol blah: ", accTradeVol24hBlah);
         const accTradeVol24h = accTradeVol24hInt + accTradeVol24hBlah;
 
         const lastPriceText = $(html)
@@ -700,7 +702,7 @@ const getBitsonicCandleSticks = coin => {
             const fiveMinData = parsedBody.filter(elem => elem.T > tenMinsAgo);
             let lastFiveMinVolume = 0;
             let currentFiveMinVolume = 0;
-            let lastFiveMinPrice = fiveMinData.rerverse()[0].c;
+            let lastFiveMinPrice = fiveMinData.reverse()[0].c;
             fiveMinData.forEach(elem => {
               if (elem.T < fiveMinsAgo) {
                 lastFiveMinVolume += parseFloat(elem.q);
@@ -840,12 +842,13 @@ const getBitsonicOrderbook = coin => {
   return new Promise((resolve, reject) => {
     rp({
       method: "GET",
-      url: `https://bitsonic.co.kr/front/exchange/${coin}-krw`
+      url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
     })
       .then(function(html) {
         //success!
         const aggAskText = $(html)
           .find("div#stickyOrderbook div.orderbook-header.orderbook-header-top")
+          .children()
           .last()
           .find("p.text-blue")
           .text()
@@ -861,12 +864,12 @@ const getBitsonicOrderbook = coin => {
           .find(
             "div#stickyOrderbook div.orderbook-header.orderbook-header-bottom"
           )
+          .children()
           .last()
           .find("p.text-pink")
           .text()
           .split(".");
         const aggBidsInt = parseFloat(aggBidsText[0].match(/\d/g).join(""));
-
         let aggBidsBlah = 0;
         if (aggBidsText.length === 2) {
           aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""));
@@ -875,7 +878,7 @@ const getBitsonicOrderbook = coin => {
 
         const lowestAskPriceText = $(html)
           .find("ul.orderbook-flex-list.blue")
-          .eq(9)
+          .last()
           .find("span.PriceNumber.PriceNumber--high")
           .text()
           .split(".");
@@ -892,7 +895,6 @@ const getBitsonicOrderbook = coin => {
 
         const lowestAskQuantityText = $(html)
           .find("ul.orderbook-flex-list.blue")
-          .eq(9)
           .last()
           .find("span.orderbook-bar--qty")
           .text()
@@ -910,8 +912,8 @@ const getBitsonicOrderbook = coin => {
 
         const highestBidPriceText = $(html)
           .find("ul.orderbook-flex-list.pink")
-          .eq(10)
-          .find("span.PriceNumber.PriceNumber--low")
+          .first()
+          .find("span.PriceNumber.PriceNumber--high")
           .text()
           .split(".");
         const highestBidPriceInt = parseFloat(
@@ -927,8 +929,7 @@ const getBitsonicOrderbook = coin => {
 
         const highestBidQuantityText = $(html)
           .find("ul.orderbook-flex-list.pink")
-          .eq(10)
-          .last()
+          .first()
           .find("span.orderbook-bar--qty")
           .text()
           .split(".");
@@ -951,8 +952,7 @@ const getBitsonicOrderbook = coin => {
           lowestAskPrice,
           lowestAskQuantity
         };
-        console.log("aggOrders: ", aggOrders);
-        console.log("bidAsk: ", bidAsk);
+        resolve({ aggOrders, bidAsk });
       })
       .catch(function(err) {
         console.log(err);
@@ -962,74 +962,54 @@ const getBitsonicOrderbook = coin => {
 
 const getBitsonicTrades = coin => {};
 
-
-
-
 const getCoinbitCandleSticks = coin => {
   return new Promise((resolve, reject) => {
     const now = new Date();
     const from = Math.floor((now - 7200000) / 60000) * 60 - 1;
     const to = Math.ceil(now / 60000) * 60;
 
-    const twoHoursAgo = now - 7200000;
-    const hourAgo = now - 3600000;
-    const thirtyMinsAgo = now - 1800000;
-    const fifteenMinsAgo = now - 900000;
-    const tenMinsAgo = now - 600000;
-    const sixMinsAgo = now - 360000;
-    const fiveMinsAgo = now - 300000;
-    const threeMinsAgo = now - 300000;
-    const twoMinsAgo = now - 120000;
-    const minAgo = now - 60000;
-
-    rp({
-      method: "GET",
-      url: `https://www.coinbit.co.kr/trade/order/krw-${coin}#`
-    })
-      .then(function(html) {
-        //success!
-
-         //24h volume 더하기
-        let xhr24 = new XMLHttpRequest();
-        xhr24.onreadystatechange = () => {
-          let parsedCoinbitHour = JSON.parse(xhr24.responseText);
-          if (parsedCoinbitHour.s === "ok"){
-            parsedCoinbitHour.t.forEach((elem, i) => {
-              let accTradeVol24h = 0.0;
-              for (i= 0; i < 24; i++){
-                accTradeVol24h = accTradeVol24h + parseFloat(parsedCoinbitHour.v.reverse()[i])
-              };
-            });
-          };
-        xhr24.open(
-          "GET",
-          `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-60/from-${from}/to-${to}`
-        );
-        xhr24.send();
+    const twoHoursAgo = (now - 7200000) / 1000;
+    const hourAgo = (now - 3600000) / 1000;
+    const thirtyMinsAgo = (now - 1800000) / 1000;
+    const fifteenMinsAgo = (now - 900000) / 1000;
+    const tenMinsAgo = (now - 600000) / 1000;
+    const sixMinsAgo = (now - 360000) / 1000;
+    const fiveMinsAgo = (now - 300000) / 1000;
+    const threeMinsAgo = (now - 300000) / 1000;
+    const twoMinsAgo = (now - 120000) / 1000;
+    const minAgo = (now - 60000) / 1000;
+    console.log("starting here");
+    //24h volume 더하기
+    let xhr24 = new XMLHttpRequest();
+    let lastPrice;
+    let accTradeVol24h = 0.0;
+    xhr24.onreadystatechange = () => {
+      if (xhr24.readyState === 4 && xhr24.status === 200) {
+        console.log("getting 24h volume data");
+        let parsedCoinbitHour = JSON.parse(xhr24.responseText);
+        if (parsedCoinbitHour.s === "ok") {
+          lastPrice = parsedCoinbitHour.c[0];
+          parsedCoinbitHour.t.forEach((elem, i) => {
+            for (i = 0; i < 24; i++) {
+              accTradeVol24h =
+                accTradeVol24h + parseFloat(parsedCoinbitHour.v.reverse()[i]);
+            }
+          });
         }
+      }
+    };
+    xhr24.open(
+      "GET",
+      `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-60/from-${from}/to-${to}`
+    );
+    xhr24.send();
 
-        // 최근가격 scrpaing
-        const lastPriceText = $(html)
-          .find("div.Hd_quote_left_Num h5#headerPrice")
-          .text()
-          .split(".");
-        const lastPriceInt = parseFloat(lastPriceText[0].match(/\d/g).join(""));
-        let lastPriceBlah = 0;
-        if (lastPriceText.length === 2) {
-          lastPriceBlah = parseFloat(
-            "0." + lastPriceText[1].match(/\d/g).join("")
-          );
-        }
-
-        const lastPrice = lastPriceInt + lastPriceBlah;
-
-
-      let xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = () => {
-
+    let xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4 && xhr.status === 200) {
         let parsedCoinbit = JSON.parse(xhr.responseText);
-        if (parsedCoinbit.s === "ok"){
-          let parsedBody = [];
+        let parsedBody = [];
+        if (parsedCoinbit.s === "ok") {
           parsedCoinbit.t.forEach((elem, i) => {
             let arr = [];
             arr.push(elem);
@@ -1040,228 +1020,223 @@ const getCoinbitCandleSticks = coin => {
             arr.push(parsedCoinbit.v[i]);
             parsedBody.push(arr);
           });
-        };
-
-        if (xhr.readyState === 4 && xhr.status === 200) {
-         // let parsedBody = JSON.parse(xhr.responseText);
-
-          if (parsedBody.length === 0) {
-            const volumeChanges = {
-              accTradeVol24h,
-              hourVolumeChange: 0,
-              thirtyMinVolumeChange: 0,
-              fifteenMinVolumeChange: 0,
-              fiveMinVolumeChange: 0,
-              threeMinVolumeChange: 0,
-              minVolumeChange: 0,
-              currentHourVolume: 0,
-              currentThirtyMinVolume: 0,
-              currentFifteenMinVolume: 0,
-              currentFiveMinVolume: 0,
-              currentThreeMinVolume: 0,
-              currentMinVolume: 0
-            };
-            const priceChanges = {
-              hourPriceChange: 0,
-              thirtyMinPriceChange: 0,
-              fifteenMinPriceChange: 0,
-              fiveMinPriceChange: 0,
-              threeMinPriceChange: 0,
-              minPriceChange: 0,
-              currentPrice: lastPrice
-            };
-
-            resolve(volumeChanges, priceChanges);
-          } else {
-            // when parsedBody.length > 0
-
-            const hourData = parsedBody.filter(elem => elem[0] > twoHoursAgo);
-            let lastHourVolume = 0;
-            let currentHourVolume = 0;
-            let lastHourPrice = hourData[0][4];
-            hourData.forEach(elem => {
-              if (elem[0] < hourAgo) {
-                lastHourVolume += parseFloat(elem[5]);
-                lastHourPrice = parseFloat(elem[4]);
-              } else {
-                currentHourVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const thirtyMinData = parsedBody.filter(elem => elem[0] > hourAgo);
-            let lastThirtyMinVolume = 0;
-            let currentThirtyMinVolume = 0;
-            let lastThirtyMinPrice = hourData[0][4];
-            thirtyMinData.forEach(elem => {
-              if (elem[0] < thirtyMinsAgo) {
-                lastThirtyMinVolume += parseFloat(elem[5]);
-                lastThirtyMinPrice = parseFloat(elem[4]);
-              } else {
-                currentThirtyMinVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const fifteenMinData = parsedBody.filter(
-              elem => elem[0] > thirtyMinsAgo
-            );
-            let lastFifteenMinVolume = 0;
-            let currentFifteenMinVolume = 0;
-            let lastFifteenMinPrice = hourData[0][4];
-            fifteenMinData.forEach(elem => {
-              if (elem[0] < fifteenMinsAgo) {
-                lastFifteenMinVolume += parseFloat(elem[5]);
-                lastFifteenMinPrice = parseFloat(elem[4]);
-              } else {
-                currentFifteenMinVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const fiveMinData = parsedBody.filter(elem => elem[0] > tenMinsAgo);
-            let lastFiveMinVolume = 0;
-            let currentFiveMinVolume = 0;
-            let lastFiveMinPrice = hourData[0][4];
-            fiveMinData.forEach(elem => {
-              if (elem[0] < fiveMinsAgo) {
-                lastFiveMinVolume += parseFloat(elem[5]);
-                lastFiveMinPrice = parseFloat(elem[4]);
-              } else {
-                currentFiveMinVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const threeMinData = parsedBody.filter(
-              elem => elem[0] > sixMinsAgo
-            );
-            let lastThreeMinVolume = 0;
-            let currentThreeMinVolume = 0;
-            let lastThreeMinPrice = hourData[0][4];
-            threeMinData.forEach(elem => {
-              if (elem[0] < threeMinsAgo) {
-                lastThreeMinVolume += parseFloat(elem[5]);
-                lastThreeMinPrice = parseFloat(elem[4]);
-              } else {
-                currentThreeMinVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const minData = parsedBody.filter(elem => elem[0] > twoMinsAgo);
-            let lastMinVolume = 0;
-            let currentMinVolume = 0;
-            let lastMinPrice = hourData[0][4];
-            let currentPrice = hourData.reverse()[0][4];
-            minData.forEach(elem => {
-              if (elem[0] < minAgo) {
-                lastMinVolume += parseFloat(elem[5]);
-                lastMinPrice = parseFloat(elem[4]);
-              } else {
-                currentMinVolume += parseFloat(elem[5]);
-              }
-            });
-
-            const hourVolumeChange =
-              lastHourVolume !== 0
-                ? ((currentHourVolume / lastHourVolume) * 100 - 100).toFixed(2)
-                : 0;
-            const thirtyMinVolumeChange =
-              lastThirtyMinVolume !== 0
-                ? (
-                    (currentThirtyMinVolume / lastThirtyMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
-                : 0;
-            const fifteenMinVolumeChange =
-              lastFifteenMinVolume !== 0
-                ? (
-                    (currentFifteenMinVolume / lastFifteenMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
-                : 0;
-            const fiveMinVolumeChange =
-              lastFiveMinVolume !== 0
-                ? (
-                    (currentFiveMinVolume / lastFiveMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
-                : 0;
-            const threeMinVolumeChange =
-              lastThreeMinVolume !== 0
-                ? (
-                    (currentThreeMinVolume / lastThreeMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
-                : 0;
-            const minVolumeChange =
-              lastMinVolume !== 0
-                ? ((currentMinVolume / lastMinVolume) * 100 - 100).toFixed(2)
-                : 0;
-            const hourPriceChange =
-              lastHourPrice !== 0
-                ? ((currentPrice / lastHourPrice) * 100 - 100).toFixed(2)
-                : 0;
-            const thirtyMinPriceChange =
-              lastThirtyMinPrice !== 0
-                ? ((currentPrice / lastThirtyMinPrice) * 100 - 100).toFixed(2)
-                : 0;
-            const fifteenMinPriceChange =
-              lastFifteenMinPrice !== 0
-                ? ((currentPrice / lastFifteenMinPrice) * 100 - 100).toFixed(2)
-                : 0;
-            const fiveMinPriceChange =
-              lastFiveMinPrice !== 0
-                ? ((currentPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
-                : 0;
-            const threeMinPriceChange =
-              lastThreeMinPrice !== 0
-                ? ((currentPrice / lastThreeMinPrice) * 100 - 100).toFixed(2)
-                : 0;
-            const minPriceChange =
-              lastMinPrice !== 0
-                ? ((currentPrice / lastMinPrice) * 100 - 100).toFixed(2)
-                : 0;
-
-            const volumeChanges = {
-              accTradeVol24h,
-              hourVolumeChange,
-              thirtyMinVolumeChange,
-              fifteenMinVolumeChange,
-              fiveMinVolumeChange,
-              threeMinVolumeChange,
-              minVolumeChange,
-              currentHourVolume,
-              currentThirtyMinVolume,
-              currentFifteenMinVolume,
-              currentFiveMinVolume,
-              currentThreeMinVolume,
-              currentMinVolume
-            };
-            const priceChanges = {
-              hourPriceChange,
-              thirtyMinPriceChange,
-              fifteenMinPriceChange,
-              fiveMinPriceChange,
-              threeMinPriceChange,
-              minPriceChange,
-              currentPrice
-            };
-            resolve({ volumeChanges, priceChanges });
-          }
         }
-      };
-      xhr.open(
-        "GET",
-        `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-1/from-${from}/to-${to}`
-      );
-      xhr.send();
-    });
+
+        // let parsedBody = JSON.parse(xhr.responseText);
+
+        if (parsedBody.length === 0) {
+          const volumeChanges = {
+            accTradeVol24h,
+            hourVolumeChange: 0,
+            thirtyMinVolumeChange: 0,
+            fifteenMinVolumeChange: 0,
+            fiveMinVolumeChange: 0,
+            threeMinVolumeChange: 0,
+            minVolumeChange: 0,
+            currentHourVolume: 0,
+            currentThirtyMinVolume: 0,
+            currentFifteenMinVolume: 0,
+            currentFiveMinVolume: 0,
+            currentThreeMinVolume: 0,
+            currentMinVolume: 0
+          };
+          const priceChanges = {
+            hourPriceChange: 0,
+            thirtyMinPriceChange: 0,
+            fifteenMinPriceChange: 0,
+            fiveMinPriceChange: 0,
+            threeMinPriceChange: 0,
+            minPriceChange: 0,
+            currentPrice: lastPrice
+          };
+
+          resolve(volumeChanges, priceChanges);
+        } else {
+          // when parsedBody.length > 0
+
+          const hourData = parsedBody.filter(elem => elem[0] > twoHoursAgo);
+          let lastHourVolume = 0;
+          let currentHourVolume = 0;
+          let lastHourPrice = hourData[0][4];
+          hourData.forEach(elem => {
+            if (elem[0] < hourAgo) {
+              lastHourVolume += parseFloat(elem[5]);
+              lastHourPrice = parseFloat(elem[4]);
+            } else {
+              currentHourVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const thirtyMinData = parsedBody.filter(elem => elem[0] > hourAgo);
+          let lastThirtyMinVolume = 0;
+          let currentThirtyMinVolume = 0;
+          let lastThirtyMinPrice = hourData[0][4];
+          thirtyMinData.forEach(elem => {
+            if (elem[0] < thirtyMinsAgo) {
+              lastThirtyMinVolume += parseFloat(elem[5]);
+              lastThirtyMinPrice = parseFloat(elem[4]);
+            } else {
+              currentThirtyMinVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const fifteenMinData = parsedBody.filter(
+            elem => elem[0] > thirtyMinsAgo
+          );
+          let lastFifteenMinVolume = 0;
+          let currentFifteenMinVolume = 0;
+          let lastFifteenMinPrice = hourData[0][4];
+          fifteenMinData.forEach(elem => {
+            if (elem[0] < fifteenMinsAgo) {
+              lastFifteenMinVolume += parseFloat(elem[5]);
+              lastFifteenMinPrice = parseFloat(elem[4]);
+            } else {
+              currentFifteenMinVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const fiveMinData = parsedBody.filter(elem => elem[0] > tenMinsAgo);
+          let lastFiveMinVolume = 0;
+          let currentFiveMinVolume = 0;
+          let lastFiveMinPrice = hourData[0][4];
+          fiveMinData.forEach(elem => {
+            if (elem[0] < fiveMinsAgo) {
+              lastFiveMinVolume += parseFloat(elem[5]);
+              lastFiveMinPrice = parseFloat(elem[4]);
+            } else {
+              currentFiveMinVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const threeMinData = parsedBody.filter(elem => elem[0] > sixMinsAgo);
+          let lastThreeMinVolume = 0;
+          let currentThreeMinVolume = 0;
+          let lastThreeMinPrice = hourData[0][4];
+          threeMinData.forEach(elem => {
+            if (elem[0] < threeMinsAgo) {
+              lastThreeMinVolume += parseFloat(elem[5]);
+              lastThreeMinPrice = parseFloat(elem[4]);
+            } else {
+              currentThreeMinVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const minData = parsedBody.filter(elem => elem[0] > twoMinsAgo);
+          let lastMinVolume = 0;
+          let currentMinVolume = 0;
+          let lastMinPrice = hourData[0][4];
+          let currentPrice = hourData.reverse()[0][4];
+          minData.forEach(elem => {
+            if (elem[0] < minAgo) {
+              lastMinVolume += parseFloat(elem[5]);
+              lastMinPrice = parseFloat(elem[4]);
+            } else {
+              currentMinVolume += parseFloat(elem[5]);
+            }
+          });
+
+          const hourVolumeChange =
+            lastHourVolume !== 0
+              ? ((currentHourVolume / lastHourVolume) * 100 - 100).toFixed(2)
+              : 0;
+          const thirtyMinVolumeChange =
+            lastThirtyMinVolume !== 0
+              ? (
+                  (currentThirtyMinVolume / lastThirtyMinVolume) * 100 -
+                  100
+                ).toFixed(2)
+              : 0;
+          const fifteenMinVolumeChange =
+            lastFifteenMinVolume !== 0
+              ? (
+                  (currentFifteenMinVolume / lastFifteenMinVolume) * 100 -
+                  100
+                ).toFixed(2)
+              : 0;
+          const fiveMinVolumeChange =
+            lastFiveMinVolume !== 0
+              ? (
+                  (currentFiveMinVolume / lastFiveMinVolume) * 100 -
+                  100
+                ).toFixed(2)
+              : 0;
+          const threeMinVolumeChange =
+            lastThreeMinVolume !== 0
+              ? (
+                  (currentThreeMinVolume / lastThreeMinVolume) * 100 -
+                  100
+                ).toFixed(2)
+              : 0;
+          const minVolumeChange =
+            lastMinVolume !== 0
+              ? ((currentMinVolume / lastMinVolume) * 100 - 100).toFixed(2)
+              : 0;
+          const hourPriceChange =
+            lastHourPrice !== 0
+              ? ((currentPrice / lastHourPrice) * 100 - 100).toFixed(2)
+              : 0;
+          const thirtyMinPriceChange =
+            lastThirtyMinPrice !== 0
+              ? ((currentPrice / lastThirtyMinPrice) * 100 - 100).toFixed(2)
+              : 0;
+          const fifteenMinPriceChange =
+            lastFifteenMinPrice !== 0
+              ? ((currentPrice / lastFifteenMinPrice) * 100 - 100).toFixed(2)
+              : 0;
+          const fiveMinPriceChange =
+            lastFiveMinPrice !== 0
+              ? ((currentPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
+              : 0;
+          const threeMinPriceChange =
+            lastThreeMinPrice !== 0
+              ? ((currentPrice / lastThreeMinPrice) * 100 - 100).toFixed(2)
+              : 0;
+          const minPriceChange =
+            lastMinPrice !== 0
+              ? ((currentPrice / lastMinPrice) * 100 - 100).toFixed(2)
+              : 0;
+
+          const volumeChanges = {
+            accTradeVol24h,
+            hourVolumeChange,
+            thirtyMinVolumeChange,
+            fifteenMinVolumeChange,
+            fiveMinVolumeChange,
+            threeMinVolumeChange,
+            minVolumeChange,
+            currentHourVolume,
+            currentThirtyMinVolume,
+            currentFifteenMinVolume,
+            currentFiveMinVolume,
+            currentThreeMinVolume,
+            currentMinVolume
+          };
+          const priceChanges = {
+            hourPriceChange,
+            thirtyMinPriceChange,
+            fifteenMinPriceChange,
+            fiveMinPriceChange,
+            threeMinPriceChange,
+            minPriceChange,
+            currentPrice
+          };
+          resolve({ volumeChanges, priceChanges });
+        }
+      }
+    };
+    xhr.open(
+      "GET",
+      `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-1/from-${from}/to-${to}`
+    );
+    xhr.send();
   });
 };
-
 
 const getCoinbitOrderbook = coin => {
   return new Promise((resolve, reject) => {
     rp({
       method: "GET",
-      url: `https://www.coinbit.co.kr/trade/order/krw-${coin}#`
+      url: `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/trade/order/krw-${coin}#`
     })
       .then(function(html) {
         //success!
@@ -1278,9 +1253,7 @@ const getCoinbitOrderbook = coin => {
         const aggAsks = aggAskInt + aggAskBlah;
 
         const aggBidsText = $(html)
-          .find(
-            "div#tradeTfoot ul"
-          )
+          .find("div#tradeTfoot ul")
           .last()
           .text()
           .split(".");
@@ -1291,7 +1264,6 @@ const getCoinbitOrderbook = coin => {
           aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""));
         }
         const aggBids = aggBidsInt + aggBidsBlah;
-
 
         const lowestAskPriceText = $(html)
           .find("div.trade-table.list-trademarketcost tr.blue.green")
@@ -1310,14 +1282,12 @@ const getCoinbitOrderbook = coin => {
         }
         const lowestAskPrice = lowestAskPriceInt + lowestAskPriceBlah;
 
-
-
         const lowestAskQuantityText = $(html)
-        .find("div.trade-table.list-trademarketcost tr.blue.green")
-        .last()
-        .find("p.graph_num_blue.graph_num_green")
-        .text()
-        .split(".");
+          .find("div.trade-table.list-trademarketcost tr.blue.green")
+          .last()
+          .find("p.graph_num_blue.graph_num_green")
+          .text()
+          .split(".");
         const lowestAskQuantityInt = parseFloat(
           lowestAskQuantityText[0].match(/\d/g).join("")
         );
@@ -1329,13 +1299,12 @@ const getCoinbitOrderbook = coin => {
         }
         const lowestAskQuantity = lowestAskQuantityInt + lowestAskQuantityBlah;
 
-
         const highestBidPriceText = $(html)
-        .find("div.trade-table.list-trademarketcost tr.red")
-        .first()
-        .find("td.fw-500")
-        .text()
-        .split(".");
+          .find("div.trade-table.list-trademarketcost tr.red")
+          .first()
+          .find("td.fw-500")
+          .text()
+          .split(".");
         const highestBidPriceInt = parseFloat(
           highestBidPriceText[0].match(/\d/g).join("")
         );
@@ -1348,11 +1317,11 @@ const getCoinbitOrderbook = coin => {
         const highestBidPrice = highestBidPriceInt + highestBidPriceBlah;
 
         const highestBidQuantityText = $(html)
-        .find("div.trade-table.list-trademarketcost tr.red")
-        .first()
-        .find("p.graph_num_red")
-        .text()
-        .split(".");
+          .find("div.trade-table.list-trademarketcost tr.red")
+          .first()
+          .find("p.graph_num_red")
+          .text()
+          .split(".");
         const highestBidQuantityInt = parseFloat(
           highestBidQuantityText[0].match(/\d/g).join("")
         );
@@ -1372,8 +1341,9 @@ const getCoinbitOrderbook = coin => {
           lowestAskPrice,
           lowestAskQuantity
         };
-        console.log("aggOrders: ", aggOrders);
-        console.log("bidAsk: ", bidAsk);
+        console.log(aggOrders);
+        console.log(bidAsk);
+        resolve({ aggOrders, bidAsk });
       })
       .catch(function(err) {
         console.log(err);
@@ -1382,9 +1352,6 @@ const getCoinbitOrderbook = coin => {
 };
 
 const getCoinbitTrades = coin => {};
-
-
-
 
 export const selectExchange = exchange => {
   //make async requests to exchange api or db
@@ -1430,6 +1397,21 @@ export const selectExchange = exchange => {
           priceChanges: candleData.priceChanges
         });
         getBitsonicOrderbook(selectedCoin).then(orderbookData => {
+          dispatch({
+            type: RECEIVE_ORDERBOOK_DATA,
+            aggOrders: orderbookData.aggOrders,
+            bidAsk: orderbookData.bidAsk
+          });
+        });
+      });
+    } else if (exchange === "Coinbit") {
+      return getCoinbitCandleSticks(selectedCoin).then(candleData => {
+        dispatch({
+          type: RECEIVE_CANDLE_DATA,
+          volumeChanges: candleData.volumeChanges,
+          priceChanges: candleData.priceChanges
+        });
+        getCoinbitOrderbook(selectedCoin).then(orderbookData => {
           dispatch({
             type: RECEIVE_ORDERBOOK_DATA,
             aggOrders: orderbookData.aggOrders,
