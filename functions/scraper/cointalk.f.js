@@ -12,7 +12,7 @@ try {
 
 const url = "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard";
 const runtimeOpts = {
-  timeoutSeconds: 110,
+  timeoutSeconds: 280,
   memory: "2GB"
 };
 
