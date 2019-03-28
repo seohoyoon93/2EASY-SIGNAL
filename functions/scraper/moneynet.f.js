@@ -54,6 +54,13 @@ exports = module.exports = functions
 
         await page.goto(link, { waitUntil: "domcontentloaded", timeout: 0 });
         const subHtml = await page.content();
+        const uploadTime = await $("div.board_read ul.wt_box", subHtml)
+          .eq(0)
+          .children()
+          .last()
+          .find("span.number")
+          .text();
+        const timestamp = await Date.parse(uploadTime + " UTC+9");
         const title = await $("div.read_header h1", subHtml).text();
 
         let content = await $(
@@ -73,7 +80,8 @@ exports = module.exports = functions
           .set({
             title,
             content,
-            comments
+            comments,
+            timestamp
           })
           .then(() => {})
           .catch(err => {
