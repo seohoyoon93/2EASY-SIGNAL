@@ -374,4 +374,52 @@ exports.getOrderbook = coin => {
   });
 };
 
-exports.getTrades = coin => {};
+exports.getTrades = coin => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      method: "GET",
+      url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
+    };
+
+    rp(options)
+      .then(html => {
+        const tradeTable = $(
+          "div.center-flex-table.history-time div.scrollbar-y",
+          html
+        );
+        let asks = [];
+        let bids = [];
+        tradeTable.children().each((i, elem) => {
+          if ($(elem).find("p.text-pink").length > 0) {
+            bids.push(
+              parseInt(
+                $(elem)
+                  .find(".table-item")
+                  .last()
+                  .text()
+                  .match(/\d/g)
+                  .join("")
+              )
+            );
+          } else {
+            asks.push(
+              parseInt(
+                $(elem)
+                  .find(".table-item")
+                  .last()
+                  .text()
+                  .match(/\d/g)
+                  .join("")
+              )
+            );
+          }
+        });
+        const aggAsks = asks.reduce((acc, cur) => acc + cur);
+        const aggBids = bids.reduce((acc, cur) => acc + cur);
+        resolve({ aggAsks, aggBids });
+      })
+      .catch(err => {
+        reject("Bitsonic trade history err: ", err);
+      });
+  });
+};

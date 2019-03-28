@@ -288,4 +288,32 @@ exports.getOrderbook = coin => {
   });
 };
 
-exports.getTrades = coin => {};
+exports.getTrades = coin => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      method: "GET",
+      uri: `https://api.bithumb.com/public/transaction_history/${coin}`,
+      qs: { count: 100 },
+      json: true
+    };
+    rp(options)
+      .then(parsedBody => {
+        const asks = parsedBody.data.filter(obj => obj.type === "ask");
+        const bids = parsedBody.data.filter(obj => obj.type === "bid");
+
+        let aggAsks = 0;
+        asks.forEach(ask => {
+          aggAsks += parseFloat(ask.total);
+        });
+        let aggBids = 0;
+        bids.forEach(bid => {
+          aggBids += parseFloat(bid.total);
+        });
+
+        resolve({ aggAsks, aggBids });
+      })
+      .catch(err => {
+        reject("Bithumb transaction history err: ", err);
+      });
+  });
+};

@@ -300,4 +300,32 @@ exports.getOrderbook = coin => {
   });
 };
 
-exports.getTrades = coin => {};
+exports.getTrades = coin => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      method: "GET",
+      url: "https://api.upbit.com/v1/trades/ticks",
+      qs: { market: `KRW-${coin}`, count: 100 },
+      json: true
+    };
+
+    rp(options)
+      .then(parsedBody => {
+        const asks = parsedBody.filter(obj => obj.ask_bid === "ASK");
+        const bids = parsedBody.filter(obj => obj.ask_bid === "BID");
+
+        let aggAsks = 0;
+        asks.forEach(ask => {
+          aggAsks += ask.trade_price * ask.trade_volume;
+        });
+        let aggBids = 0;
+        bids.forEach(bid => {
+          aggBids += bid.trade_price * bid.trade_volume;
+        });
+        resolve({ aggAsks, aggBids });
+      })
+      .catch(err => {
+        reject("Upbit trade history err: ", err);
+      });
+  });
+};
