@@ -398,4 +398,8 @@ exports.getOrderbook = coin => {
   });
 };
 
-exports.getTrades = coin => {};
+exports.getTrades = coin => {
+  return new Promise((resolve, reject) => {
+    resolve({ aggAsks: 0, aggBids: 0 });
+  });
+};

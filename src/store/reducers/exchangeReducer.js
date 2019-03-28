@@ -2,7 +2,8 @@ import {
   SELECT_EXCHANGE,
   SELECT_EXCHANGE_ERROR,
   RECEIVE_CANDLE_DATA,
-  RECEIVE_ORDERBOOK_DATA
+  RECEIVE_ORDERBOOK_DATA,
+  RECEIVE_TRADES_DATA
 } from "../actionTypes";
 
 const initialState = {
@@ -16,6 +17,11 @@ const initialState = {
     isFetching: false,
     aggOrders: {},
     bidAsk: {}
+  },
+  tradesData: {
+    isFetching: false,
+    aggAsks: null,
+    aggBids: null
   }
 };
 
@@ -46,6 +52,16 @@ const exchangeReducer = (state = initialState, action) => {
           isFetching: false,
           aggOrders: action.aggOrders,
           bidAsk: action.bidAsk
+        }
+      };
+
+    case RECEIVE_TRADES_DATA:
+      return {
+        ...state,
+        tradesData: {
+          isFetching: false,
+          aggAsks: action.aggAsks,
+          aggBids: action.aggBids
         }
       };
 
