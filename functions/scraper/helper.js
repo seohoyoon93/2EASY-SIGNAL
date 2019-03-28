@@ -1,6 +1,11 @@
 module.exports = {
   countCoinNickname: function(text) {
-    return mapNicknameToCoin(coins, coinNicknames, text);
+    //Initialize coins object
+    let coinObj = coins.reduce(function(result, item, index, array) {
+      result[item] = 0;
+      return result;
+    }, {});
+    return mapNicknameToCoin(coinObj, coinNicknames, text);
   }
 };
 
@@ -934,7 +939,7 @@ function mapNicknameToCoin(coinObj, nicknames, text) {
           count("IUC", nickname, coinObj, text);
           return;
         case "썬체인":
-          count("SUN", nickname, coinObj, text);
+          count("SUNC", nickname, coinObj, text);
           return;
         case "튜다":
           count("TUDA", nickname, coinObj, text);
@@ -1112,6 +1117,72 @@ function mapNicknameToCoin(coinObj, nicknames, text) {
           return;
         case "지엑스체인":
           count("GXC", nickname, coinObj, text);
+          return;
+        case "KIN":
+          count("KIN", nickname, coinObj, text);
+          return;
+        case "킨":
+          count("KIN", nickname, coinObj, text);
+          return;
+        case "MXM":
+          count("MXM", nickname, coinObj, text);
+          return;
+        case "맥시마인":
+          count("MXM", nickname, coinObj, text);
+          return;
+        case "R":
+          count("R", nickname, coinObj, text);
+          return;
+        case "리베인":
+          count("R", nickname, coinObj, text);
+          return;
+        case "ROMTV":
+          count("ROMTV", nickname, coinObj, text);
+          return;
+        case "롬티비":
+          count("ROMTV", nickname, coinObj, text);
+          return;
+        case "NXT":
+          count("NXT", nickname, coinObj, text);
+          return;
+        case "엔엑":
+          count("NXT", nickname, coinObj, text);
+          return;
+        case "NEXO":
+          count("NEXO", nickname, coinObj, text);
+          return;
+        case "넥소":
+          count("NEXO", nickname, coinObj, text);
+          return;
+        case "NET":
+          count("NET", nickname, coinObj, text);
+          return;
+        case "넥스트":
+          count("NET", nickname, coinObj, text);
+          return;
+        case "BLINK":
+          count("BLINK", nickname, coinObj, text);
+          return;
+        case "블록메이슨":
+          count("BLINK", nickname, coinObj, text);
+          return;
+        case "블메":
+          count("BLINK", nickname, coinObj, text);
+          return;
+        case "블링크":
+          count("BLINK", nickname, coinObj, text);
+          return;
+        case "이그드라시":
+          count("YEED", nickname, coinObj, text);
+          return;
+        case "YEED":
+          count("YEED", nickname, coinObj, text);
+          return;
+        case "디센트럴":
+          count("MANA", nickname, coinObj, text);
+          return;
+        case "MANA":
+          count("MANA", nickname, coinObj, text);
           return;
         default:
           return;
@@ -1488,7 +1559,29 @@ const coinNicknames = [
   "비에이치피",
   "마이다스",
   "큐브",
-  "지엑스체인"
+  "지엑스체인",
+  "KIN",
+  "킨",
+  "MXM",
+  "맥시마인",
+  "R",
+  "리베인",
+  "ROMTV",
+  "롬티비",
+  "NXT",
+  "엔엑",
+  "NEXO",
+  "넥소",
+  "NET",
+  "넥스트",
+  "BLINK",
+  "블록메이슨",
+  "블메",
+  "블링크",
+  "이그드라시",
+  "YEED",
+  "디센트럴",
+  "MANA"
 ];
 const coins = [
   "CPT",
@@ -1595,7 +1688,6 @@ const coins = [
   "XVG",
   "DXG",
   "YEED",
-  "BCHABC",
   "MANA",
   "POA",
   "ISR",
@@ -1631,7 +1723,6 @@ const coins = [
   "YOYO",
   "SKY",
   "HC",
-  "BCHSV",
   "MOD",
   "BCD",
   "AMB",
@@ -1674,11 +1765,16 @@ const coins = [
   "O2O",
   "FEMI",
   "IUC",
-  "SUN",
+  "SUNC",
   "TUDA",
   "FRNT",
-  "LISK"
-].reduce(function(result, item, index, array) {
-  result[item] = 0;
-  return result;
-}, {});
+  "LISK",
+  "KIN",
+  "MXM",
+  "R",
+  "ROMTV",
+  "NXT",
+  "NEXO",
+  "NET",
+  "BLINK"
+];

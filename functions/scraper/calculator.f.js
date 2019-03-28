@@ -28,7 +28,7 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
   const timestamp = Date.now();
   await admin
     .firestore()
-    .doc(`coins/${timestamp}`)
+    .doc(`mentions/${timestamp}`)
     .set({
       mentions: coins,
       timestamp: timestamp
