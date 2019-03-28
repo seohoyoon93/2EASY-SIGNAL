@@ -13,6 +13,11 @@ class Exchanges extends Component {
 
     this.handleClick = this.handleClick.bind(this);
   }
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.selectedCoin !== this.props.selectedCoin) {
+      this.props.selectExchange(this.props.exchanges[0].name);
+    }
+  }
   handleClick(e, data) {
     this.setState(
       {
@@ -44,7 +49,8 @@ class Exchanges extends Component {
 const mapStateToProps = state => {
   return {
     selectedExchange: state.exchange.selectedExchange,
-    exchanges: state.coin.exchanges
+    exchanges: state.coin.exchanges,
+    selectedCoin: state.coin.selectedCoin
   };
 };
 
