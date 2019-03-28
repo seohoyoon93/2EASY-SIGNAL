@@ -5,6 +5,7 @@ import {
 } from "../actionTypes";
 
 const rp = require("request-promise");
+const $ = require("cheerio");
 
 const getUpbitCandleSticks = coin => {
   return new Promise((resolve, reject) => {
@@ -592,8 +593,6 @@ const getBithumbOrderbook = coin => {
 
 const getBithumbTrades = coin => {};
 
-
-
 const getBitsonicCandleSticks = coin => {
   return new Promise((resolve, reject) => {
     const now = new Date();
@@ -611,46 +610,54 @@ const getBitsonicCandleSticks = coin => {
     const twoMinsAgo = now - 120000;
     const minAgo = now - 60000;
 
-      rp(`https://bitsonic.co.kr/front/exchange/${coin}-krw`)
-      .then(function(html){
+    rp({
+      method: "GET",
+      url: `https://bitsonic.co.kr/front/exchange/${coin}-krw`
+    })
+      .then(function(html) {
         //success!
 
-        const accTradeVol24hText = html.find('div.coin-text-group').last().find('p').text().split(".")
-        const accTradeVol24hInt = parseFloat(accTradeVol24hText[0].match(/\d/g).join(""))
-         let accTradeVol24hBlah = 0;
-        if (accTradeVol24hText.length === 2){
-          accTradeVol24hBlah = parseFloat("0." + accTradeVol24hText[1].match(/\d/g).join(""))
+        const accTradeVol24hText = $(html)
+          .find("div.coin-text-group")
+          .last()
+          .find("p")
+          .text()
+          .split(".");
+        const accTradeVol24hInt = parseFloat(
+          accTradeVol24hText[0].match(/\d/g).join("")
+        );
+        let accTradeVol24hBlah = 0;
+        if (accTradeVol24hText.length === 2) {
+          accTradeVol24hBlah = parseFloat(
+            "0." + accTradeVol24hText[1].match(/\d/g).join("")
+          );
         }
-        const accTradeVol24h = accTradeVol24hInt + accTradeVol24hBlah
+        const accTradeVol24h = accTradeVol24hInt + accTradeVol24hBlah;
 
-
-        const lastPriceText = html.find('h3.coin-price-title').text().split(".")
-        const lastPriceInt = parseFloat(lastPriceText[0].match(/\d/g).join(""))
-         let lastPriceBlah = 0;
-        if (lastPriceText.length === 2){
-          lastPriceBlah = parseFloat("0." + lastPriceText[1].match(/\d/g).join(""))
+        const lastPriceText = html
+          .find("h3.coin-price-title")
+          .text()
+          .split(".");
+        const lastPriceInt = parseFloat(lastPriceText[0].match(/\d/g).join(""));
+        let lastPriceBlah = 0;
+        if (lastPriceText.length === 2) {
+          lastPriceBlah = parseFloat(
+            "0." + lastPriceText[1].match(/\d/g).join("")
+          );
         }
 
-        const lastPrice = lastPriceInt + lastPriceBlah
+        const lastPrice = lastPriceInt + lastPriceBlah;
 
-      })
-      .catch(function(err){
-         console.log(err)
-      });
-
-
-    rp(tickerOptions).then(parsedBody => {
-
-      let xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          let parsedBody2 = JSON.parse(xhr.responseText);
-          let parsedBody = parsedBody2.result.k
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            let response = JSON.parse(xhr.responseText);
+            let parsedBody = response.result.k;
 
             const hourData = parsedBody.filter(elem => elem.T > twoHoursAgo);
             let lastHourVolume = 0;
             let currentHourVolume = 0;
-            let lastHourPrice = hourData.reverse()[0].c
+            let lastHourPrice = hourData.reverse()[0].c;
             hourData.forEach(elem => {
               if (elem.T < hourAgo) {
                 lastHourVolume += parseFloat(elem.q);
@@ -660,13 +667,10 @@ const getBitsonicCandleSticks = coin => {
               }
             });
 
-
-
-
             const thirtyMinData = parsedBody.filter(elem => elem.T > hourAgo);
             let lastThirtyMinVolume = 0;
             let currentThirtyMinVolume = 0;
-            let lastThirtyMinPrice = thirtyMinData.reverse()[0].c
+            let lastThirtyMinPrice = thirtyMinData.reverse()[0].c;
             thirtyMinData.forEach(elem => {
               if (elem.T < thirtyMinsAgo) {
                 lastThirtyMinVolume += parseFloat(elem.q);
@@ -681,7 +685,7 @@ const getBitsonicCandleSticks = coin => {
             );
             let lastFifteenMinVolume = 0;
             let currentFifteenMinVolume = 0;
-            let lastFifteenMinPrice = fiftennMinData.reverse()[0].c
+            let lastFifteenMinPrice = fifteenMinData.reverse()[0].c;
             fifteenMinData.forEach(elem => {
               if (elem.T < fifteenMinsAgo) {
                 lastFifteenMinVolume += parseFloat(elem.q);
@@ -704,12 +708,10 @@ const getBitsonicCandleSticks = coin => {
               }
             });
 
-            const threeMinData = parsedBody.filter(
-              elem => elem.T > sixMinsAgo
-            );
+            const threeMinData = parsedBody.filter(elem => elem.T > sixMinsAgo);
             let lastThreeMinVolume = 0;
             let currentThreeMinVolume = 0;
-            let lastThreeMinPrice = threeMinData.reverse()[0].c
+            let lastThreeMinPrice = threeMinData.reverse()[0].c;
             threeMinData.forEach(elem => {
               if (elem.T < threeMinsAgo) {
                 lastThreeMinVolume += parseFloat(elem.q);
@@ -722,8 +724,7 @@ const getBitsonicCandleSticks = coin => {
             const minData = parsedBody.filter(elem => elem.T > twoMinsAgo);
             let lastMinVolume = 0;
             let currentMinVolume = 0;
-            let lastMinPrice = minData.reverse()[0].c
-            let currentPrice = minData.[0].c;
+            let lastMinPrice = minData.reverse()[0].c;
             minData.forEach(elem => {
               if (elem.T < minAgo) {
                 lastMinVolume += parseFloat(elem.q);
@@ -771,27 +772,27 @@ const getBitsonicCandleSticks = coin => {
                 : 0;
             const hourPriceChange =
               lastHourPrice !== 0
-                ? ((currentPrice / lastHourPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastHourPrice) * 100 - 100).toFixed(2)
                 : 0;
             const thirtyMinPriceChange =
               lastThirtyMinPrice !== 0
-                ? ((currentPrice / lastThirtyMinPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastThirtyMinPrice) * 100 - 100).toFixed(2)
                 : 0;
             const fifteenMinPriceChange =
               lastFifteenMinPrice !== 0
-                ? ((currentPrice / lastFifteenMinPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastFifteenMinPrice) * 100 - 100).toFixed(2)
                 : 0;
             const fiveMinPriceChange =
               lastFiveMinPrice !== 0
-                ? ((currentPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
                 : 0;
             const threeMinPriceChange =
               lastThreeMinPrice !== 0
-                ? ((currentPrice / lastThreeMinPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastThreeMinPrice) * 100 - 100).toFixed(2)
                 : 0;
             const minPriceChange =
               lastMinPrice !== 0
-                ? ((currentPrice / lastMinPrice) * 100 - 100).toFixed(2)
+                ? ((lastPrice / lastMinPrice) * 100 - 100).toFixed(2)
                 : 0;
 
             const volumeChanges = {
@@ -816,107 +817,148 @@ const getBitsonicCandleSticks = coin => {
               fiveMinPriceChange,
               threeMinPriceChange,
               minPriceChange,
-              currentPrice
+              currentPrice: lastPrice
             };
             resolve({ volumeChanges, priceChanges });
           }
-      };
-      xhr.open(
-        "GET",
-        `https://cors-anywhere.herokuapp.com/https://api.bitsonic.co.kr/api/v2/klines?symbol=${coin}KRW&interval=1m&endTime=${now}&startTime=${twoHoursAgo}`
-      xhr.send();
-    });
+        };
+        xhr.open(
+          "GET",
+          `https://cors-anywhere.herokuapp.com/https://api.bitsonic.co.kr/api/v2/klines?symbol=${coin}KRW&interval=1m&endTime=${to}&startTime=${from}`
+        );
+        xhr.send();
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
   });
 };
 
 const getBitsonicOrderbook = coin => {
   return new Promise((resolve, reject) => {
-    const options = {
+    rp({
       method: "GET",
-      uri: `https://api.bithumb.com/public/orderbook/${coin}`,
-      qs: { count: 50 },
-      json: true
-    };
-
-
-    rp(`https://bitsonic.co.kr/front/exchange/${coin}-krw`)
-    .then(function(html){
-      //success!
-      const aggAskText = html.find('div#stickyOrderbook div.orderbook-header.orderbook-header-top').last().find('p.text-blue').text().split(".")
-      const aggAskInt = parseFloat(aggAskText[0].match(/\d/g).join(""))
-      let aggAskBlah = 0;
-      if (aggAskText.length === 2){
-      aggAskBlah = parseFloat("0." + aggAskText[1].match(/\d/g).join(""))
-      }
-      const aggAsk = aggAskInt + aggAskBlah
-
-
-      const aggBidsText = html.find('div#stickyOrderbook div.orderbook-header.orderbook-header-bottom').last().find('p.text-pink').text().split(".")
-      const aggBidsInt = parseFloat(aggBidsText[0].match(/\d/g).join(""))
-
-      let aggBidsBlah = 0;
-      if (aggBidsText.length === 2){
-      aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""))
-      }
-      const aggBids = aggBidsInt + aggBidsBlah
-
-      const lowestAskPriceText = html.find('ul.orderbook-flex-list.blue').eq(9).find('span.PriceNumber.PriceNumber--high').text().split(".");
-      const lowestAskPriceInt = parseFloat(lowestAskPriceText[0].match(/\d/g).join(""))
-      let lowestAskPriceBlah = 0;
-      if (lowestAskPriceText.length === 2){
-      lowestAskPriceBlah = parseFloat("0." + lowestAskPriceText[1].match(/\d/g).join(""))
-      }
-      const lowestAskPrice = lowestAskPriceInt + lowestAskPriceBlah
-
-
-      const lowestAskQuantityText = html.find('ul.orderbook-flex-list.blue').eq(9).last().find('span.orderbook-bar--qty').text().split(".");
-      const lowestAskQuantityInt = parseFloat(lowestAskQuantityText[0].match(/\d/g).join(""))
-      let lowestAskQuantityBlah = 0;
-      if (lowestAskQuantityText.length === 2){
-      lowestAskQuantityBlah = parseFloat("0." + lowestAskQuantityText[1].match(/\d/g).join(""))
-      }
-      const lowestAskQuantity = lowestAskQuantityInt + lowestAskQuantityBlah
-
-
-
-      const highestBidPriceText = html.find('ul.orderbook-flex-list.pink').eq(10).find('span.PriceNumber.PriceNumber--low').text().split(".");
-      const highestBidPriceInt = parseFloat(highestBidPriceText[0].match(/\d/g).join(""))
-      let highestBidPriceBlah = 0;
-      if (highestBidPriceText.length === 2){
-      highestBidPriceBlah = parseFloat("0." + highestBidPriceText[1].match(/\d/g).join(""))
-      }
-      const highestBidPrice = highestBidPriceInt + highestBidPriceBlah
-
-
-
-      const highestBidQuantityText = html.find('ul.orderbook-flex-list.pink').eq(10).last().find('span.orderbook-bar--qty').text().split(".");
-      const highestBidQuantityInt = parseFloat(highestBidQuantityText[0].match(/\d/g).join(""))
-      let highestBidQuantityBlah = 0;
-      if (highestBidQuantityText.length === 2){
-      highestBidQuantityBlah = parseFloat("0." + highestBidQuantityText[1].match(/\d/g).join(""))
-      }
-      const highestBidQuantity = highestBidQuantityInt + highestBidQuantityBlah
-
-
-      const aggOrders = { aggAsks, aggBids };
-      const bidAsk = {
-        highestBidPrice,
-        highestBidQuantity,
-        lowestAskPrice,
-        lowestAskQuantity
-      };
-
-
+      url: `https://bitsonic.co.kr/front/exchange/${coin}-krw`
     })
-    .catch(function(err){
-       console.log(err)
-    });
+      .then(function(html) {
+        //success!
+        const aggAskText = $(html)
+          .find("div#stickyOrderbook div.orderbook-header.orderbook-header-top")
+          .last()
+          .find("p.text-blue")
+          .text()
+          .split(".");
+        const aggAskInt = parseFloat(aggAskText[0].match(/\d/g).join(""));
+        let aggAskBlah = 0;
+        if (aggAskText.length === 2) {
+          aggAskBlah = parseFloat("0." + aggAskText[1].match(/\d/g).join(""));
+        }
+        const aggAsks = aggAskInt + aggAskBlah;
+
+        const aggBidsText = $(html)
+          .find(
+            "div#stickyOrderbook div.orderbook-header.orderbook-header-bottom"
+          )
+          .last()
+          .find("p.text-pink")
+          .text()
+          .split(".");
+        const aggBidsInt = parseFloat(aggBidsText[0].match(/\d/g).join(""));
+
+        let aggBidsBlah = 0;
+        if (aggBidsText.length === 2) {
+          aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""));
+        }
+        const aggBids = aggBidsInt + aggBidsBlah;
+
+        const lowestAskPriceText = $(html)
+          .find("ul.orderbook-flex-list.blue")
+          .eq(9)
+          .find("span.PriceNumber.PriceNumber--high")
+          .text()
+          .split(".");
+        const lowestAskPriceInt = parseFloat(
+          lowestAskPriceText[0].match(/\d/g).join("")
+        );
+        let lowestAskPriceBlah = 0;
+        if (lowestAskPriceText.length === 2) {
+          lowestAskPriceBlah = parseFloat(
+            "0." + lowestAskPriceText[1].match(/\d/g).join("")
+          );
+        }
+        const lowestAskPrice = lowestAskPriceInt + lowestAskPriceBlah;
+
+        const lowestAskQuantityText = $(html)
+          .find("ul.orderbook-flex-list.blue")
+          .eq(9)
+          .last()
+          .find("span.orderbook-bar--qty")
+          .text()
+          .split(".");
+        const lowestAskQuantityInt = parseFloat(
+          lowestAskQuantityText[0].match(/\d/g).join("")
+        );
+        let lowestAskQuantityBlah = 0;
+        if (lowestAskQuantityText.length === 2) {
+          lowestAskQuantityBlah = parseFloat(
+            "0." + lowestAskQuantityText[1].match(/\d/g).join("")
+          );
+        }
+        const lowestAskQuantity = lowestAskQuantityInt + lowestAskQuantityBlah;
+
+        const highestBidPriceText = $(html)
+          .find("ul.orderbook-flex-list.pink")
+          .eq(10)
+          .find("span.PriceNumber.PriceNumber--low")
+          .text()
+          .split(".");
+        const highestBidPriceInt = parseFloat(
+          highestBidPriceText[0].match(/\d/g).join("")
+        );
+        let highestBidPriceBlah = 0;
+        if (highestBidPriceText.length === 2) {
+          highestBidPriceBlah = parseFloat(
+            "0." + highestBidPriceText[1].match(/\d/g).join("")
+          );
+        }
+        const highestBidPrice = highestBidPriceInt + highestBidPriceBlah;
+
+        const highestBidQuantityText = $(html)
+          .find("ul.orderbook-flex-list.pink")
+          .eq(10)
+          .last()
+          .find("span.orderbook-bar--qty")
+          .text()
+          .split(".");
+        const highestBidQuantityInt = parseFloat(
+          highestBidQuantityText[0].match(/\d/g).join("")
+        );
+        let highestBidQuantityBlah = 0;
+        if (highestBidQuantityText.length === 2) {
+          highestBidQuantityBlah = parseFloat(
+            "0." + highestBidQuantityText[1].match(/\d/g).join("")
+          );
+        }
+        const highestBidQuantity =
+          highestBidQuantityInt + highestBidQuantityBlah;
+
+        const aggOrders = { aggAsks, aggBids };
+        const bidAsk = {
+          highestBidPrice,
+          highestBidQuantity,
+          lowestAskPrice,
+          lowestAskQuantity
+        };
+        console.log("aggOrders: ", aggOrders);
+        console.log("bidAsk: ", bidAsk);
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
   });
 };
 
-
 const getBitsonicTrades = coin => {};
-
 
 export const selectExchange = exchange => {
   //make async requests to exchange api or db
@@ -947,6 +989,21 @@ export const selectExchange = exchange => {
           priceChanges: candleData.priceChanges
         });
         getBithumbOrderbook(selectedCoin).then(orderbookData => {
+          dispatch({
+            type: RECEIVE_ORDERBOOK_DATA,
+            aggOrders: orderbookData.aggOrders,
+            bidAsk: orderbookData.bidAsk
+          });
+        });
+      });
+    } else if (exchange === "Bitsonic") {
+      return getBitsonicCandleSticks(selectedCoin).then(candleData => {
+        dispatch({
+          type: RECEIVE_CANDLE_DATA,
+          volumeChanges: candleData.volumeChanges,
+          priceChanges: candleData.priceChanges
+        });
+        getBitsonicOrderbook(selectedCoin).then(orderbookData => {
           dispatch({
             type: RECEIVE_ORDERBOOK_DATA,
             aggOrders: orderbookData.aggOrders,
