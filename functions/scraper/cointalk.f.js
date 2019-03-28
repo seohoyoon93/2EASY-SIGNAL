@@ -62,10 +62,8 @@ exports = module.exports = functions
         await page.goto(link, { waitUntil: "domcontentloaded", timeout: 0 });
         const subHtml = await page.content();
 
-        const uploadTime = await $("div.info div.desc", subHtml)
-          .eq(0)
-          .find("strong")
-          .eq(0)
+        const uploadTime = await $("#st-view div.info div.desc strong", subHtml)
+          .eq(1)
           .text();
         const timestamp = await Date.parse(uploadTime + " UTC+9");
         const title = await $("div.info h4", subHtml).text();
