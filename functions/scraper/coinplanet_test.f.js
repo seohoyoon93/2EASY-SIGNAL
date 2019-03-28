@@ -1,10 +1,23 @@
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 const chromium = require("chrome-aws-lambda");
-const puppeteer = require('./node_modules/puppeteer');
+const puppeteer = require("puppeteer-core");
 const $ = require("cheerio");
+const config = functions.config().firebase;
+try {
+  admin.initializeApp(config);
+} catch (e) {
+  console.log(e);
+}
 
+const runtimeOpts = {
+  timeoutSeconds: 280,
+  memory: "2GB"
+};
 
-
-(async () => {
+exports = module.exports = functions
+  .runWith(runtimeOpts)
+  .https.onRequest(async (req, res) => {
 
     let browser = null;
     // launch browser with puppeteer and open a new page
@@ -17,23 +30,10 @@ const $ = require("cheerio");
 
 
     try {
-
-      /* 로그인 제거
-      const page = await browser.newPage();
-      const naver_id = "easternegg";
-      const naver_pw = "Easternegg1!";
-      await page.goto('https://nid.naver.com/nidlogin.login');
-      await page.evaluate((id, pw) => {
-        document.querySelector('#id').value = id;
-        document.querySelector('#pw').value = pw;
-      }, naver_id, naver_pw);
-      await page.click('.btn_global');
-      await page.waitForNavigation();
-      */
      
      const page = await browser.newPage();
 
-     await page.goto('https://cafe.naver.com/ArticleList.nhn?search.clubid=25698071&search.menuid=127&search.boardtype=L', {
+     await page.goto('https://cafe.naver.com/ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L', {
        waitUntil: "networkidle2",
        timeout: 0
      });
@@ -42,7 +42,7 @@ const $ = require("cheerio");
 
       let mframe = [];
      for (const frame of frames){
-       if (frame.url().includes('ArticleList.nhn?search.clubid=25698071&search.menuid=127&search.boardtype=L')){
+       if (frame.url().includes('ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L')){
          console.log(frame.url())
                mframe = frame
         }
@@ -59,30 +59,37 @@ const $ = require("cheerio");
           .find("a.article")
           .text();
    
-         const content = ""
-         const comments = ""
          if (title !== ""){
-         console.log("title :" + title)
-         }
+          console.log("title :" + title)
 
-        });
-
-        /*
-        await admin
+          const time = $(elem)
+           .find("td.td_date")
+           .match(/[0-9]+/)[0];
+ 
+           var currentTime = Date.now()
+           var day = currentTime.getDate()
+           var year = currentTime.getFullYear()
+ 
+           const uploadTime = `${year}`+`${day}`+`${time}`
+           const timestamp = await Date.parse(uploadTime + " UTC+9");
+    
+           let content = ""
+           let comments = ""
+ 
+          await admin
           .firestore()
           .doc(`communities/nvbitoka/data/${contentId}`)
           .set({
             title,
             content,
-            comments
+            comments,
+            timestamp
           })
-          .then(() => {
-            console.log("New data scraped for coinpan");
-          })
-          .catch(err => {
-            console.error("Failed to scrape coinpan, ", err);
-          });
-          */
+         }
+
+        });
+
+    
     } catch (e) {
       throw e;
     } finally {
@@ -92,4 +99,4 @@ const $ = require("cheerio");
     }
 
 
-  })();
+  });
