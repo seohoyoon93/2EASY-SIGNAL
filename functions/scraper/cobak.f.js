@@ -17,13 +17,10 @@ const runtimeOpts = {
   memory: "2GB"
 };
 
-//TODO: render react doms by using puppeteer to scrape cobak data
-
 exports = module.exports = functions
   .runWith(runtimeOpts)
   .https.onRequest(async (req, res) => {
     let browser = null;
-    // launch browser with puppeteer and open a new page
     browser = await puppeteer.launch({
       headless: chromium.headless,
       args: chromium.args,
@@ -32,18 +29,14 @@ exports = module.exports = functions
     });
     try {
       const page = await browser.newPage();
-      await console.log("opening a new browser");
       await page.goto(url, {
         waitUntil: "networkidle2",
         timeout: 0
       });
-      await console.log("opening a new page");
       const html = await page.content();
-      await console.log("got content: ", html);
       let contentIds = [];
 
       await $("div.postingPreview___tLLsW a", html).each((i, elem) => {
-        console.log("elem: ", elem);
         const contentId = $(elem)
           .attr("href")
           .match(/post\/([0-9]+)/)[0]
@@ -74,9 +67,7 @@ exports = module.exports = functions
               comments,
               timestamp
             })
-            .then(() => {
-              console.log("New data scraped for cobak");
-            })
+            .then(() => {})
             .catch(err => {
               console.error("Failed to scrape cobak, ", err);
             });
@@ -95,9 +86,7 @@ exports = module.exports = functions
               comments,
               timestamp
             })
-            .then(() => {
-              console.log("New data scraped for cobak");
-            })
+            .then(() => {})
             .catch(err => {
               console.error("Failed to scrape cobak, ", err);
             });
