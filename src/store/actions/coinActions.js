@@ -16,8 +16,24 @@ export const selectCoin = coin => {
           };
           exchanges.push(exchange);
         });
-      })
-      .then(() => {
+        exchanges.sort((a, b) => {
+          switch (a.name) {
+            case "Upbit":
+              return -1;
+            case "Bitsonic":
+              if (b.name === "Upbit") {
+                return 1;
+              }
+              return -1;
+            case "Coinbit":
+              if (b.name === "Upbit" || b.name === "Bitsonic") {
+                return 1;
+              }
+              return -1;
+            default:
+              return 1;
+          }
+        });
         const coinAndExchanges = { coin: coin, exchanges: exchanges };
         dispatch({ type: SELECT_COIN, coinAndExchanges });
       })
