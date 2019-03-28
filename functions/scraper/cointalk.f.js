@@ -11,7 +11,6 @@ try {
 }
 
 const url = "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard";
-//const cred = require("../config/coinpan_credentials");
 const runtimeOpts = {
   timeoutSeconds: 110,
   memory: "2GB"
@@ -21,7 +20,6 @@ exports = module.exports = functions
   .runWith(runtimeOpts)
   .https.onRequest(async (req, res) => {
     let browser = null;
-    // launch browser with puppeteer and open a new page
     browser = await puppeteer.launch({
       headless: chromium.headless,
       args: chromium.args,
@@ -34,48 +32,48 @@ exports = module.exports = functions
         waitUntil: "domcontentloaded",
         timeout: 0
       });
-
-      /*
-      await page.type(".idpw_id", cred.COINPAN_ID);
-      await page.type(".idpw_pass", cred.COINPAN_PW);
-      await Promise.all([
-        page.click(".loginbutton input"),
-        page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 0 })
-      ]);
-      */
       const html = await page.content();
-      // await console.log($(".userName p span", html).text());
-      // Note: Above code checks if login succeeded
+
       let contentIds = [];
-      await $("#fboardlist", html)
-        .find("tr")
+      await $("#fboardlist tr", html)
         .not(".notice")
-        .find("td.sbj")
-        .find("a")
+        .find("td.sbj a")
+        .not(".dropdown-toggle")
         .each((i, elem) => {
-          let contentId = $(elem)
-            .attr("href")
-            .match(/id=([0-9]+)/)[0]
-            .match(/[0-9]+/)[0];
-          contentIds.push(contentId);
+          if (
+            $(elem)
+              .attr("href")
+              .indexOf("wr_id=") !== -1
+          ) {
+            let contentId = $(elem)
+              .attr("href")
+              .match(/id=([0-9]+)/)[0]
+              .match(/[0-9]+/)[0];
+            contentIds.push(contentId);
+          }
         });
 
-
       await contentIds.reduce(async (promise, contentId) => {
-        const link = "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard&wr_id=" + contentId;
+        const link =
+          "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard&wr_id=" +
+          contentId;
         await promise;
 
         await page.goto(link, { waitUntil: "domcontentloaded", timeout: 0 });
         const subHtml = await page.content();
 
-
+        const uploadTime = await $("div.info div.desc", subHtml)
+          .eq(0)
+          .find("strong")
+          .eq(0)
+          .text();
+        const timestamp = await Date.parse(uploadTime + " UTC+9");
         const title = await $("div.info h4", subHtml).text();
-        const content = await $("article.text p", subHtml).text();
+        let content = await $("article.text p", subHtml).text();
         const content2 = await $("article.text h1", subHtml).text();
-        content = content2+content
+        content = content2 + content;
 
         const comments = await $("#st-comment p", subHtml).text();
-
 
         await admin
           .firestore()
@@ -83,13 +81,12 @@ exports = module.exports = functions
           .set({
             title,
             content,
-            comments
+            comments,
+            timestamp
           })
-          .then(() => {
-            console.log("New data scraped for coinpan");
-          })
+          .then(() => {})
           .catch(err => {
-            console.error("Failed to scrape coinpan, ", err);
+            console.error("Failed to scrape cointalk, ", err);
           });
       }, Promise.resolve());
     } catch (e) {

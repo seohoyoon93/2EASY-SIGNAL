@@ -10,8 +10,7 @@ try {
   console.log(e);
 }
 
-const url = "https://www.moneynet.co.kr/free_board";
-//const cred = require("../config/coinpan_credentials");
+const url = "https://gall.dcinside.com/board/lists?id=bitcoins";
 const runtimeOpts = {
   timeoutSeconds: 110,
   memory: "2GB"
@@ -21,7 +20,6 @@ exports = module.exports = functions
   .runWith(runtimeOpts)
   .https.onRequest(async (req, res) => {
     let browser = null;
-    // launch browser with puppeteer and open a new page
     browser = await puppeteer.launch({
       headless: chromium.headless,
       args: chromium.args,
@@ -34,66 +32,47 @@ exports = module.exports = functions
         waitUntil: "domcontentloaded",
         timeout: 0
       });
-
-      /*
-      await page.type(".idpw_id", cred.COINPAN_ID);
-      await page.type(".idpw_pass", cred.COINPAN_PW);
-      await Promise.all([
-        page.click(".loginbutton input"),
-        page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 0 })
-      ]);
-      */
       const html = await page.content();
-      // await console.log($(".userName p span", html).text());
-      // Note: Above code checks if login succeeded
-
       let contentIds = [];
-      await $("#board_list", html)
-        .find("tr")
-        .not(".notice")
-        .find("td.title")
-        .find("a")
-        .not("[title=Replies]")
-        .each((i, elem) => {
+      await $("div.gall_listwrap tr.us-post td.gall_tit a", html).each(
+        (i, elem) => {
           let contentId = $(elem)
             .attr("href")
-            .match(/free_board\/([0-9]+)/)[0]
+            .match(/no=([0-9]+)/)[0]
             .match(/[0-9]+/)[0];
           contentIds.push(contentId);
-        });
-
-
-
+        }
+      );
 
       await contentIds.reduce(async (promise, contentId) => {
-        const link = "https://www.moneynet.co.kr/free_board/" + contentId;
+        const link =
+          "https://gall.dcinside.com/board/view/?id=bitcoins&no=" + contentId;
         await promise;
-
         await page.goto(link, { waitUntil: "domcontentloaded", timeout: 0 });
         const subHtml = await page.content();
-        const title = await $("div.read_header h1", subHtml).text();
-
-        const content = await $("div.read_body .xe_content p span", subHtml).text();
-        const content2 = await $("div.read_body .xe_content", subHtml).text();
-        const content3 = await $("div.read_body .xe_content p", subHtml).text();
-
-        content = content+content2+content3
-
-        const comments = await $("#comment .xe_content", subHtml).text();
+        const uploadTime = await $(
+          "div.gallview_head span.gall_date",
+          subHtml
+        ).attr("title");
+        const timestamp = await Date.parse(uploadTime + " UTC+9");
+        const title = await $("span.title_subject", subHtml).text();
+        let content = await $("div.writing_view_box div p", subHtml).text();
+        const content2 = await $("div.writing_view_box div", subHtml).text();
+        content = content + content2;
+        const comments = await $("ul.cmt_list li.ub-content p", subHtml).text();
 
         await admin
           .firestore()
-          .doc(`communities/moneynet/data/${contentId}`)
+          .doc(`communities/dcinside/data/${contentId}`)
           .set({
             title,
             content,
-            comments
+            comments,
+            timestamp
           })
-          .then(() => {
-            console.log("New data scraped for coinpan");
-          })
+          .then(() => {})
           .catch(err => {
-            console.error("Failed to scrape coinpan, ", err);
+            console.error("Failed to scrape dcinside, ", err);
           });
       }, Promise.resolve());
     } catch (e) {

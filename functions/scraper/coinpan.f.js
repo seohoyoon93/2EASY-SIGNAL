@@ -61,20 +61,27 @@ exports = module.exports = functions
         await promise;
         await page.goto(link, { waitUntil: "domcontentloaded", timeout: 0 });
         const subHtml = await page.content();
+        const uploadTime = await $("div.board_read ul.wt_box", subHtml)
+          .eq(0)
+          .children()
+          .last()
+          .find("span.number")
+          .text();
+        const timestamp = await Date.parse(uploadTime + " UTC+9");
         const title = await $("div.read_header h1", subHtml).text();
         const content = await $("div.read_body .xe_content", subHtml).text();
         const comments = await $("#comment .xe_content", subHtml).text();
+
         await admin
           .firestore()
           .doc(`communities/coinpan/data/${contentId}`)
           .set({
             title,
             content,
-            comments
+            comments,
+            timestamp
           })
-          .then(() => {
-            console.log("New data scraped for coinpan");
-          })
+          .then(() => {})
           .catch(err => {
             console.error("Failed to scrape coinpan, ", err);
           });
