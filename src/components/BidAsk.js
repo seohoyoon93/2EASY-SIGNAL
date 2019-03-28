@@ -16,9 +16,9 @@ class BidAsk extends Component {
   }
   render() {
     const { orderbookData } = this.props;
-
+    let divClass = this.props.selectedExchange === "Coinbit" ? "hidden" : "";
     return (
-      <div className="bidask content-wrapper">
+      <div className={`${divClass} bidask content-wrapper`}>
         <div className="content-header" onClick={this.handleClick}>
           현재 매수/매도 갭
           {this.state.isHidden ? (
@@ -52,7 +52,8 @@ class BidAsk extends Component {
 
 const mapStateToProps = state => {
   return {
-    orderbookData: state.exchange.orderbookData
+    orderbookData: state.exchange.orderbookData,
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 
