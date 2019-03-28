@@ -13,37 +13,29 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
   const cointalkPromise = getCommPromise("cointalk");
   const dcinsidePromise = getCommPromise("dcinside");
   const moneynetPromise = getCommPromise("moneynet");
+  const cobakPromise = getCommPromise("cobak");
 
   let totalText = "";
-  await Promise.all([
+  let values = await Promise.all([
     coinpanPromise,
     cointalkPromise,
     dcinsidePromise,
-    moneynetPromise
-  ])
-    .then(values => {
-      totalText += values.reduce((acc, cur) => acc + cur);
-
-      const coins = helper.countCoinNickname(totalText);
-      Object.keys(coins).forEach(coin => {
-        admin
-          .firestore()
-          .doc(`coins/${coin}`)
-          .set({
-            count: coins[coin]
-          })
-          .then(() => {
-            console.log("Updated coin counts, ", coins);
-            res.send("Done");
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      });
+    moneynetPromise,
+    cobakPromise
+  ]);
+  totalText = await values.reduce((acc, cur) => acc + cur);
+  const coins = await helper.countCoinNickname(totalText);
+  const timestamp = Date.now();
+  await admin
+    .firestore()
+    .doc(`coins/${timestamp}`)
+    .set({
+      mentions: coins,
+      timestamp: timestamp
     })
-    .catch(err => {
-      console.log(err);
-    });
+    .then(() => {})
+    .catch(err => console.log(err));
+  await res.send("Done");
 });
 
 function getCommPromise(community) {
