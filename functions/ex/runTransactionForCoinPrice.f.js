@@ -226,7 +226,7 @@ exports = module.exports = functions
             return coin;
           })
           .then(() => {
-            console.log(`${coin} updated`);
+            console.log("updated coinprices");
           })
           .catch(err => console.log(err));
       });
