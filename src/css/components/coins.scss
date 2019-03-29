@@ -21,7 +21,13 @@
     color: #fff !important;
   }
 }
-
+.ui.loading.dropdown > i.icon:after {
+  top: 55% !important;
+  left: 13% !important;
+  width: 2em !important;
+  height: 2em !important;
+  border-color: #ffffff transparent transparent !important;
+}
 @media only screen and (max-width: 767px) {
   .ui.search.dropdown .menu {
     max-height: 180px;

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Icon } from "semantic-ui-react";
+import { Icon, Dimmer, Loader } from "semantic-ui-react";
 
 class BidAsk extends Component {
   constructor(props) {
@@ -10,13 +10,45 @@ class BidAsk extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    this.setState(state => ({
-      isHidden: !state.isHidden
-    }));
+    if (!this.props.orderbookData.isFetching) {
+      this.setState(state => ({
+        isHidden: !state.isHidden
+      }));
+    }
   }
   render() {
-    const { orderbookData } = this.props;
-    let divClass = this.props.selectedExchange === "Coinbit" ? "hidden" : "";
+    const { orderbookData, selectedExchange } = this.props;
+    let divClass = selectedExchange === "Coinbit" ? "hidden" : "";
+    let content = orderbookData.isFetching ? (
+      selectedExchange === "Bitsonic" ? (
+        <Dimmer active inverted>
+          <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
+        </Dimmer>
+      ) : (
+        <Dimmer active inverted>
+          <Loader inverted />
+        </Dimmer>
+      )
+    ) : (
+      <div>
+        <div className="best-offer">
+          <p className="price">{`최고 매수 호가 = ${
+            orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
+          }`}</p>
+          <p className="amount">{`잔량 ${
+            orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
+          }`}</p>
+        </div>
+        <div className="best-offer">
+          <p className="price">{`최저 매도 호가 = ${
+            orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
+          }`}</p>
+          <p className="amount">{`잔량 ${
+            orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
+          }`}</p>
+        </div>
+      </div>
+    );
     return (
       <div className={`${divClass} bidask content-wrapper`}>
         <div className="content-header" onClick={this.handleClick}>
@@ -28,22 +60,7 @@ class BidAsk extends Component {
           )}
         </div>
         <div className={this.state.isHidden ? "content hidden" : "content"}>
-          <div className="best-offer">
-            <p className="price">{`최고 매수 호가 = ${
-              orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
-            }`}</p>
-            <p className="amount">{`잔량 ${
-              orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
-            }`}</p>
-          </div>
-          <div className="best-offer">
-            <p className="price">{`최저 매도 호가 = ${
-              orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
-            }`}</p>
-            <p className="amount">{`잔량 ${
-              orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
-            }`}</p>
-          </div>
+          {content}
         </div>
       </div>
     );

@@ -29,7 +29,7 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
     bitokaPromise,
     coinplanetPromise
   ]);
-  totalText = await values.reduce((acc, cur) => acc + cur);
+  totalText = await values.reduce((acc, cur) => acc + " " + cur);
   const coins = await helper.countCoinNickname(totalText);
   const timestamp = Date.now();
   await admin
@@ -57,8 +57,12 @@ function getCommPromise(community) {
         let result = "";
         querySnapshot.forEach(doc => {
           const text =
-            doc.data().title + doc.data().content + doc.data().comments;
-          result += text;
+            doc.data().title +
+            " " +
+            doc.data().content +
+            " " +
+            doc.data().comments;
+          result += " " + text;
         });
         resolve(result);
       })

@@ -8,42 +8,13 @@ exports.getCandleSticks = coin => {
     const twoHoursAgo = now - 7200000;
     const hourAgo = now - 3600000;
     const thirtyMinsAgo = now - 1800000;
-    const fifteenMinsAgo = now - 900000;
     const tenMinsAgo = now - 600000;
     const sixMinsAgo = now - 360000;
-    const fiveMinsAgo = now - 300000;
-    const threeMinsAgo = now - 300000;
     const twoMinsAgo = now - 120000;
-    const minAgo = now - 60000;
     function isBeforeTwoHours(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
       return candleTime >= twoHoursAgo;
-    }
-    function isBeforeHour(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
-
-      return candleTime >= hourAgo;
-    }
-    function isBeforeThirtyMins(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
-
-      return candleTime >= thirtyMinsAgo;
-    }
-    function isBeforeTenMins(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
-
-      return candleTime >= tenMinsAgo;
-    }
-    function isBeforeSixMins(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
-
-      return candleTime >= sixMinsAgo;
-    }
-    function isBeforeTwoMins(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
-
-      return candleTime >= twoMinsAgo;
     }
     function notRightNow(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
@@ -67,6 +38,7 @@ exports.getCandleSticks = coin => {
     rp(tickerOptions).then(parsedBody => {
       const accTradeVol24h = parsedBody[0].acc_trade_price_24h;
       const lastPrice = parsedBody[0].trade_price;
+      const priceChange = parsedBody[0].signed_change_rate.toFixed(2);
 
       rp(candleOptions).then(parsedBody => {
         if (parsedBody.length === 0) {
@@ -92,7 +64,8 @@ exports.getCandleSticks = coin => {
             fiveMinPriceChange: 0,
             threeMinPriceChange: 0,
             minPriceChange: 0,
-            currentPrice: lastPrice
+            currentPrice: lastPrice,
+            priceChange
           };
 
           resolve({ volumeChanges, priceChanges });
@@ -100,85 +73,125 @@ exports.getCandleSticks = coin => {
           // when parsedBody.length > 0
           const data = parsedBody.filter(notRightNow);
           const hourData = data.filter(isBeforeTwoHours);
+          let timestamps = [];
+          let time = twoHoursAgo;
+          for (let i = 0; i < 120; i++) {
+            timestamps.push(time);
+            time += 60000;
+          }
+          let filledData = [];
+          for (let i = 0; i < 120; i++) {
+            let item = hourData.filter(
+              elem =>
+                new Date(elem.candle_date_time_kst).getTime() === timestamps[i]
+            );
+            let candle;
+            if (i === 0) {
+              if (item === undefined || item.length === 0) {
+                candle = {
+                  timestamp: timestamps[i],
+                  price: lastPrice,
+                  volume: 0
+                };
+              } else {
+                candle = {
+                  timestamp: timestamps[i],
+                  price: item[0].trade_price,
+                  volume: item[0].candle_acc_trade_price
+                };
+              }
+            } else {
+              if (item === undefined || item.length === 0) {
+                candle = {
+                  timestamp: timestamps[i],
+                  price: filledData[i - 1].price,
+                  volume: 0
+                };
+              } else {
+                candle = {
+                  timestamp: timestamps[i],
+                  price: item[0].trade_price,
+                  volume: item[0].candle_acc_trade_price
+                };
+              }
+            }
+            filledData.push(candle);
+          }
+
           let lastHourVolume = 0;
           let currentHourVolume = 0;
-          let lastHourPrice = hourData[0].trade_price;
-          hourData.forEach(elem => {
-            if (new Date(elem.candle_date_time_kst).getTime() < hourAgo) {
-              lastHourVolume += elem.candle_acc_trade_price;
-              lastHourPrice = elem.trade_price;
+          let lastHourPrice = filledData[60].price;
+          for (let i = 0; i < 120; i++) {
+            if (i < 60) {
+              lastHourVolume += filledData[i].volume;
             } else {
-              currentHourVolume += elem.candle_acc_trade_price;
+              currentHourVolume += filledData[i].volume;
             }
-          });
+          }
 
-          const thirtyMinData = data.filter(isBeforeHour);
+          const thirtyMinData = filledData.filter(
+            elem => elem.timestamp >= hourAgo
+          );
           let lastThirtyMinVolume = 0;
           let currentThirtyMinVolume = 0;
-          let lastThirtyMinPrice = hourData[0].trade_price;
-          thirtyMinData.forEach(elem => {
-            if (new Date(elem.candle_date_time_kst).getTime() < thirtyMinsAgo) {
-              lastThirtyMinVolume += elem.candle_acc_trade_price;
-              lastThirtyMinPrice = elem.trade_price;
+          let lastThirtyMinPrice = thirtyMinData[30].price;
+          for (let i = 0; i < 60; i++) {
+            if (i < 30) {
+              lastThirtyMinVolume += filledData[i].volume;
             } else {
-              currentThirtyMinVolume += elem.candle_acc_trade_price;
+              currentThirtyMinVolume += filledData[i].volume;
             }
-          });
+          }
 
-          const fifteenMinData = data.filter(isBeforeThirtyMins);
+          const fifteenMinData = filledData.filter(
+            elem => elem.timestamp >= thirtyMinsAgo
+          );
           let lastFifteenMinVolume = 0;
           let currentFifteenMinVolume = 0;
-          let lastFifteenMinPrice = hourData[0].trade_price;
-          fifteenMinData.forEach(elem => {
-            if (
-              new Date(elem.candle_date_time_kst).getTime() < fifteenMinsAgo
-            ) {
-              lastFifteenMinVolume += elem.candle_acc_trade_price;
-              lastFifteenMinPrice = elem.trade_price;
+          let lastFifteenMinPrice = fifteenMinData[15].price;
+          for (let i = 0; i < 30; i++) {
+            if (i < 15) {
+              lastFifteenMinVolume += filledData[i].volume;
             } else {
-              currentFifteenMinVolume += elem.candle_acc_trade_price;
+              currentFifteenMinVolume += filledData[i].volume;
             }
-          });
+          }
 
-          const fiveMinData = data.filter(isBeforeTenMins);
+          const fiveMinData = filledData.filter(
+            elem => elem.timestamp >= tenMinsAgo
+          );
           let lastFiveMinVolume = 0;
           let currentFiveMinVolume = 0;
-          let lastFiveMinPrice = hourData[0].trade_price;
-          fiveMinData.forEach(elem => {
-            if (new Date(elem.candle_date_time_kst).getTime() < fiveMinsAgo) {
-              lastFiveMinVolume += elem.candle_acc_trade_price;
-              lastFiveMinPrice = elem.trade_price;
+          let lastFiveMinPrice = fiveMinData[5].price;
+          for (let i = 0; i < 10; i++) {
+            if (i < 5) {
+              lastFiveMinVolume += filledData[i].volume;
             } else {
-              currentFiveMinVolume += elem.candle_acc_trade_price;
+              currentFiveMinVolume += filledData[i].volume;
             }
-          });
+          }
 
-          const threeMinData = data.filter(isBeforeSixMins);
+          const threeMinData = filledData.filter(
+            elem => elem.timestamp >= sixMinsAgo
+          );
           let lastThreeMinVolume = 0;
           let currentThreeMinVolume = 0;
-          let lastThreeMinPrice = hourData[0].trade_price;
-          threeMinData.forEach(elem => {
-            if (new Date(elem.candle_date_time_kst).getTime() < threeMinsAgo) {
-              lastThreeMinVolume += elem.candle_acc_trade_price;
-              lastThreeMinPrice = elem.trade_price;
+          let lastThreeMinPrice = threeMinData[3].price;
+          for (let i = 0; i < 6; i++) {
+            if (i < 3) {
+              lastThreeMinVolume += filledData[i].volume;
             } else {
-              currentThreeMinVolume += elem.candle_acc_trade_price;
+              currentThreeMinVolume += filledData[i].volume;
             }
-          });
+          }
 
-          const minData = data.filter(isBeforeTwoMins);
-          let lastMinVolume = 0;
-          let currentMinVolume = 0;
-          let lastMinPrice = hourData[0].trade_price;
-          let currentPrice = hourData.reverse()[0].trade_price;
-          minData.forEach(elem => {
-            if (new Date(elem.candle_date_time_kst).getTime() < minAgo) {
-              lastMinVolume += elem.candle_acc_trade_price;
-              lastMinPrice = elem.trade_price;
-            } else {
-              currentMinVolume += elem.candle_acc_trade_price;
-            }
-          });
+          const minData = filledData.filter(
+            elem => elem.timestamp >= twoMinsAgo
+          );
+          let lastMinVolume = minData[0].volume;
+          let currentMinVolume = minData[1].volume;
+          let lastMinPrice = minData[0].price;
+          let currentPrice = minData[1].price;
 
           const hourVolumeChange =
             lastHourVolume !== 0
@@ -212,6 +225,7 @@ exports.getCandleSticks = coin => {
                   100
                 ).toFixed(2)
               : 0;
+
           const minVolumeChange =
             lastMinVolume !== 0
               ? ((currentMinVolume / lastMinVolume) * 100 - 100).toFixed(2)
@@ -265,7 +279,8 @@ exports.getCandleSticks = coin => {
             fiveMinPriceChange,
             threeMinPriceChange,
             minPriceChange,
-            currentPrice
+            currentPrice,
+            priceChange
           };
 
           resolve({ volumeChanges, priceChanges });

@@ -99,9 +99,11 @@ class Exchanges extends Component {
           >
             <img src="/images/icon_document.svg" alt="community" />
           </a>
-          <span className="recent-update">{`최근 업데이트 ${
-            this.state.updatedAt
-          }`}</span>
+          <span className="recent-update">
+            {this.state.updatedAt !== null
+              ? `최근 업데이트 ${this.state.updatedAt}`
+              : "-"}
+          </span>
         </div>
       </div>
     );

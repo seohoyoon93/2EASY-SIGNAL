@@ -12,20 +12,39 @@ class Price extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    this.setState(state => ({
-      isHidden: !state.isHidden
-    }));
+    if (!this.props.candleData.isFetching) {
+      this.setState(state => ({
+        isHidden: !state.isHidden
+      }));
+    }
   }
   render() {
-    const { candleData } = this.props;
+    const { candleData, selectedExchange } = this.props;
+    const priceChange = candleData.priceChanges.priceChange;
+    const priceChangeText =
+      priceChange > 0
+        ? `+${priceChange}%`
+        : priceChange === 0
+        ? `${priceChange}%`
+        : `-${priceChange}%`;
     let content = candleData.isFetching ? (
-      <Dimmer active inverted>
-        <Loader inverted>Loading...</Loader>
-      </Dimmer>
+      selectedExchange === "Bitsonic" ? (
+        <Dimmer active inverted>
+          <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
+        </Dimmer>
+      ) : (
+        <Dimmer active inverted>
+          <Loader inverted />
+        </Dimmer>
+      )
     ) : (
       <div>
-        <h4>현재시세</h4>
-        <p>{`₩${candleData.priceChanges.currentPrice}`}</p>
+        <div>
+          <h4>전일대비</h4>
+          <p>{priceChangeText}</p>
+          <h4>현재시세</h4>
+          <p>{`₩${candleData.priceChanges.currentPrice}`}</p>
+        </div>
         <div className="charts">
           <div className="chart">
             <div className="percent">{`${
@@ -108,7 +127,8 @@ class Price extends Component {
 
 const mapStateToProps = state => {
   return {
-    candleData: state.exchange.candleData
+    candleData: state.exchange.candleData,
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 

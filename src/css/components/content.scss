@@ -17,11 +17,19 @@
       height: 1.5em;
     }
   }
+  &.orderbook .content {
+    height: 120px !important;
+  }
+  &.bidask .content {
+    height: 80px !important;
+  }
   .content {
+    position: relative;
+    height: 227px;
+    margin-top: 12px;
     &.hidden {
       display: none;
     }
-    margin-top: 12px;
     h4 {
       text-align: right;
       font-size: 1.2rem;

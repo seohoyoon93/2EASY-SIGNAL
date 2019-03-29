@@ -12,13 +12,9 @@ exports.getCandleSticks = coin => {
     const twoHoursAgo = (to - 7200) * 1000;
     const hourAgo = (to - 3600) * 1000;
     const thirtyMinsAgo = (to - 1800) * 1000;
-    const fifteenMinsAgo = (to - 900) * 1000;
     const tenMinsAgo = (to - 600) * 1000;
     const sixMinsAgo = (to - 360) * 1000;
-    const fiveMinsAgo = (to - 300) * 1000;
-    const threeMinsAgo = (to - 180) * 1000;
     const twoMinsAgo = (to - 120) * 1000;
-    const minAgo = (to - 60) * 1000;
 
     const tickerOptions = {
       method: "GET",
@@ -28,7 +24,10 @@ exports.getCandleSticks = coin => {
 
     rp(tickerOptions).then(parsedBody => {
       const accTradeVol24h = parsedBody.data.volume_1day;
-      const lastPrice = parsedBody.data.opening_price;
+      const lastPrice = parseFloat(parsedBody.data.opening_price);
+      const priceChange = parseFloat(
+        parsedBody.data["24H_fluctate_rate"]
+      ).toFixed(2);
 
       let xhr = new XMLHttpRequest();
       xhr.onreadystatechange = () => {
@@ -58,92 +57,131 @@ exports.getCandleSticks = coin => {
               fiveMinPriceChange: 0,
               threeMinPriceChange: 0,
               minPriceChange: 0,
-              currentPrice: lastPrice
+              currentPrice: lastPrice,
+              priceChange
             };
 
             resolve(volumeChanges, priceChanges);
           } else {
             const data = parsedBody.filter(elem => elem[0] < to * 1000);
             const hourData = data.filter(elem => elem[0] >= twoHoursAgo);
+            let timestamps = [];
+            let time = twoHoursAgo;
+            for (let i = 0; i < 120; i++) {
+              timestamps.push(time);
+              time += 60000;
+            }
+            let filledData = [];
+            for (let i = 0; i < 120; i++) {
+              let item = hourData.filter(
+                elem => new Date(elem[0]).getTime() === timestamps[i]
+              );
+              let candle;
+              if (i === 0) {
+                if (item === undefined || item.length === 0) {
+                  candle = {
+                    timestamp: timestamps[i],
+                    price: lastPrice,
+                    volume: 0
+                  };
+                } else {
+                  candle = {
+                    timestamp: timestamps[i],
+                    price: parseFloat(item[0][2]),
+                    volume: parseFloat(item[0][5])
+                  };
+                }
+              } else {
+                if (item === undefined || item.length === 0) {
+                  candle = {
+                    timestamp: timestamps[i],
+                    price: filledData[i - 1].price,
+                    volume: 0
+                  };
+                } else {
+                  candle = {
+                    timestamp: timestamps[i],
+                    price: parseFloat(item[0][2]),
+                    volume: parseFloat(item[0][5])
+                  };
+                }
+              }
+              filledData.push(candle);
+            }
             let lastHourVolume = 0;
             let currentHourVolume = 0;
-            let lastHourPrice = hourData[0][2];
-            hourData.forEach(elem => {
-              if (elem[0] < hourAgo) {
-                lastHourVolume += parseFloat(elem[5]);
-                lastHourPrice = parseFloat(elem[2]);
+            let lastHourPrice = filledData[60].price;
+            for (let i = 0; i < 120; i++) {
+              if (i < 60) {
+                lastHourVolume += filledData[i].volume;
               } else {
-                currentHourVolume += parseFloat(elem[5]);
+                currentHourVolume += filledData[i].volume;
               }
-            });
+            }
 
-            const thirtyMinData = data.filter(elem => elem[0] >= hourAgo);
+            const thirtyMinData = filledData.filter(
+              elem => elem.timestamp >= hourAgo
+            );
             let lastThirtyMinVolume = 0;
             let currentThirtyMinVolume = 0;
-            let lastThirtyMinPrice = hourData[0][2];
-            thirtyMinData.forEach(elem => {
-              if (elem[0] < thirtyMinsAgo) {
-                lastThirtyMinVolume += parseFloat(elem[5]);
-                lastThirtyMinPrice = parseFloat(elem[2]);
+            let lastThirtyMinPrice = thirtyMinData[30].price;
+            for (let i = 0; i < 60; i++) {
+              if (i < 30) {
+                lastThirtyMinVolume += filledData[i].volume;
               } else {
-                currentThirtyMinVolume += parseFloat(elem[5]);
+                currentThirtyMinVolume += filledData[i].volume;
               }
-            });
+            }
 
-            const fifteenMinData = data.filter(
-              elem => elem[0] >= thirtyMinsAgo
+            const fifteenMinData = filledData.filter(
+              elem => elem.timestamp >= thirtyMinsAgo
             );
             let lastFifteenMinVolume = 0;
             let currentFifteenMinVolume = 0;
-            let lastFifteenMinPrice = hourData[0][2];
-            fifteenMinData.forEach(elem => {
-              if (elem[0] < fifteenMinsAgo) {
-                lastFifteenMinVolume += parseFloat(elem[5]);
-                lastFifteenMinPrice = parseFloat(elem[2]);
+            let lastFifteenMinPrice = fifteenMinData[15].price;
+            for (let i = 0; i < 30; i++) {
+              if (i < 15) {
+                lastFifteenMinVolume += filledData[i].volume;
               } else {
-                currentFifteenMinVolume += parseFloat(elem[5]);
+                currentFifteenMinVolume += filledData[i].volume;
               }
-            });
+            }
 
-            const fiveMinData = data.filter(elem => elem[0] >= tenMinsAgo);
+            const fiveMinData = filledData.filter(
+              elem => elem.timestamp >= tenMinsAgo
+            );
             let lastFiveMinVolume = 0;
             let currentFiveMinVolume = 0;
-            let lastFiveMinPrice = hourData[0][2];
-            fiveMinData.forEach(elem => {
-              if (elem[0] < fiveMinsAgo) {
-                lastFiveMinVolume += parseFloat(elem[5]);
-                lastFiveMinPrice = parseFloat(elem[2]);
+            let lastFiveMinPrice = fiveMinData[5].price;
+            for (let i = 0; i < 10; i++) {
+              if (i < 5) {
+                lastFiveMinVolume += filledData[i].volume;
               } else {
-                currentFiveMinVolume += parseFloat(elem[5]);
+                currentFiveMinVolume += filledData[i].volume;
               }
-            });
+            }
 
-            const threeMinData = data.filter(elem => elem[0] >= sixMinsAgo);
+            const threeMinData = filledData.filter(
+              elem => elem.timestamp >= sixMinsAgo
+            );
             let lastThreeMinVolume = 0;
             let currentThreeMinVolume = 0;
-            let lastThreeMinPrice = hourData[0][2];
-            threeMinData.forEach(elem => {
-              if (elem[0] < threeMinsAgo) {
-                lastThreeMinVolume += parseFloat(elem[5]);
-                lastThreeMinPrice = parseFloat(elem[2]);
+            let lastThreeMinPrice = threeMinData[3].price;
+            for (let i = 0; i < 6; i++) {
+              if (i < 3) {
+                lastThreeMinVolume += filledData[i].volume;
               } else {
-                currentThreeMinVolume += parseFloat(elem[5]);
+                currentThreeMinVolume += filledData[i].volume;
               }
-            });
+            }
 
-            const minData = data.filter(elem => elem[0] >= twoMinsAgo);
-            let lastMinVolume = 0;
-            let currentMinVolume = 0;
-            let lastMinPrice = minData[0][2];
-            let currentPrice = minData.reverse()[0][2];
-            minData.forEach(elem => {
-              if (elem[0] < minAgo) {
-                lastMinVolume += parseFloat(elem[5]);
-                lastMinPrice = parseFloat(elem[2]);
-              } else {
-                currentMinVolume += parseFloat(elem[5]);
-              }
-            });
+            const minData = filledData.filter(
+              elem => elem.timestamp >= twoMinsAgo
+            );
+            let lastMinVolume = minData[0].volume;
+            let currentMinVolume = minData[1].volume;
+            let lastMinPrice = minData[0].price;
+            let currentPrice = minData[1].price;
 
             const hourVolumeChange =
               lastHourVolume !== 0
@@ -228,7 +266,8 @@ exports.getCandleSticks = coin => {
               fiveMinPriceChange,
               threeMinPriceChange,
               minPriceChange,
-              currentPrice
+              currentPrice,
+              priceChange
             };
             resolve({ volumeChanges, priceChanges });
           }

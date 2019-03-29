@@ -35,21 +35,25 @@ export const selectExchange = exchange => {
       }
       await Promise.all([candlePromise, orderbookPromise, tradesPromise]).then(
         values => {
-          dispatch({
-            type: RECEIVE_CANDLE_DATA,
-            volumeChanges: values[0].volumeChanges,
-            priceChanges: values[0].priceChanges
-          });
-          dispatch({
-            type: RECEIVE_ORDERBOOK_DATA,
-            aggOrders: values[1].aggOrders,
-            bidAsk: values[1].bidAsk
-          });
-          dispatch({
-            type: RECEIVE_TRADES_DATA,
-            aggAsks: values[2].aggAsks,
-            aggBids: values[2].aggBids
-          });
+          let currentCoin = getState().coin.selectedCoin;
+          let currentEx = getState().exchange.selectedExchange;
+          if (currentCoin === selectedCoin && currentEx === exchange) {
+            dispatch({
+              type: RECEIVE_CANDLE_DATA,
+              volumeChanges: values[0].volumeChanges,
+              priceChanges: values[0].priceChanges
+            });
+            dispatch({
+              type: RECEIVE_ORDERBOOK_DATA,
+              aggOrders: values[1].aggOrders,
+              bidAsk: values[1].bidAsk
+            });
+            dispatch({
+              type: RECEIVE_TRADES_DATA,
+              aggAsks: values[2].aggAsks,
+              aggBids: values[2].aggBids
+            });
+          }
         }
       );
     } catch (err) {

@@ -24,6 +24,7 @@ exports.getCandleSticks = coin => {
     let xhr24 = new XMLHttpRequest();
     let lastPrice;
     let accTradeVol24h = 0.0;
+    let priceChange = 0;
     xhr24.onreadystatechange = () => {
       if (xhr24.readyState === 4 && xhr24.status === 200) {
         let parsedCoinbitHour = JSON.parse(xhr24.responseText);
@@ -84,7 +85,8 @@ exports.getCandleSticks = coin => {
             fiveMinPriceChange: 0,
             threeMinPriceChange: 0,
             minPriceChange: 0,
-            currentPrice: lastPrice
+            currentPrice: lastPrice,
+            priceChange: 0
           };
 
           resolve(volumeChanges, priceChanges);
@@ -252,7 +254,11 @@ exports.getCandleSticks = coin => {
             fiveMinPriceChange,
             threeMinPriceChange,
             minPriceChange,
-            currentPrice
+            currentPrice,
+            priceChange: (
+              ((currentPrice - lastPrice) / lastPrice) *
+              100
+            ).toFixed(2)
           };
           resolve({ volumeChanges, priceChanges });
         }

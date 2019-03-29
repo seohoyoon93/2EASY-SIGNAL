@@ -10,10 +10,14 @@ module.exports = {
 };
 
 function count(symbol, nickname, coinObj, text) {
-  const regexp = RegExp(nickname, "g");
+  const regexp = RegExp("\\s" + nickname + "|\\n" + nickname, "g");
+
   let count = 0;
-  while ((matches = regexp.exec(text)) !== null) {
+  if (text.substr(0, nickname.length) === nickname) {
     ++count;
+  }
+  if (text.match(regexp) !== null) {
+    count += text.match(regexp).length;
   }
   coinObj[symbol] += count;
   return coinObj;

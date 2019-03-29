@@ -55,6 +55,12 @@ exports.getCandleSticks = coin => {
           );
         }
 
+        const priceChangeText = $(
+          "p.coin-price-subtitle span.PriceNumber",
+          html
+        ).text();
+        const priceChange = parseFloat(priceChangeText).toFixed(2);
+
         const lastPrice = lastPriceInt + lastPriceBlah;
 
         let xhr = new XMLHttpRequest();
@@ -228,7 +234,8 @@ exports.getCandleSticks = coin => {
               fiveMinPriceChange,
               threeMinPriceChange,
               minPriceChange,
-              currentPrice: lastPrice
+              currentPrice: lastPrice,
+              priceChange
             };
             resolve({ volumeChanges, priceChanges });
           }

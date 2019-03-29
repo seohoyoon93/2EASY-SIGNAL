@@ -15,7 +15,7 @@ class App extends Component {
     super(props);
     window.Kakao.init("3e5e4aeea8c7475b5efd977b69e4180c");
     this.state = {
-      visitors: null
+      visitors: "-"
     };
   }
   componentDidMount() {

@@ -10,12 +10,17 @@ class Orderbook extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    this.setState(state => ({
-      isHidden: !state.isHidden
-    }));
+    if (
+      !this.props.orderbookData.isFetching &&
+      !this.props.tradesData.isFetching
+    ) {
+      this.setState(state => ({
+        isHidden: !state.isHidden
+      }));
+    }
   }
   render() {
-    const { orderbookData, tradesData } = this.props;
+    const { orderbookData, tradesData, selectedExchange } = this.props;
     let ask = orderbookData ? orderbookData.aggOrders.aggAsks : 1;
     let bid = orderbookData ? orderbookData.aggOrders.aggBids : 1;
 
@@ -35,9 +40,15 @@ class Orderbook extends Component {
     };
     let content =
       orderbookData.isFetching || tradesData.isFetching ? (
-        <Dimmer active inverted>
-          <Loader inverted>Loading...</Loader>
-        </Dimmer>
+        selectedExchange === "Bitsonic" ? (
+          <Dimmer active inverted>
+            <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
+          </Dimmer>
+        ) : (
+          <Dimmer active inverted>
+            <Loader inverted />
+          </Dimmer>
+        )
       ) : (
         <div>
           <h4>최근 3분 체결 비율</h4>

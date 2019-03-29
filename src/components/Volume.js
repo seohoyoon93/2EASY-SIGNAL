@@ -12,16 +12,24 @@ class Volume extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    this.setState(state => ({
-      isHidden: !state.isHidden
-    }));
+    if (!this.props.candleData.isFetching) {
+      this.setState(state => ({
+        isHidden: !state.isHidden
+      }));
+    }
   }
   render() {
-    const { candleData } = this.props;
+    const { candleData, selectedExchange } = this.props;
     let content = candleData.isFetching ? (
-      <Dimmer active inverted>
-        <Loader inverted>Loading...</Loader>
-      </Dimmer>
+      selectedExchange === "Bitsonic" ? (
+        <Dimmer active inverted>
+          <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
+        </Dimmer>
+      ) : (
+        <Dimmer active inverted>
+          <Loader inverted />
+        </Dimmer>
+      )
     ) : (
       <div>
         <h4>24H 거래대금</h4>
@@ -112,7 +120,8 @@ class Volume extends Component {
 
 const mapStateToProps = state => {
   return {
-    candleData: state.exchange.candleData
+    candleData: state.exchange.candleData,
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 

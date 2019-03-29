@@ -27,9 +27,7 @@ const ExchangeList = props => {
           );
         })
       ) : (
-        <div className="no-coin-selected">
-          코인을 선택해야 거래소가 보입니다.
-        </div>
+        <div className="no-coin-selected">거래소를 불러오는 중입니다.</div>
       );
   }
   return <div className="exchanges-btns">{btns}</div>;

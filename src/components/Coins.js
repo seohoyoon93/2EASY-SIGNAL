@@ -10,6 +10,7 @@ class Coins extends Component {
     this.state = {
       sym: "",
       nameKo: "",
+      text: "",
       coinOptions: []
     };
   }
@@ -56,6 +57,11 @@ class Coins extends Component {
       {
         sym: topMentionedCoin.symbol,
         nameKo: topMentionedCoin.nameKo,
+        text: `${topMentionedCoin.nameKo} (${
+          topMentionedCoin.symbol
+        }) 。 커뮤니티 언급비율 ${topMentionedCoin.mentionPercentage}% (${
+          topMentionedCoin.mentions
+        }회)`,
         coinOptions: coinOptions
       },
       () => {
@@ -72,7 +78,12 @@ class Coins extends Component {
       const firstCoin = this.state.coinOptions[0];
       const symbol = firstCoin.symbol;
       const nameKo = firstCoin.nameKo;
-      this.setState({ sym: symbol, nameKo: nameKo }, () => {
+      const text = `${firstCoin.nameKo} (${
+        firstCoin.symbol
+      }) 。 커뮤니티 언급비율 ${firstCoin.mentionPercentage}% (${
+        firstCoin.mentions
+      }회)`;
+      this.setState({ sym: symbol, nameKo: nameKo, text: text }, () => {
         this.props.selectCoin({
           symbol: this.state.sym,
           nameKo: this.state.nameKo
@@ -82,14 +93,22 @@ class Coins extends Component {
   };
 
   onChangeFollower = (e, data) => {
+    const selectedOne = this.state.coinOptions.find(elem => {
+      return elem.symbol === data.value;
+    });
+    const text = `${selectedOne.nameKo} (${
+      selectedOne.symbol
+    }) 。 커뮤니티 언급비율 ${selectedOne.mentionPercentage}% (${
+      selectedOne.mentions
+    }회)`;
     if (e.target.innerText) {
       const symbol = e.target.innerText
         .match(/\([A-Z]\)|\([A-Z]\w+\)/)[0]
         .match(/[A-Z]\w+|[A-Z]/)[0];
       const nameKo = e.target.innerText
-        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+\(/)[0]
+        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+\s\(/)[0]
         .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+/)[0];
-      this.setState({ sym: symbol, nameKo: nameKo }, () => {
+      this.setState({ sym: symbol, nameKo: nameKo, text: text }, () => {
         this.props.selectCoin({
           symbol: this.state.sym,
           nameKo: this.state.nameKo
@@ -103,24 +122,32 @@ class Coins extends Component {
       return {
         key: coin.id,
         value: coin.symbol,
-        text: `${coin.nameKo}(${coin.symbol}) 。 최근 커뮤니티 언급비율: ${
+        text: `${coin.nameKo} (${coin.symbol}) 。 커뮤니티 언급비율 ${
           coin.mentionPercentage
         }% (${coin.mentions}회)`
       };
     });
-    return coinOptions[0] ? (
+    return this.props.isFetching ? (
+      <Dropdown
+        fluid
+        search
+        selection
+        options={coinOptions}
+        className="coins"
+        loading
+      />
+    ) : (
       <Dropdown
         fluid
         search
         selection
         className="coins"
+        text={this.state.text}
         defaultValue={coinOptions[0].key}
         options={coinOptions}
         onChange={this.onChangeFollower}
         onBlur={this.onBlurFollower}
       />
-    ) : (
-      <div>Loading...</div>
     );
   }
 }
@@ -170,6 +197,12 @@ const mapMentionToCoin = values => {
   return coins;
 };
 
+const mapStateToProps = state => {
+  return {
+    isFetching: state.coin.isFetching
+  };
+};
+
 const mapDispatchToProps = dispatch => {
   return {
     selectCoin: coin => dispatch(selectCoin(coin))
@@ -177,6 +210,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(Coins);
