@@ -69,11 +69,11 @@ exports.getCandleSticks = coin => {
             const hourData = parsedBody.filter(elem => elem[0] > twoHoursAgo);
             let lastHourVolume = 0;
             let currentHourVolume = 0;
-            let lastHourPrice = hourData[0][4];
+            let lastHourPrice = hourData[0][2];
             hourData.forEach(elem => {
               if (elem[0] < hourAgo) {
                 lastHourVolume += parseFloat(elem[5]);
-                lastHourPrice = parseFloat(elem[4]);
+                lastHourPrice = parseFloat(elem[2]);
               } else {
                 currentHourVolume += parseFloat(elem[5]);
               }
@@ -82,11 +82,11 @@ exports.getCandleSticks = coin => {
             const thirtyMinData = parsedBody.filter(elem => elem[0] > hourAgo);
             let lastThirtyMinVolume = 0;
             let currentThirtyMinVolume = 0;
-            let lastThirtyMinPrice = hourData[0][4];
+            let lastThirtyMinPrice = hourData[0][2];
             thirtyMinData.forEach(elem => {
               if (elem[0] < thirtyMinsAgo) {
                 lastThirtyMinVolume += parseFloat(elem[5]);
-                lastThirtyMinPrice = parseFloat(elem[4]);
+                lastThirtyMinPrice = parseFloat(elem[2]);
               } else {
                 currentThirtyMinVolume += parseFloat(elem[5]);
               }
@@ -97,11 +97,11 @@ exports.getCandleSticks = coin => {
             );
             let lastFifteenMinVolume = 0;
             let currentFifteenMinVolume = 0;
-            let lastFifteenMinPrice = hourData[0][4];
+            let lastFifteenMinPrice = hourData[0][2];
             fifteenMinData.forEach(elem => {
               if (elem[0] < fifteenMinsAgo) {
                 lastFifteenMinVolume += parseFloat(elem[5]);
-                lastFifteenMinPrice = parseFloat(elem[4]);
+                lastFifteenMinPrice = parseFloat(elem[2]);
               } else {
                 currentFifteenMinVolume += parseFloat(elem[5]);
               }
@@ -110,11 +110,11 @@ exports.getCandleSticks = coin => {
             const fiveMinData = parsedBody.filter(elem => elem[0] > tenMinsAgo);
             let lastFiveMinVolume = 0;
             let currentFiveMinVolume = 0;
-            let lastFiveMinPrice = hourData[0][4];
+            let lastFiveMinPrice = hourData[0][2];
             fiveMinData.forEach(elem => {
               if (elem[0] < fiveMinsAgo) {
                 lastFiveMinVolume += parseFloat(elem[5]);
-                lastFiveMinPrice = parseFloat(elem[4]);
+                lastFiveMinPrice = parseFloat(elem[2]);
               } else {
                 currentFiveMinVolume += parseFloat(elem[5]);
               }
@@ -125,11 +125,11 @@ exports.getCandleSticks = coin => {
             );
             let lastThreeMinVolume = 0;
             let currentThreeMinVolume = 0;
-            let lastThreeMinPrice = hourData[0][4];
+            let lastThreeMinPrice = hourData[0][2];
             threeMinData.forEach(elem => {
               if (elem[0] < threeMinsAgo) {
                 lastThreeMinVolume += parseFloat(elem[5]);
-                lastThreeMinPrice = parseFloat(elem[4]);
+                lastThreeMinPrice = parseFloat(elem[2]);
               } else {
                 currentThreeMinVolume += parseFloat(elem[5]);
               }
@@ -138,12 +138,12 @@ exports.getCandleSticks = coin => {
             const minData = parsedBody.filter(elem => elem[0] > twoMinsAgo);
             let lastMinVolume = 0;
             let currentMinVolume = 0;
-            let lastMinPrice = hourData[0][4];
-            let currentPrice = hourData.reverse()[0][4];
+            let lastMinPrice = hourData[0][2];
+            let currentPrice = hourData.reverse()[0][2];
             minData.forEach(elem => {
               if (elem[0] < minAgo) {
                 lastMinVolume += parseFloat(elem[5]);
-                lastMinPrice = parseFloat(elem[4]);
+                lastMinPrice = parseFloat(elem[2]);
               } else {
                 currentMinVolume += parseFloat(elem[5]);
               }

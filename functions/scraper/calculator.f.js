@@ -14,6 +14,9 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
   const dcinsidePromise = getCommPromise("dcinside");
   const moneynetPromise = getCommPromise("moneynet");
   const cobakPromise = getCommPromise("cobak");
+  const bitmanPromise = getCommPromise("bitman");
+  const bitokaPromise = getCommPromise("bitoka");
+  const coinplanetPromise = getCommPromise("coinplanet");
 
   let totalText = "";
   let values = await Promise.all([
@@ -21,7 +24,10 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
     cointalkPromise,
     dcinsidePromise,
     moneynetPromise,
-    cobakPromise
+    cobakPromise,
+    bitmanPromise,
+    bitokaPromise,
+    coinplanetPromise
   ]);
   totalText = await values.reduce((acc, cur) => acc + cur);
   const coins = await helper.countCoinNickname(totalText);
