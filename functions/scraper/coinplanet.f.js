@@ -38,21 +38,25 @@ exports = module.exports = functions
         }
       );
 
-      var frames = await page.frames();
+          await page.waitForSelector('iframe[src*=22862592]');
+          await page.waitForNavigation(  {
+            waitUntil: "networkidle2",
+            timeout: 0
+          });
 
-      let mframe = [];
-      frames.reduce(async (promise, frame) => {
-        await promise;
-        if (
-          await frame
-            .url()
-            .includes(
-              "ArticleList.nhn?search.clubid=24978815&search.menuid=332&search.boardtype=L"
-            )
-        ) {
-          mframe = await frame;
-        }
-      }, Promise.resolve());
+          await delay(500);
+
+          const frames = await page.frames();
+
+          const mframe = frames.find((frame) => {
+            return frame
+                      .url()
+                      .includes(
+                        "ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L"
+                      );
+          });
+
+          console.log("mframe:", mFrame.url()); 
 
       const html = await mframe.content();
 
