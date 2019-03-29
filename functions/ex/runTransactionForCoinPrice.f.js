@@ -10,7 +10,7 @@ try {
 }
 
 const runtimeOpts = {
-  timeoutSeconds: 110,
+  timeoutSeconds: 280,
   memory: "2GB"
 };
 
@@ -92,6 +92,8 @@ exports = module.exports = functions
       .catch(err => {
         console.log(err);
       });
+
+    await console.log("upbitPrices: ", upbitPrices);
     const remainingCoins = await coins
       .filter(coin => !upbitBases.includes(coin.symbol))
       .map(coin => coin.symbol);
@@ -124,6 +126,7 @@ exports = module.exports = functions
           console.log(err);
         });
     }, Promise.resolve());
+    await console.log("bithumbPrices: ", bithumbPrices);
     const remainingCoins2 = await remainingCoins.filter(
       coin => !bithumbMarkets.includes(coin)
     );
@@ -143,20 +146,24 @@ exports = module.exports = functions
         url: `https://www.coinbit.co.kr/tradingview/history/symbol-${base}/resolution-1/from-${from}/to-${now}`,
         json: true
       };
-      await rp(coinbitTickerOptions).then(parsedBody => {
-        const lastPrice = parsedBody.c[0];
-        const price = parsedBody.c.reverse()[0];
-        const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
-          2
-        );
-        coinbitPrices.push({
-          base: base,
-          price: price,
-          priceChange: priceChange
+      await rp(coinbitTickerOptions)
+        .then(parsedBody => {
+          const lastPrice = parsedBody.c[0];
+          const price = parsedBody.c.reverse()[0];
+          const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
+            2
+          );
+          coinbitPrices.push({
+            base: base,
+            price: price,
+            priceChange: priceChange
+          });
+        })
+        .catch(err => {
+          console.log(err);
         });
-      });
     }, Promise.resolve());
-
+    await console.log("coinbitPrices: ", coinbitPrices);
     const remainingCoins3 = await remainingCoins2.filter(
       coin => !coinbitMarkets.includes(coin)
     );
@@ -176,19 +183,24 @@ exports = module.exports = functions
         url: `https://api.bitsonic.co.kr/api/v2/klines?symbol=${base}KRW&interval=1h&endTime=${now}&startTime=${from}`,
         json: true
       };
-      await rp(bitsonicOptions).then(parsedBody => {
-        const lastPrice = parseFloat(parsedBody.result.k[0].c);
-        const price = parseFloat(parsedBody.result.k.reverse()[0].c);
-        const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
-          2
-        );
-        bitsonicPrices.push({
-          base: base,
-          price: price,
-          priceChange: priceChange
+      await rp(bitsonicOptions)
+        .then(parsedBody => {
+          const lastPrice = parseFloat(parsedBody.result.k[0].c);
+          const price = parseFloat(parsedBody.result.k.reverse()[0].c);
+          const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
+            2
+          );
+          bitsonicPrices.push({
+            base: base,
+            price: price,
+            priceChange: priceChange
+          });
+        })
+        .catch(err => {
+          console.log(err);
         });
-      });
     }, Promise.resolve());
+    await console.log("bitsonicPrices: ", bitsonicPrices);
 
     const prices = await upbitPrices.concat(
       bithumbPrices.concat(coinbitPrices.concat(bitsonicPrices))
@@ -211,8 +223,11 @@ exports = module.exports = functions
               priceChange: priceObj.priceChange,
               updatedAt: Date.now()
             });
+            return coin;
           })
-          .then(() => {})
+          .then(() => {
+            console.log(`${coin} updated`);
+          })
           .catch(err => console.log(err));
       });
     }, Promise.resolve());

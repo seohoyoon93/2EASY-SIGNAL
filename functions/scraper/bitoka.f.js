@@ -37,9 +37,11 @@ exports = module.exports = functions
           timeout: 0
         }
       );
+      let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+      await sleep(1000);
 
       var frames = await page.frames();
-
+      await sleep(1000);
       let mframe = [];
       for (const frame of frames) {
         if (

@@ -415,7 +415,7 @@ function mapNicknameToCoin(coinObj, nicknames, text) {
           count("BTG", nickname, coinObj, text);
           return;
         case "리스크":
-          count("LISK", nickname, coinObj, text);
+          count("LSK", nickname, coinObj, text);
           return;
         case "모네로":
           count("XMR", nickname, coinObj, text);
@@ -1772,7 +1772,7 @@ const coins = [
   "SUNC",
   "TUDA",
   "FRNT",
-  "LISK",
+  "LSK",
   "KIN",
   "MXM",
   "R",

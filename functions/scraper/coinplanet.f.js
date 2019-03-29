@@ -38,26 +38,25 @@ exports = module.exports = functions
         }
       );
 
-          await page.waitForSelector('iframe[src*=22862592]');
-          await page.waitForNavigation(  {
-            waitUntil: "networkidle2",
-            timeout: 0
-          });
+      let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-          await delay(500);
+      await sleep(1000);
+      const frames = await page.frames();
 
-          const frames = await page.frames();
+      await sleep(1000);
 
-          const mframe = frames.find((frame) => {
-            return frame
-                      .url()
-                      .includes(
-                        "ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L"
-                      );
-          });
-
-          console.log("mframe:", mFrame.url()); 
-
+      let mframe = [];
+      for (const frame of frames) {
+        if (
+          frame
+            .url()
+            .includes(
+              "ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L"
+            )
+        ) {
+          mframe = frame;
+        }
+      }
       const html = await mframe.content();
 
       const article = await $("div.article-board", html)
