@@ -62,10 +62,6 @@ exports.getCandleSticks = coin => {
 
             resolve(volumeChanges, priceChanges);
           } else {
-            // when parsedBody.length > 0
-
-            // time, open, close, high, low, volume 순서로 elem 수정 필요
-
             const hourData = parsedBody.filter(elem => elem[0] > twoHoursAgo);
             let lastHourVolume = 0;
             let currentHourVolume = 0;
