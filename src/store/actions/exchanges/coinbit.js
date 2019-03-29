@@ -22,26 +22,24 @@ exports.getCandleSticks = coin => {
     const minAgo = to - 60;
     //24h volume 더하기
     let xhr24 = new XMLHttpRequest();
+    let from24 = Math.floor((to - 86460) / 60) * 60;
     let lastPrice;
     let accTradeVol24h = 0.0;
-    let priceChange = 0;
     xhr24.onreadystatechange = () => {
       if (xhr24.readyState === 4 && xhr24.status === 200) {
         let parsedCoinbitHour = JSON.parse(xhr24.responseText);
         if (parsedCoinbitHour.s === "ok") {
           lastPrice = parsedCoinbitHour.c[0];
           parsedCoinbitHour.t.forEach((elem, i) => {
-            for (i = 0; i < 24; i++) {
-              accTradeVol24h =
-                accTradeVol24h + parseFloat(parsedCoinbitHour.v.reverse()[i]);
-            }
+            accTradeVol24h =
+              accTradeVol24h + parseFloat(parsedCoinbitHour.v[i]);
           });
         }
       }
     };
     xhr24.open(
       "GET",
-      `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-60/from-${from}/to-${to}`
+      `https://cors-anywhere.herokuapp.com/https://www.coinbit.co.kr/tradingview/history/symbol-${coin}/resolution-1/from-${from24}/to-${to}`
     );
     xhr24.send();
 

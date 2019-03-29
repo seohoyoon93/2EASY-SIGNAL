@@ -41,17 +41,18 @@ exports = module.exports = functions
       var frames = await page.frames();
 
       let mframe = [];
-      for (const frame of frames) {
+      frames.reduce(async (promise, frame) => {
+        await promise;
         if (
-          frame
+          await frame
             .url()
             .includes(
-              "ArticleList.nhn?search.clubid=22862592&search.menuid=316&search.boardtype=L"
+              "ArticleList.nhn?search.clubid=24978815&search.menuid=332&search.boardtype=L"
             )
         ) {
-          mframe = frame;
+          mframe = await frame;
         }
-      }
+      }, Promise.resolve());
 
       const html = await mframe.content();
 
