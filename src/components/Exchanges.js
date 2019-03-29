@@ -44,8 +44,6 @@ class Exchanges extends Component {
     });
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log(prevProps.selectedCoin);
-    console.log(this.props.selectedCoin);
     if (prevProps.selectedCoin !== this.props.selectedCoin) {
       this.props.selectExchange(this.props.exchanges[0].name);
     }

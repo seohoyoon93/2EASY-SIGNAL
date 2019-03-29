@@ -6,8 +6,7 @@ exports = module.exports = {};
 exports.getCandleSticks = coin => {
   return new Promise((resolve, reject) => {
     const now = new Date();
-    const from = Math.floor((now - 7200000) / 60000) * 60 - 1;
-    const to = Math.ceil(now / 60000) * 60;
+    const from = Math.floor((now - 7200000) / 60000) * 60;
 
     const twoHoursAgo = now - 7200000;
     const hourAgo = now - 3600000;
@@ -64,7 +63,7 @@ exports.getCandleSticks = coin => {
             let response = JSON.parse(xhr.responseText);
             let parsedBody = response.result.k;
 
-            const hourData = parsedBody.filter(elem => elem.T > twoHoursAgo);
+            const hourData = parsedBody.filter(elem => elem.T >= twoHoursAgo);
             let lastHourVolume = 0;
             let currentHourVolume = 0;
             let lastHourPrice = hourData.reverse()[0].c;
@@ -77,7 +76,7 @@ exports.getCandleSticks = coin => {
               }
             });
 
-            const thirtyMinData = parsedBody.filter(elem => elem.T > hourAgo);
+            const thirtyMinData = parsedBody.filter(elem => elem.T >= hourAgo);
             let lastThirtyMinVolume = 0;
             let currentThirtyMinVolume = 0;
             let lastThirtyMinPrice = thirtyMinData.reverse()[0].c;
@@ -105,7 +104,7 @@ exports.getCandleSticks = coin => {
               }
             });
 
-            const fiveMinData = parsedBody.filter(elem => elem.T > tenMinsAgo);
+            const fiveMinData = parsedBody.filter(elem => elem.T >= tenMinsAgo);
             let lastFiveMinVolume = 0;
             let currentFiveMinVolume = 0;
             let lastFiveMinPrice = fiveMinData.reverse()[0].c;
@@ -118,7 +117,9 @@ exports.getCandleSticks = coin => {
               }
             });
 
-            const threeMinData = parsedBody.filter(elem => elem.T > sixMinsAgo);
+            const threeMinData = parsedBody.filter(
+              elem => elem.T >= sixMinsAgo
+            );
             let lastThreeMinVolume = 0;
             let currentThreeMinVolume = 0;
             let lastThreeMinPrice = threeMinData.reverse()[0].c;
@@ -131,7 +132,7 @@ exports.getCandleSticks = coin => {
               }
             });
 
-            const minData = parsedBody.filter(elem => elem.T > twoMinsAgo);
+            const minData = parsedBody.filter(elem => elem.T >= twoMinsAgo);
             let lastMinVolume = 0;
             let currentMinVolume = 0;
             let lastMinPrice = minData.reverse()[0].c;
@@ -234,7 +235,7 @@ exports.getCandleSticks = coin => {
         };
         xhr.open(
           "GET",
-          `https://cors-anywhere.herokuapp.com/https://api.bitsonic.co.kr/api/v2/klines?symbol=${coin}KRW&interval=1m&endTime=${to}&startTime=${from}`
+          `https://cors-anywhere.herokuapp.com/https://api.bitsonic.co.kr/api/v2/klines?symbol=${coin}KRW&interval=1m&endTime=${now}&startTime=${from}`
         );
         xhr.send();
       })
@@ -414,8 +415,8 @@ exports.getTrades = coin => {
             );
           }
         });
-        const aggAsks = asks.reduce((acc, cur) => acc + cur);
-        const aggBids = bids.reduce((acc, cur) => acc + cur);
+        const aggAsks = asks.reduce((acc, cur) => acc + cur, 0);
+        const aggBids = bids.reduce((acc, cur) => acc + cur, 0);
         resolve({ aggAsks, aggBids });
       })
       .catch(err => {

@@ -5,20 +5,21 @@ exports = module.exports = {};
 
 exports.getCandleSticks = coin => {
   return new Promise((resolve, reject) => {
-    const now = new Date();
-    const from = Math.floor((now - 7200000) / 60000) * 60 - 1;
-    const to = Math.ceil(now / 60000) * 60;
+    const date = new Date();
+    const now = date.getTime();
+    const to = Math.floor(now / 60000) * 60;
+    const from = Math.floor((to - 7260) / 60) * 60;
 
-    const twoHoursAgo = (now - 7200000) / 1000;
-    const hourAgo = (now - 3600000) / 1000;
-    const thirtyMinsAgo = (now - 1800000) / 1000;
-    const fifteenMinsAgo = (now - 900000) / 1000;
-    const tenMinsAgo = (now - 600000) / 1000;
-    const sixMinsAgo = (now - 360000) / 1000;
-    const fiveMinsAgo = (now - 300000) / 1000;
-    const threeMinsAgo = (now - 300000) / 1000;
-    const twoMinsAgo = (now - 120000) / 1000;
-    const minAgo = (now - 60000) / 1000;
+    const twoHoursAgo = to - 7200;
+    const hourAgo = to - 3600;
+    const thirtyMinsAgo = to - 1800;
+    const fifteenMinsAgo = to - 900;
+    const tenMinsAgo = to - 600;
+    const sixMinsAgo = to - 360;
+    const fiveMinsAgo = to - 300;
+    const threeMinsAgo = to - 180;
+    const twoMinsAgo = to - 120;
+    const minAgo = to - 60;
     //24h volume 더하기
     let xhr24 = new XMLHttpRequest();
     let lastPrice;
@@ -60,9 +61,6 @@ exports.getCandleSticks = coin => {
             parsedBody.push(arr);
           });
         }
-
-        // let parsedBody = JSON.parse(xhr.responseText);
-
         if (parsedBody.length === 0) {
           const volumeChanges = {
             accTradeVol24h,
@@ -91,9 +89,8 @@ exports.getCandleSticks = coin => {
 
           resolve(volumeChanges, priceChanges);
         } else {
-          // when parsedBody.length > 0
-
-          const hourData = parsedBody.filter(elem => elem[0] > twoHoursAgo);
+          const data = parsedBody.filter(elem => elem[0] < to);
+          const hourData = data.filter(elem => elem[0] >= twoHoursAgo);
           let lastHourVolume = 0;
           let currentHourVolume = 0;
           let lastHourPrice = hourData[0][4];
@@ -106,7 +103,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const thirtyMinData = parsedBody.filter(elem => elem[0] > hourAgo);
+          const thirtyMinData = data.filter(elem => elem[0] >= hourAgo);
           let lastThirtyMinVolume = 0;
           let currentThirtyMinVolume = 0;
           let lastThirtyMinPrice = hourData[0][4];
@@ -119,9 +116,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const fifteenMinData = parsedBody.filter(
-            elem => elem[0] > thirtyMinsAgo
-          );
+          const fifteenMinData = data.filter(elem => elem[0] >= thirtyMinsAgo);
           let lastFifteenMinVolume = 0;
           let currentFifteenMinVolume = 0;
           let lastFifteenMinPrice = hourData[0][4];
@@ -134,7 +129,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const fiveMinData = parsedBody.filter(elem => elem[0] > tenMinsAgo);
+          const fiveMinData = data.filter(elem => elem[0] >= tenMinsAgo);
           let lastFiveMinVolume = 0;
           let currentFiveMinVolume = 0;
           let lastFiveMinPrice = hourData[0][4];
@@ -147,7 +142,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const threeMinData = parsedBody.filter(elem => elem[0] > sixMinsAgo);
+          const threeMinData = data.filter(elem => elem[0] >= sixMinsAgo);
           let lastThreeMinVolume = 0;
           let currentThreeMinVolume = 0;
           let lastThreeMinPrice = hourData[0][4];
@@ -160,11 +155,11 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const minData = parsedBody.filter(elem => elem[0] > twoMinsAgo);
+          const minData = data.filter(elem => elem[0] >= twoMinsAgo);
           let lastMinVolume = 0;
           let currentMinVolume = 0;
-          let lastMinPrice = hourData[0][4];
-          let currentPrice = hourData.reverse()[0][4];
+          let lastMinPrice = minData[0][4];
+          let currentPrice = minData.reverse()[0][4];
           minData.forEach(elem => {
             if (elem[0] < minAgo) {
               lastMinVolume += parseFloat(elem[5]);

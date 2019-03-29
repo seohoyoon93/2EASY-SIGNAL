@@ -52,8 +52,8 @@ export const selectExchange = exchange => {
           });
         }
       );
-    } catch {
-      console.log("err");
+    } catch (err) {
+      console.log("err: ", err);
     }
   };
 };

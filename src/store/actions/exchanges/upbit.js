@@ -18,37 +18,42 @@ exports.getCandleSticks = coin => {
     function isBeforeTwoHours(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > twoHoursAgo;
+      return candleTime >= twoHoursAgo;
     }
     function isBeforeHour(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > hourAgo;
+      return candleTime >= hourAgo;
     }
     function isBeforeThirtyMins(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > thirtyMinsAgo;
+      return candleTime >= thirtyMinsAgo;
     }
     function isBeforeTenMins(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > tenMinsAgo;
+      return candleTime >= tenMinsAgo;
     }
     function isBeforeSixMins(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > sixMinsAgo;
+      return candleTime >= sixMinsAgo;
     }
     function isBeforeTwoMins(data) {
       const candleTime = new Date(data.candle_date_time_kst).getTime();
 
-      return candleTime > twoMinsAgo;
+      return candleTime >= twoMinsAgo;
+    }
+    function notRightNow(data) {
+      const candleTime = new Date(data.candle_date_time_kst).getTime();
+
+      return candleTime < now;
     }
     const candleOptions = {
       method: "GET",
       url: "https://api.upbit.com/v1/candles/minutes/1",
-      qs: { market: `KRW-${coin}`, count: "120" },
+      qs: { market: `KRW-${coin}`, count: "121" },
       json: true
     };
 
@@ -93,7 +98,8 @@ exports.getCandleSticks = coin => {
           resolve({ volumeChanges, priceChanges });
         } else {
           // when parsedBody.length > 0
-          const hourData = parsedBody.filter(isBeforeTwoHours);
+          const data = parsedBody.filter(notRightNow);
+          const hourData = data.filter(isBeforeTwoHours);
           let lastHourVolume = 0;
           let currentHourVolume = 0;
           let lastHourPrice = hourData[0].trade_price;
@@ -106,7 +112,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const thirtyMinData = parsedBody.filter(isBeforeHour);
+          const thirtyMinData = data.filter(isBeforeHour);
           let lastThirtyMinVolume = 0;
           let currentThirtyMinVolume = 0;
           let lastThirtyMinPrice = hourData[0].trade_price;
@@ -119,7 +125,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const fifteenMinData = parsedBody.filter(isBeforeThirtyMins);
+          const fifteenMinData = data.filter(isBeforeThirtyMins);
           let lastFifteenMinVolume = 0;
           let currentFifteenMinVolume = 0;
           let lastFifteenMinPrice = hourData[0].trade_price;
@@ -134,7 +140,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const fiveMinData = parsedBody.filter(isBeforeTenMins);
+          const fiveMinData = data.filter(isBeforeTenMins);
           let lastFiveMinVolume = 0;
           let currentFiveMinVolume = 0;
           let lastFiveMinPrice = hourData[0].trade_price;
@@ -147,7 +153,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const threeMinData = parsedBody.filter(isBeforeSixMins);
+          const threeMinData = data.filter(isBeforeSixMins);
           let lastThreeMinVolume = 0;
           let currentThreeMinVolume = 0;
           let lastThreeMinPrice = hourData[0].trade_price;
@@ -160,7 +166,7 @@ exports.getCandleSticks = coin => {
             }
           });
 
-          const minData = parsedBody.filter(isBeforeTwoMins);
+          const minData = data.filter(isBeforeTwoMins);
           let lastMinVolume = 0;
           let currentMinVolume = 0;
           let lastMinPrice = hourData[0].trade_price;
