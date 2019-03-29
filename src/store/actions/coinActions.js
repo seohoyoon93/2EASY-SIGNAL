@@ -5,7 +5,7 @@ export const selectCoin = coin => {
     const db = getFirestore();
     const exchanges = [];
     db.collection("exchanges")
-      .where("bases", "array-contains", coin)
+      .where("bases", "array-contains", coin.symbol)
       .get()
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {

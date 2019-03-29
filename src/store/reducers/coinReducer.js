@@ -1,7 +1,9 @@
 import { SELECT_COIN, SELECT_COIN_ERROR } from "../actionTypes";
 
 const initialState = {
+  isFetching: true,
   selectedCoin: "",
+  selectedCoinNameKo: "",
   exchanges: []
 };
 
@@ -10,7 +12,9 @@ const coinReducer = (state = initialState, action) => {
     case SELECT_COIN:
       return {
         ...state,
-        selectedCoin: action.coinAndExchanges.coin,
+        isFetching: false,
+        selectedCoin: action.coinAndExchanges.coin.symbol,
+        selectedCoinNameKo: action.coinAndExchanges.coin.nameKo,
         exchanges: action.coinAndExchanges.exchanges
       };
 

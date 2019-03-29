@@ -9,17 +9,17 @@ import {
 const initialState = {
   selectedExchange: "",
   candleData: {
-    isFetching: false,
+    isFetching: true,
     volumeChanges: {},
     priceChanges: {}
   },
   orderbookData: {
-    isFetching: false,
+    isFetching: true,
     aggOrders: {},
     bidAsk: {}
   },
   tradesData: {
-    isFetching: false,
+    isFetching: true,
     aggAsks: null,
     aggBids: null
   }
@@ -32,7 +32,8 @@ const exchangeReducer = (state = initialState, action) => {
         ...state,
         selectedExchange: action.exchange,
         candleData: { ...state.candleData, isFetching: true },
-        orderbookData: { ...state.orderbookData, isFetching: true }
+        orderbookData: { ...state.orderbookData, isFetching: true },
+        tradesData: { ...state.tradesData, isFetching: true }
       };
 
     case RECEIVE_CANDLE_DATA:

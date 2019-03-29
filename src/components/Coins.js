@@ -9,6 +9,7 @@ class Coins extends Component {
     super(props);
     this.state = {
       sym: "",
+      nameKo: "",
       coinOptions: []
     };
   }
@@ -52,9 +53,16 @@ class Coins extends Component {
     const coinOptions = await sortByMentions(coins);
     const topMentionedCoin = coinOptions[0];
     await this.setState(
-      { sym: topMentionedCoin.symbol, coinOptions: coinOptions },
+      {
+        sym: topMentionedCoin.symbol,
+        nameKo: topMentionedCoin.nameKo,
+        coinOptions: coinOptions
+      },
       () => {
-        this.props.selectCoin(this.state.sym);
+        this.props.selectCoin({
+          symbol: this.state.sym,
+          nameKo: this.state.nameKo
+        });
       }
     );
   }
@@ -63,8 +71,12 @@ class Coins extends Component {
     if (this.state.sym === "") {
       const firstCoin = this.state.coinOptions[0];
       const symbol = firstCoin.symbol;
-      this.setState({ sym: symbol }, () => {
-        this.props.selectCoin(this.state.sym);
+      const nameKo = firstCoin.nameKo;
+      this.setState({ sym: symbol, nameKo: nameKo }, () => {
+        this.props.selectCoin({
+          symbol: this.state.sym,
+          nameKo: this.state.nameKo
+        });
       });
     }
   };
@@ -72,10 +84,16 @@ class Coins extends Component {
   onChangeFollower = (e, data) => {
     if (e.target.innerText) {
       const symbol = e.target.innerText
-        .match(/\([A-Z]\w+\)/)[0]
-        .match(/[A-Z]\w+/)[0];
-      this.setState({ sym: symbol }, () => {
-        this.props.selectCoin(this.state.sym);
+        .match(/\([A-Z]\)|\([A-Z]\w+\)/)[0]
+        .match(/[A-Z]\w+|[A-Z]/)[0];
+      const nameKo = e.target.innerText
+        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+\(/)[0]
+        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+/)[0];
+      this.setState({ sym: symbol, nameKo: nameKo }, () => {
+        this.props.selectCoin({
+          symbol: this.state.sym,
+          nameKo: this.state.nameKo
+        });
       });
     }
   };
@@ -85,7 +103,7 @@ class Coins extends Component {
       return {
         key: coin.id,
         value: coin.symbol,
-        text: `${coin.nameEn}(${coin.symbol}) 。 최근 커뮤니티 언급비율: ${
+        text: `${coin.nameKo}(${coin.symbol}) 。 최근 커뮤니티 언급비율: ${
           coin.mentionPercentage
         }% (${coin.mentions}회)`
       };

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Icon } from "semantic-ui-react";
+import { Icon, Dimmer, Loader } from "semantic-ui-react";
 
 class Orderbook extends Component {
   constructor(props) {
@@ -33,17 +33,13 @@ class Orderbook extends Component {
     let bidTradesWidth = {
       width: `${Math.round((bidTrades / totalTrades) * 100)}%`
     };
-    return (
-      <div className={`${divClass} orderbook content-wrapper`}>
-        <div className="content-header" onClick={this.handleClick}>
-          매수/매도 비율
-          {this.state.isHidden ? (
-            <Icon name="triangle up" />
-          ) : (
-            <Icon name="triangle down" />
-          )}
-        </div>
-        <div className={this.state.isHidden ? "content hidden" : "content"}>
+    let content =
+      orderbookData.isFetching || tradesData.isFetching ? (
+        <Dimmer active inverted>
+          <Loader inverted>Loading...</Loader>
+        </Dimmer>
+      ) : (
+        <div>
           <h4>최근 3분 체결 비율</h4>
           <div className="orderbook-chart">
             <div className="bars">
@@ -66,6 +62,20 @@ class Orderbook extends Component {
               </div>
             </div>
           </div>
+        </div>
+      );
+    return (
+      <div className={`${divClass} orderbook content-wrapper`}>
+        <div className="content-header" onClick={this.handleClick}>
+          매수/매도 비율
+          {this.state.isHidden ? (
+            <Icon name="triangle up" />
+          ) : (
+            <Icon name="triangle down" />
+          )}
+        </div>
+        <div className={this.state.isHidden ? "content hidden" : "content"}>
+          {content}
         </div>
       </div>
     );
