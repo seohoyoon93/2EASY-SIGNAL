@@ -5,16 +5,16 @@
   position: relative;
   display: flex;
   justify-content: space-between;
-  border: 1px solid #233086;
+  border: 1px solid $blue;
   border-radius: 4px;
   .ui.button {
     background-color: white;
     border-radius: 0;
     width: 50%;
-    color: #233086;
+    color: $blue;
     font-weight: bold;
     font-size: 1.2rem;
-    border-right: 1px solid #233086;
+    border-right: 1px solid $blue;
     margin: 0;
     padding: 0;
     height: 28px;
@@ -24,7 +24,7 @@
     }
   }
   .ui.button.selected {
-    background-color: #233086;
+    background-color: $blue;
     color: white;
     border: none;
     border-radius: 0;

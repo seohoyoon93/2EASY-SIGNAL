@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { Dropdown } from "semantic-ui-react";
+import { Search, Loader, Icon } from "semantic-ui-react";
 import { connect } from "react-redux";
+import _ from "lodash";
 import { selectCoin } from "../store/actions/coinActions";
 import firebase from "../config/fbConfig";
 
@@ -8,10 +9,10 @@ class Coins extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      sym: "",
-      nameKo: "",
-      text: "",
-      coinOptions: []
+      coins: [],
+      results: [],
+      isListHidden: true,
+      selectedCoin: null
     };
   }
 
@@ -28,8 +29,17 @@ class Coins extends Component {
             const nameEn = doc.data().nameEn;
             const nameKo = doc.data().nameKo;
             const symbol = doc.data().symbol;
+            const price = doc.data().price;
+            const priceChange = doc.data().priceChange;
 
-            coinObj[symbol] = { id, nameEn, nameKo, symbol };
+            coinObj[symbol] = {
+              id,
+              nameEn,
+              nameKo,
+              symbol,
+              price,
+              priceChange
+            };
           });
           resolve(coinObj);
         })
@@ -51,103 +61,163 @@ class Coins extends Component {
     });
     const values = await Promise.all([coinsPromise, mentionsPromise]);
     const coins = await mapMentionToCoin(values);
-    const coinOptions = await sortByMentions(coins);
-    const topMentionedCoin = coinOptions[0];
+    const results = await sortByMentions(coins);
+    const topMentionedCoin = await results[0];
     await this.setState(
       {
-        sym: topMentionedCoin.symbol,
-        nameKo: topMentionedCoin.nameKo,
-        text: `${topMentionedCoin.nameKo} (${
-          topMentionedCoin.symbol
-        }) 。 커뮤니티 언급비율 ${topMentionedCoin.mentionPercentage}% (${
-          topMentionedCoin.mentions
-        }회)`,
-        coinOptions: coinOptions
+        coins: coins,
+        results: results,
+        selectedCoin: topMentionedCoin
       },
       () => {
         this.props.selectCoin({
-          symbol: this.state.sym,
-          nameKo: this.state.nameKo
+          symbol: this.state.selectedCoin.symbol,
+          nameKo: this.state.selectedCoin.nameKo
         });
       }
     );
   }
 
-  onBlurFollower = (e, data) => {
-    if (this.state.sym === "") {
-      const firstCoin = this.state.coinOptions[0];
-      const symbol = firstCoin.symbol;
-      const nameKo = firstCoin.nameKo;
-      const text = `${firstCoin.nameKo} (${
-        firstCoin.symbol
-      }) 。 커뮤니티 언급비율 ${firstCoin.mentionPercentage}% (${
-        firstCoin.mentions
-      }회)`;
-      this.setState({ sym: symbol, nameKo: nameKo, text: text }, () => {
-        this.props.selectCoin({
-          symbol: this.state.sym,
-          nameKo: this.state.nameKo
-        });
-      });
-    }
+  handleClick = (e, data) => {
+    this.setState({ isListHidden: !this.state.isListHidden });
   };
 
-  onChangeFollower = (e, data) => {
-    const selectedOne = this.state.coinOptions.find(elem => {
-      return elem.symbol === data.value;
+  resetComponent = () => this.setState({ results: this.state.coins });
+
+  handleSearchChange = (e, { value }) => {
+    if (value.length < 1) return this.resetComponent();
+
+    const re = new RegExp(_.escapeRegExp(value), "i");
+    const isMatch = result => re.test(result.title);
+
+    this.setState({
+      isLoading: false,
+      results: sortByMentions(_.filter(this.state.coins, isMatch))
     });
-    const text = `${selectedOne.nameKo} (${
-      selectedOne.symbol
-    }) 。 커뮤니티 언급비율 ${selectedOne.mentionPercentage}% (${
-      selectedOne.mentions
-    }회)`;
-    if (e.target.innerText) {
-      const symbol = e.target.innerText
-        .match(/\([A-Z]\)|\([A-Z]\w+\)/)[0]
-        .match(/[A-Z]\w+|[A-Z]/)[0];
-      const nameKo = e.target.innerText
-        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+\s\(/)[0]
-        .match(/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+/)[0];
-      this.setState({ sym: symbol, nameKo: nameKo, text: text }, () => {
-        this.props.selectCoin({
-          symbol: this.state.sym,
-          nameKo: this.state.nameKo
-        });
+  };
+
+  handleItemClick = (e, data) => {
+    const selectedOne = this.state.coins.find(elem => {
+      return elem.symbol === e.target.getAttribute("data-item");
+    });
+    this.setState({ selectedCoin: selectedOne, isListHidden: true }, () => {
+      this.props.selectCoin({
+        symbol: this.state.selectedCoin.symbol,
+        nameKo: this.state.selectedCoin.nameKo
       });
-    }
+    });
   };
 
   render() {
-    const coinOptions = this.state.coinOptions.map(coin => {
-      return {
-        key: coin.id,
-        value: coin.symbol,
-        text: `${coin.nameKo} (${coin.symbol}) 。 커뮤니티 언급비율 ${
-          coin.mentionPercentage
-        }% (${coin.mentions}회)`
-      };
-    });
-    return this.props.isFetching ? (
-      <Dropdown
-        fluid
-        search
-        selection
-        options={coinOptions}
-        className="coins"
-        loading
-      />
-    ) : (
-      <Dropdown
-        fluid
-        search
-        selection
-        className="coins"
-        text={this.state.text}
-        defaultValue={coinOptions[0].key}
-        options={coinOptions}
-        onChange={this.onChangeFollower}
-        onBlur={this.onBlurFollower}
-      />
+    const { results, selectedCoin } = this.state;
+    const rows =
+      !this.props.isFetching && selectedCoin !== null ? (
+        results.map(item => {
+          const priceDivClass = item.priceChange >= 0 ? "up" : "down";
+          const selectedDivClass =
+            item.id === selectedCoin.id ? "selected" : "";
+          return (
+            <li
+              key={item.id}
+              className={selectedDivClass}
+              onClick={this.handleItemClick}
+              data-item={item.symbol}
+            >
+              <div
+                className="coin-summary__name context"
+                data-item={item.symbol}
+              >{`${item.nameKo} (${item.symbol})`}</div>
+              <div
+                className="coin-summary__mention context"
+                data-item={item.symbol}
+              >
+                {`${item.mentionPercentage}%`}
+                <p className="cell-bottom" data-item={item.symbol}>
+                  {`${item.mentions}회`}
+                </p>
+              </div>
+              <div
+                className="coin-summary__price context"
+                data-item={item.symbol}
+              >
+                <div className={priceDivClass} data-item={item.symbol}>
+                  {`${item.priceChange}%`}
+                  <p className="cell-bottom" data-item={item.symbol}>
+                    {`₩${item.price}%`}
+                  </p>
+                </div>
+              </div>
+            </li>
+          );
+        })
+      ) : (
+        <div />
+      );
+
+    const priceDivClass =
+      selectedCoin !== null
+        ? selectCoin.priceChange >= 0
+          ? "up"
+          : "down"
+        : "";
+    const coinSummary =
+      !this.props.isFetching && selectCoin !== null ? (
+        <div className="coin-summary-content">
+          <div className="coin-summary__name context bold">{`${
+            selectedCoin.nameKo
+          } (${selectedCoin.symbol})`}</div>
+          <div className="coin-summary__mention context bold">
+            {`${selectedCoin.mentionPercentage}%`}
+            <div className="context-bottom mention">{`${
+              selectedCoin.mentions
+            }회`}</div>
+          </div>
+          <div className={`coin-summary__price context bold ${priceDivClass}`}>
+            {`${selectedCoin.priceChange}%`}
+            <div className="context-bottom bold">
+              {`₩${selectedCoin.price}`}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="coin-summary-content">
+          <Loader active inline />
+        </div>
+      );
+
+    const searchDivClass = this.state.isListHidden
+      ? "search-coin hidden"
+      : "search-coin";
+    return (
+      <div>
+        <div className={searchDivClass}>
+          <Search
+            loading={this.props.isFetching}
+            onSearchChange={this.handleSearchChange}
+          />
+          <div>
+            <div>
+              <div>
+                <div>이름(심볼)</div>
+                <div>최근 커뮤니티 언급비율</div>
+                <div>전일대비/시세</div>
+              </div>
+            </div>
+            <ul>{rows}</ul>
+          </div>
+        </div>
+        <div className="coin-summary" onClick={this.handleClick}>
+          <div className="coin-summary-header">
+            <div className="coin-summary__name">이름(심볼)</div>
+            <div className="coin-summary__mention">최근 커뮤니티 언급비율</div>
+            <div className="coin-summary__price">전일대비/시세</div>
+          </div>
+          {coinSummary}
+          <div className="coin-summary__icon">
+            <Icon name="triangle down" />
+          </div>
+        </div>
+      </div>
     );
   }
 }
@@ -187,11 +257,14 @@ const mapMentionToCoin = values => {
     );
     return {
       id: coinObj[coin].id,
+      title: `${coinObj[coin].nameKo} (${coinObj[coin].symbol})`,
       nameEn: coinObj[coin].nameEn,
       nameKo: coinObj[coin].nameKo,
       symbol: coinObj[coin].symbol,
       mentions: mentionObj.mentions[coin],
-      mentionPercentage: ratio
+      mentionPercentage: ratio,
+      price: coinObj[coin].price,
+      priceChange: coinObj[coin].priceChange
     };
   });
   return coins;

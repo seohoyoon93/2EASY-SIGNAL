@@ -1,5 +1,7 @@
-@import "default.scss";
-@import "components/app.scss";
-@import "components/coins.scss";
-@import "components/exchanges.scss";
-@import "components/content.scss";
+@import "default";
+@import "color";
+
+@import "components/app";
+@import "components/coins";
+@import "components/exchanges";
+@import "components/content";

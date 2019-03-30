@@ -12,7 +12,7 @@ try {
 
 const url = "https://gall.dcinside.com/board/lists?id=bitcoins";
 const runtimeOpts = {
-  timeoutSeconds: 280,
+  timeoutSeconds: 200,
   memory: "2GB"
 };
 

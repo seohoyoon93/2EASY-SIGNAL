@@ -90,7 +90,12 @@ class App extends Component {
               >
                 <img src="/images/t-logo@3x.png" alt="telegram" />
               </a>
-              <a className="kakao-link" id="kakao-link-btn">
+              <a
+                className="kakao-link"
+                id="kakao-link-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <img src="/images/kakaolink-btn-medium@3x.png" alt="kakao" />
               </a>
             </div>
@@ -106,7 +111,7 @@ class App extends Component {
         <Price />
         <Orderbook />
         <BidAsk />
-        <a href={goTradeLink} target="_blank">
+        <a href={goTradeLink} target="_blank" rel="noopener noreferrer">
           <Button content="거래하기" className="go-trade" />
         </a>
       </div>

@@ -1,0 +1,87 @@
+.search-coin.hidden {
+  display: none;
+}
+
+.coin-summary {
+  height: 93px;
+  background-color: $blue;
+  border-radius: 5px;
+  border: none;
+  padding: 10px 10px 7px;
+  &:hover {
+    cursor: pointer;
+  }
+  color: white;
+}
+
+.coin-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.coin-summary__name {
+  width: 35%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.coin-summary__mention {
+  width: 34%;
+  text-align: right;
+}
+
+.coin-summary__price {
+  width: 25%;
+  text-align: right;
+  border-radius: 5px;
+  &.down {
+    background-color: $light-blue;
+  }
+  &.up {
+    background-color: $red;
+  }
+  &.context {
+    padding-right: 5px;
+    padding-bottom: 3px;
+  }
+}
+
+.coin-summary-content {
+  margin-top: 6px;
+  width: 100%;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .context {
+    font-size: 1.5rem;
+    height: 40px;
+  }
+  .context-bottom {
+    margin-top: -6px;
+    font-size: 1.1rem;
+  }
+  .context-bottom.mention {
+    font-weight: normal;
+  }
+  .bold {
+    font-weight: bold;
+  }
+  .ui.active.inline.loader {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    &:after {
+      border-color: white transparent transparent;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+}
+.coin-summary__icon {
+  text-align: center;
+  opacity: 0.4;
+}

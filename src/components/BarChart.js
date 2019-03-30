@@ -6,10 +6,10 @@ const BarChart = props => {
   let isUp;
   if (percent >= 0) {
     isUp = "up";
-    divStyle = { height: `${percent}%` };
+    divStyle = { height: `${percent}%`, minHeight: "11px" };
   } else {
     isUp = "down";
-    divStyle = { height: `${0 - percent}%` };
+    divStyle = { height: `${0 - percent}%`, minHeight: "11px" };
   }
   return <div className={`bar-chart ${percent} ${isUp}`} style={divStyle} />;
 };

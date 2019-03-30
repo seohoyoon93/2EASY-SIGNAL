@@ -1,5 +1,5 @@
-const rp = require("request-promise");
-const $ = require("cheerio");
+// const rp = require("request-promise");
+// const $ = require("cheerio");
 
 exports = module.exports = {};
 
