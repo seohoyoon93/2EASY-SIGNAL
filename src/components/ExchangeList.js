@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "semantic-ui-react";
 
 const ExchangeList = props => {
-  const { exchanges, selectedExchange } = props;
+  const { exchanges, selectedExchange, isSearching } = props;
   let btns;
   if (exchanges.length === 1) {
     btns = (
@@ -14,7 +14,7 @@ const ExchangeList = props => {
     );
   } else {
     btns =
-      exchanges.length > 0 ? (
+      exchanges.length > 0 && !isSearching ? (
         exchanges.map(exchange => {
           const divClass = selectedExchange === exchange.name ? "selected" : "";
           return (
@@ -27,7 +27,7 @@ const ExchangeList = props => {
           );
         })
       ) : (
-        <div className="no-coin-selected">거래소를 불러오는 중입니다.</div>
+        <div className="no-coin-selected" />
       );
   }
   return <div className="exchanges-btns">{btns}</div>;

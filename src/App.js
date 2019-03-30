@@ -76,8 +76,9 @@ class App extends Component {
             <h1>
               SIGNAL <span>by Eastern Golden Egg</span>
             </h1>
-            <div>
-              <button className="info">EGG SIGNAL 소개</button>
+            <div className="visitors">
+              <p>누적 방문자수</p>
+              <p>{this.state.visitors}</p>
             </div>
           </div>
           <div className="header-bottom">
@@ -99,17 +100,16 @@ class App extends Component {
                 <img src="/images/kakaolink-btn-medium@3x.png" alt="kakao" />
               </a>
             </div>
-            <div className="visitors">
-              <div>누적 방문자수</div>
-              <div>{this.state.visitors}</div>
+            <div className="info">
+              <button className="info-btn">EGG SIGNAL 소개</button>
             </div>
           </div>
         </div>
         <Coins />
         <Exchanges />
+        <Orderbook />
         <Volume />
         <Price />
-        <Orderbook />
         <BidAsk />
         <a href={goTradeLink} target="_blank" rel="noopener noreferrer">
           <Button content="거래하기" className="go-trade" />

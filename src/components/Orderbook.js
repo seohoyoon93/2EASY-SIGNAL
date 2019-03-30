@@ -10,17 +10,17 @@ class Orderbook extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    if (
-      !this.props.orderbookData.isFetching &&
-      !this.props.tradesData.isFetching
-    ) {
-      this.setState(state => ({
-        isHidden: !state.isHidden
-      }));
-    }
+    this.setState(state => ({
+      isHidden: !state.isHidden
+    }));
   }
   render() {
-    const { orderbookData, tradesData, selectedExchange } = this.props;
+    const {
+      orderbookData,
+      tradesData,
+      selectedExchange,
+      isSearching
+    } = this.props;
     let ask = orderbookData ? orderbookData.aggOrders.aggAsks : 1;
     let bid = orderbookData ? orderbookData.aggOrders.aggBids : 1;
 
@@ -39,10 +39,22 @@ class Orderbook extends Component {
       width: `${Math.round((bidTrades / totalTrades) * 100)}%`
     };
     let content =
-      orderbookData.isFetching || tradesData.isFetching ? (
+      orderbookData.isFetching || tradesData.isFetching || isSearching ? (
         selectedExchange === "Bitsonic" ? (
           <Dimmer active inverted>
-            <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
+            <Loader inverted>
+              비트소닉에서 브라우저를 확인중입니다.
+              <br />
+              비트소닉 로딩은 많은 시간이 소요됩니다..
+            </Loader>
+          </Dimmer>
+        ) : selectedExchange === "Coinbit" ? (
+          <Dimmer active inverted>
+            <Loader inverted>
+              코인빗에서 브라우저를 확인중입니다.
+              <br />
+              코인빗 로딩은 많은 시간이 소요됩니다..
+            </Loader>
           </Dimmer>
         ) : (
           <Dimmer active inverted>
@@ -51,26 +63,26 @@ class Orderbook extends Component {
         )
       ) : (
         <div>
-          <h4>최근 3분 체결 비율</h4>
+          <h4>최근 체결 비율</h4>
           <div className="orderbook-chart">
             <div className="bars">
-              <div className="bid bar" style={bidTradesWidth}>
-                {bidTrades ? bidTrades.toFixed(4) : null}
-              </div>
-              <div className="ask bar" style={askTradesWidth}>
-                {askTrades ? askTrades.toFixed(4) : null}
-              </div>
+              <div className="bid bar" style={bidTradesWidth} />
+              <div className="ask bar" style={askTradesWidth} />
+            </div>
+            <div className="numbers">
+              <div>{`매수 ${bidTrades ? bidTrades.toFixed(2) : null}`}</div>
+              <div>{`${askTrades ? askTrades.toFixed(2) : null} 매도`}</div>
             </div>
           </div>
-          <h4>매수 : 매도</h4>
+          <h4>현재 호가 비율</h4>
           <div className="orderbook-chart">
             <div className="bars">
-              <div className="bid bar" style={bidWidth}>
-                {bid ? bid.toFixed(4) : null}
-              </div>
-              <div className="ask bar" style={askWidth}>
-                {ask ? ask.toFixed(4) : null}
-              </div>
+              <div className="bid bar" style={bidWidth} />
+              <div className="ask bar" style={askWidth} />
+            </div>
+            <div className="numbers">
+              <div>{`매수 ${bid ? bid.toFixed(2) : null}`}</div>
+              <div>{`${ask ? ask.toFixed(2) : null} 매도`}</div>
             </div>
           </div>
         </div>
@@ -80,9 +92,9 @@ class Orderbook extends Component {
         <div className="content-header" onClick={this.handleClick}>
           매수/매도 비율
           {this.state.isHidden ? (
-            <Icon name="triangle up" />
-          ) : (
             <Icon name="triangle down" />
+          ) : (
+            <Icon name="triangle up" />
           )}
         </div>
         <div className={this.state.isHidden ? "content hidden" : "content"}>
@@ -97,7 +109,8 @@ const mapStateToProps = state => {
   return {
     orderbookData: state.exchange.orderbookData,
     tradesData: state.exchange.tradesData,
-    selectedExchange: state.exchange.selectedExchange
+    selectedExchange: state.exchange.selectedExchange,
+    isSearching: state.coin.isSearching
   };
 };
 

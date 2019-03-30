@@ -44,9 +44,27 @@
   margin-top: 2px;
 }
 .exchanges-lower-section {
-  margin-top: 12px;
-  img {
-    margin-left: 8px;
+  margin-top: 20px;
+  height: 24px;
+  .announcement-link img {
     height: 20px;
+    width: 23px;
+  }
+  .community-link img {
+    margin-left: 20px;
+    width: 20px;
+    height: 22px;
+  }
+  .refresh-link img {
+    margin-left: 20px;
+    width: 26px;
+    height: 22px;
+  }
+  .recent-update {
+    font-size: 1.1rem;
+    text-align: right;
+    letter-spacing: -0.2px;
+    color: $gray;
+    float: right;
   }
 }

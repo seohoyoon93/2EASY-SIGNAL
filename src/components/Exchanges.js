@@ -36,8 +36,14 @@ class Exchanges extends Component {
     const yr = await date.getFullYear();
     const month = (await date.getMonth()) + 1;
     const day = await date.getDate();
-    const hr = await date.getHours();
-    const min = await date.getMinutes();
+    const hr = await date
+      .getHours()
+      .toString()
+      .padStart(2, "0");
+    const min = await date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0");
     await this.setState({
       ...this.state,
       updatedAt: `${yr}-${month}-${day} ${hr}:${min}(UTC+09)`
@@ -59,7 +65,12 @@ class Exchanges extends Component {
     );
   }
   render() {
-    const { exchanges, selectedExchange, selectedCoinNameKo } = this.props;
+    const {
+      exchanges,
+      selectedExchange,
+      selectedCoinNameKo,
+      isSearching
+    } = this.props;
     const announcementLink = (function(exchange) {
       switch (exchange) {
         case "Upbit":
@@ -80,6 +91,7 @@ class Exchanges extends Component {
         <ExchangeList
           exchanges={exchanges}
           selectedExchange={selectedExchange}
+          isSearching={isSearching}
           handleClick={this.handleClick}
         />
         <div className="exchanges-lower-section">
@@ -99,6 +111,9 @@ class Exchanges extends Component {
           >
             <img src="/images/icon_document.svg" alt="community" />
           </a>
+          <a className="refresh-link" href=".">
+            <img src="/images/icon_refresh.svg" alt="refresh" />
+          </a>
           <span className="recent-update">
             {this.state.updatedAt !== null
               ? `최근 업데이트 ${this.state.updatedAt}`
@@ -115,7 +130,8 @@ const mapStateToProps = state => {
     selectedExchange: state.exchange.selectedExchange,
     exchanges: state.coin.exchanges,
     selectedCoin: state.coin.selectedCoin,
-    selectedCoinNameKo: state.coin.selectedCoinNameKo
+    selectedCoinNameKo: state.coin.selectedCoinNameKo,
+    isSearching: state.coin.isSearching
   };
 };
 

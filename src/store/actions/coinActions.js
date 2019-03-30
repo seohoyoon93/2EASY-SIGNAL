@@ -1,4 +1,10 @@
-import { SELECT_COIN, SELECT_COIN_ERROR } from "../actionTypes";
+import { SELECT_COIN, SELECT_COIN_ERROR, SEARCH_COIN } from "../actionTypes";
+
+export const searchCoin = () => {
+  return dispatch => {
+    dispatch({ type: SEARCH_COIN });
+  };
+};
 
 export const selectCoin = coin => {
   return (dispatch, getState, { getFirestore }) => {
@@ -20,13 +26,13 @@ export const selectCoin = coin => {
           switch (a.name) {
             case "Upbit":
               return -1;
-            case "Bitsonic":
+            case "Bithumb":
               if (b.name === "Upbit") {
                 return 1;
               }
               return -1;
             case "Coinbit":
-              if (b.name === "Upbit" || b.name === "Bitsonic") {
+              if (b.name === "Upbit" || b.name === "Bithumb") {
                 return 1;
               }
               return -1;

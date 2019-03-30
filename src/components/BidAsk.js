@@ -10,53 +10,64 @@ class BidAsk extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick() {
-    if (!this.props.orderbookData.isFetching) {
-      this.setState(state => ({
-        isHidden: !state.isHidden
-      }));
-    }
+    this.setState(state => ({
+      isHidden: !state.isHidden
+    }));
   }
   render() {
-    const { orderbookData, selectedExchange } = this.props;
+    const { orderbookData, selectedExchange, isSearching } = this.props;
     let divClass = selectedExchange === "Coinbit" ? "hidden" : "";
-    let content = orderbookData.isFetching ? (
-      selectedExchange === "Bitsonic" ? (
-        <Dimmer active inverted>
-          <Loader inverted>비트소닉에서 브라우저를 확인중입니다..</Loader>
-        </Dimmer>
+    let content =
+      orderbookData.isFetching || isSearching ? (
+        selectedExchange === "Bitsonic" ? (
+          <Dimmer active inverted>
+            <Loader inverted>
+              비트소닉에서 브라우저를 확인중입니다.
+              <br />
+              비트소닉 로딩은 많은 시간이 소요됩니다..
+            </Loader>
+          </Dimmer>
+        ) : selectedExchange === "Coinbit" ? (
+          <Dimmer active inverted>
+            <Loader inverted>
+              코인빗에서 브라우저를 확인중입니다.
+              <br />
+              코인빗 로딩은 많은 시간이 소요됩니다..
+            </Loader>
+          </Dimmer>
+        ) : (
+          <Dimmer active inverted>
+            <Loader inverted />
+          </Dimmer>
+        )
       ) : (
-        <Dimmer active inverted>
-          <Loader inverted />
-        </Dimmer>
-      )
-    ) : (
-      <div>
-        <div className="best-offer">
-          <p className="price">{`최고 매수 호가 = ${
-            orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
-          }`}</p>
-          <p className="amount">{`잔량 ${
-            orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
-          }`}</p>
+        <div>
+          <div className="best-offer">
+            <h4 className="price bid">{`최고 매수 호가 = ${
+              orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
+            }`}</h4>
+            <p className="amount">{`잔량 ${
+              orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
+            }`}</p>
+          </div>
+          <div className="best-offer">
+            <h4 className="price ask">{`최저 매도 호가 = ${
+              orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
+            }`}</h4>
+            <p className="amount">{`잔량 ${
+              orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
+            }`}</p>
+          </div>
         </div>
-        <div className="best-offer">
-          <p className="price">{`최저 매도 호가 = ${
-            orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
-          }`}</p>
-          <p className="amount">{`잔량 ${
-            orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
-          }`}</p>
-        </div>
-      </div>
-    );
+      );
     return (
       <div className={`${divClass} bidask content-wrapper`}>
         <div className="content-header" onClick={this.handleClick}>
           현재 매수/매도 갭
           {this.state.isHidden ? (
-            <Icon name="triangle up" />
-          ) : (
             <Icon name="triangle down" />
+          ) : (
+            <Icon name="triangle up" />
           )}
         </div>
         <div className={this.state.isHidden ? "content hidden" : "content"}>
@@ -70,7 +81,8 @@ class BidAsk extends Component {
 const mapStateToProps = state => {
   return {
     orderbookData: state.exchange.orderbookData,
-    selectedExchange: state.exchange.selectedExchange
+    selectedExchange: state.exchange.selectedExchange,
+    isSearching: state.coin.isSearching
   };
 };
 

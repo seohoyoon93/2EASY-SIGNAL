@@ -1,10 +1,11 @@
-import { SELECT_COIN, SELECT_COIN_ERROR } from "../actionTypes";
+import { SELECT_COIN, SELECT_COIN_ERROR, SEARCH_COIN } from "../actionTypes";
 
 const initialState = {
   isFetching: true,
   selectedCoin: "",
   selectedCoinNameKo: "",
-  exchanges: []
+  exchanges: [],
+  isSearching: false
 };
 
 const coinReducer = (state = initialState, action) => {
@@ -15,12 +16,19 @@ const coinReducer = (state = initialState, action) => {
         isFetching: false,
         selectedCoin: action.coinAndExchanges.coin.symbol,
         selectedCoinNameKo: action.coinAndExchanges.coin.nameKo,
-        exchanges: action.coinAndExchanges.exchanges
+        exchanges: action.coinAndExchanges.exchanges,
+        isSearching: false
       };
 
     case SELECT_COIN_ERROR:
       console.log("Error selecting coin, ", action);
       return state;
+
+    case SEARCH_COIN:
+      return {
+        ...state,
+        isSearching: true
+      };
 
     default:
       return state;

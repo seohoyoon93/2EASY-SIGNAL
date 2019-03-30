@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Search, Loader, Icon } from "semantic-ui-react";
 import { connect } from "react-redux";
 import _ from "lodash";
-import { selectCoin } from "../store/actions/coinActions";
+import { selectCoin, searchCoin } from "../store/actions/coinActions";
 import firebase from "../config/fbConfig";
 
 class Coins extends Component {
@@ -79,10 +79,14 @@ class Coins extends Component {
   }
 
   handleClick = (e, data) => {
-    this.setState({ isListHidden: !this.state.isListHidden });
+    this.setState({ isListHidden: !this.state.isListHidden }, () => {
+      document.getElementsByClassName("prompt")[0].focus();
+      this.props.searchCoin();
+    });
   };
 
-  resetComponent = () => this.setState({ results: this.state.coins });
+  resetComponent = () =>
+    this.setState({ results: sortByMentions(this.state.coins) });
 
   handleSearchChange = (e, { value }) => {
     if (value.length < 1) return this.resetComponent();
@@ -126,7 +130,7 @@ class Coins extends Component {
             >
               <div className="coin-summary-row" data-item={item.symbol}>
                 <div
-                  className="coin-summary__name context bold"
+                  className="coin-summary__name context"
                   data-item={item.symbol}
                 >{`${item.nameKo} (${item.symbol})`}</div>
                 <div
@@ -144,7 +148,7 @@ class Coins extends Component {
                 >
                   {`${item.priceChange}%`}
                   <p className="context-bottom" data-item={item.symbol}>
-                    {`₩${item.price}%`}
+                    {`₩${item.price}`}
                   </p>
                 </div>
               </div>
@@ -164,7 +168,7 @@ class Coins extends Component {
     const coinSummary =
       !this.props.isFetching && selectCoin !== null ? (
         <div className="coin-summary-content">
-          <div className="coin-summary__name context bold">{`${
+          <div className="coin-summary__name context">{`${
             selectedCoin.nameKo
           } (${selectedCoin.symbol})`}</div>
           <div className="coin-summary__mention context bold">
@@ -190,7 +194,7 @@ class Coins extends Component {
       ? "search-coin hidden"
       : "search-coin";
     return (
-      <div>
+      <div className="coins">
         <div className={searchDivClass}>
           <Search
             loading={this.props.isFetching}
@@ -204,9 +208,13 @@ class Coins extends Component {
               </div>
               <div className="coin-summary__price">전일대비/시세</div>
             </div>
-            <ul className="coin-summary-rows" onClick={this.handleItemClick}>
-              {rows}
-            </ul>
+            {results.length === 0 ? (
+              <div className="no-match">일치하는 검색 결과가 없습니다.</div>
+            ) : (
+              <ul className="coin-summary-rows" onClick={this.handleItemClick}>
+                {rows}
+              </ul>
+            )}
           </div>
           <div className="transparent-background" />
         </div>
@@ -282,7 +290,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    selectCoin: coin => dispatch(selectCoin(coin))
+    selectCoin: coin => dispatch(selectCoin(coin)),
+    searchCoin: () => dispatch(searchCoin())
   };
 };
 

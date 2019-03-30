@@ -1,3 +1,6 @@
+.coins {
+  position: relative;
+}
 .search-coin.hidden {
   display: none;
 }
@@ -14,25 +17,33 @@
   color: white;
 }
 
+.no-match {
+  font-size: 1.1rem;
+  color: white;
+  text-align: center;
+  margin-top: 60px;
+  pointer-events: none;
+}
+
 .search-coin {
   height: 100vh;
-  width: 100%;
+  width: calc(100% + 20px);
   margin-left: auto;
   margin-right: auto;
   position: absolute;
-  top: 40px;
-  left: 0;
+  top: -90px;
+  left: -10px;
   right: 0;
   z-index: 999;
   .transparent-background {
-    height: 100vh;
-    width: 100%;
+    height: 100%;
+    width: calc(100% + 20px);
     background-color: white;
     opacity: 0.9;
     position: absolute;
     overflow: hidden;
-    top: -28px;
-    left: -6px;
+    top: 0px;
+    left: -10px;
     z-index: -1;
   }
   .coin-summary-header {
@@ -45,7 +56,8 @@
     visibility: hidden !important;
   }
   .ui.search {
-    margin-bottom: 10px;
+    margin-top: 40px;
+    margin-bottom: 12px;
     text-align: center;
   }
   .ui.input {
@@ -54,18 +66,36 @@
 }
 
 .coin-summary-list {
+  position: relative;
   background-color: $blue;
   border-radius: 5px;
-  height: calc(100% - 78px);
+  height: calc(100vh - 90px);
   color: white;
+  overflow: hidden;
   .coin-summary-header {
     background-color: $navy;
     padding: 0 14px;
     height: 25px;
   }
   .coin-summary-rows {
-    overflow: auto;
+    height: calc(100% - 25px);
+    overflow-y: auto;
     background-color: $blue;
+  }
+  ::-webkit-scrollbar {
+    width: 0px;
+  } /* Safari */
+  ::-moz-scrollbars {
+    display: none;
+  }
+  ::-o-scrollbar {
+    display: none;
+  } /* opera */
+  ::-google-ms-scrollbar {
+    display: none;
+  }
+  ::-khtml-scrollbar {
+    display: none;
   }
 }
 li.coin-summary-content {
@@ -149,8 +179,9 @@ li.coin-summary-content {
     margin-left: auto;
     margin-right: auto;
     margin-top: 5px;
+    font-size: 1.1rem !important;
     &:after {
-      border-color: white transparent transparent;
+      border-color: rgba(255, 255, 255, 0.7) transparent transparent;
       width: 2rem;
       height: 2rem;
     }
