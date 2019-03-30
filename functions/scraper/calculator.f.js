@@ -45,7 +45,7 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
 });
 
 function getCommPromise(community) {
-  const threeHrsAgo = Date.now() - 1080000;
+  const threeHrsAgo = Date.now() - 10800000;
 
   return new Promise((resolve, reject) => {
     admin
