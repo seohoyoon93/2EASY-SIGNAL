@@ -115,34 +115,35 @@ class Coins extends Component {
         results.map(item => {
           const priceDivClass = item.priceChange >= 0 ? "up" : "down";
           const selectedDivClass =
-            item.id === selectedCoin.id ? "selected" : "";
+            item.id === selectedCoin.id
+              ? "coin-summary-content selected"
+              : "coin-summary-content";
           return (
             <li
               key={item.id}
               className={selectedDivClass}
-              onClick={this.handleItemClick}
               data-item={item.symbol}
             >
-              <div
-                className="coin-summary__name context"
-                data-item={item.symbol}
-              >{`${item.nameKo} (${item.symbol})`}</div>
-              <div
-                className="coin-summary__mention context"
-                data-item={item.symbol}
-              >
-                {`${item.mentionPercentage}%`}
-                <p className="cell-bottom" data-item={item.symbol}>
-                  {`${item.mentions}회`}
-                </p>
-              </div>
-              <div
-                className="coin-summary__price context"
-                data-item={item.symbol}
-              >
-                <div className={priceDivClass} data-item={item.symbol}>
+              <div className="coin-summary-row" data-item={item.symbol}>
+                <div
+                  className="coin-summary__name context bold"
+                  data-item={item.symbol}
+                >{`${item.nameKo} (${item.symbol})`}</div>
+                <div
+                  className="coin-summary__mention context bold"
+                  data-item={item.symbol}
+                >
+                  {`${item.mentionPercentage}%`}
+                  <p className="context-bottom" data-item={item.symbol}>
+                    {`${item.mentions}회`}
+                  </p>
+                </div>
+                <div
+                  className={`coin-summary__price context bold ${priceDivClass}`}
+                  data-item={item.symbol}
+                >
                   {`${item.priceChange}%`}
-                  <p className="cell-bottom" data-item={item.symbol}>
+                  <p className="context-bottom" data-item={item.symbol}>
                     {`₩${item.price}%`}
                   </p>
                 </div>
@@ -195,16 +196,19 @@ class Coins extends Component {
             loading={this.props.isFetching}
             onSearchChange={this.handleSearchChange}
           />
-          <div>
-            <div>
-              <div>
-                <div>이름(심볼)</div>
-                <div>최근 커뮤니티 언급비율</div>
-                <div>전일대비/시세</div>
+          <div className="coin-summary-list">
+            <div className="coin-summary-header">
+              <div className="coin-summary__name">이름(심볼)</div>
+              <div className="coin-summary__mention">
+                최근 커뮤니티 언급비율
               </div>
+              <div className="coin-summary__price">전일대비/시세</div>
             </div>
-            <ul>{rows}</ul>
+            <ul className="coin-summary-rows" onClick={this.handleItemClick}>
+              {rows}
+            </ul>
           </div>
+          <div className="transparent-background" />
         </div>
         <div className="coin-summary" onClick={this.handleClick}>
           <div className="coin-summary-header">
