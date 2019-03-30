@@ -67,20 +67,20 @@
 
 .coin-summary-list {
   position: relative;
-  background-color: $blue;
+  background-color: #666b88;
   border-radius: 5px;
   height: calc(100vh - 90px);
   color: white;
   overflow: hidden;
   .coin-summary-header {
-    background-color: $navy;
+    background-color: #666b88;
     padding: 0 14px;
     height: 25px;
   }
   .coin-summary-rows {
     height: calc(100% - 25px);
     overflow-y: auto;
-    background-color: $blue;
+    background-color: #666b88;
   }
   ::-webkit-scrollbar {
     width: 0px;
@@ -101,9 +101,9 @@
 li.coin-summary-content {
   margin-top: 0;
   height: 60px;
-  border-bottom: 1px solid #334099;
+  border-bottom: 1px solid #6e738f;
   :hover {
-    background-color: #6e7eaf;
+    background-color: $blue;
     cursor: pointer;
   }
   .coin-summary-row {
@@ -113,9 +113,12 @@ li.coin-summary-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    .coin-summary__mention .context-bottom {
+      font-weight: normal;
+    }
   }
   &.selected .coin-summary-row {
-    background-color: #6e7eaf;
+    background-color: $blue;
   }
 }
 
@@ -190,4 +193,9 @@ li.coin-summary-content {
 .coin-summary__icon {
   text-align: center;
   opacity: 0.4;
+}
+
+.ui.input.focus > input,
+.ui.input > input:focus {
+  border-color: $blue;
 }

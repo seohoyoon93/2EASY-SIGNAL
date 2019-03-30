@@ -161,7 +161,7 @@ class Coins extends Component {
 
     const priceDivClass =
       selectedCoin !== null
-        ? selectCoin.priceChange >= 0
+        ? selectedCoin.priceChange >= 0
           ? "up"
           : "down"
         : "";

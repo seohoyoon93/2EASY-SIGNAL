@@ -37,27 +37,25 @@
     height: 20px;
   }
   .header-btns {
-    margin-top: 15px;
-    text-align: center;
-    height: 20px;
-    a {
-      width: 20px;
-      height: 20px;
-    }
-    a:first-child {
-      margin-right: 20px;
-    }
+    margin-top: 3px;
+    text-align: right;
   }
   .info {
     font-size: 1.1rem;
     color: $gray;
     text-decoration: underline;
-    margin-top: 10px;
+    margin-top: 3px;
+    cursor: pointer;
+    &:first-child {
+      margin-top: 0;
+    }
   }
   .info-btn {
     color: $gray;
+    cursor: pointer;
     background-color: transparent;
     text-decoration: underline;
+    outline: 0;
   }
   .header-top,
   .header-bottom {

@@ -63,7 +63,7 @@ class Orderbook extends Component {
         )
       ) : (
         <div>
-          <h4>최근 체결 비율</h4>
+          <h4>최근 100개 체결내역 비율</h4>
           <div className="orderbook-chart">
             <div className="bars">
               <div className="bid bar" style={bidTradesWidth} />

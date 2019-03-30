@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="19" height="22" viewBox="0 0 19 22">
+    <g fill="none" fill-rule="evenodd">
+        <path fill="#FFF" d="M-171-34h360v645h-360z"/>
+        <text font-family="AppleSDGothicNeo-Bold, Apple SD Gothic Neo" font-size="14" font-weight="bold" letter-spacing="-.175" transform="translate(-171 -34)">
+            <tspan x="18" y="34" fill="#FF5F5F">SIGNAL</tspan> <tspan x="63.934" y="34" fill="#C6C7D4" letter-spacing="-.204"> </tspan> <tspan x="67.412" y="34" fill="#FFDF5F" letter-spacing="-.204">by Eastern Golden Egg</tspan>
+        </text>
+        <path fill="#000" d="M-171-34h360v645h-360z" opacity=".9"/>
+        <text fill="#FFF" font-family="YDVYGO12, [YoonV] YoonGothic100_OTF" font-size="30" transform="translate(-171 -34)">
+            <tspan x="171.665" y="54">X</tspan>
+        </text>
+    </g>
+</svg>

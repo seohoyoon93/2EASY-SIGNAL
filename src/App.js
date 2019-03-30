@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Button } from "semantic-ui-react";
 
+import Popup from "./components/Popup";
 import Coins from "./components/Coins";
 import Exchanges from "./components/Exchanges";
 import Volume from "./components/Volume";
@@ -15,8 +16,10 @@ class App extends Component {
     super(props);
     window.Kakao.init("3e5e4aeea8c7475b5efd977b69e4180c");
     this.state = {
-      visitors: "-"
+      visitors: "-",
+      isPopupHidden: true
     };
+    this.togglePopup = this.togglePopup.bind(this);
   }
   componentDidMount() {
     window.Kakao.Link.createDefaultButton({
@@ -54,6 +57,10 @@ class App extends Component {
         console.log("error retrieving count data");
       });
   }
+  togglePopup(e, data) {
+    console.log("toggle popup");
+    this.setState(state => ({ isPopupHidden: !state.isPopupHidden }));
+  }
   render() {
     const goTradeLink = (function(exchange, coin) {
       switch (exchange) {
@@ -71,6 +78,10 @@ class App extends Component {
     })(this.props.selectedExchange, this.props.selectedCoin);
     return (
       <div className="App">
+        <Popup
+          isHidden={this.state.isPopupHidden}
+          togglePopup={this.togglePopup}
+        />
         <div className="header">
           <div className="header-top">
             <h1>
@@ -83,25 +94,31 @@ class App extends Component {
           </div>
           <div className="header-bottom">
             <div className="header-btns">
-              <a
-                className="telegram-link"
-                href="https://telegram.me/share/url?url=https://eggsignal.com&text=EGG%20SIGNAL%20-%20암호화폐%20선동비율%20트래커"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="/images/t-logo@3x.png" alt="telegram" />
-              </a>
-              <a
-                className="kakao-link"
-                id="kakao-link-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="/images/kakaolink-btn-medium@3x.png" alt="kakao" />
-              </a>
-            </div>
-            <div className="info">
-              <button className="info-btn">EGG SIGNAL 소개</button>
+              <div className="info">
+                <button className="info-btn" onClick={this.togglePopup}>
+                  EGG SIGNAL 소개
+                </button>
+              </div>
+              <div className="info">
+                <a
+                  className="kakao-link"
+                  id="kakao-link-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  KaKaoTalk 공유
+                </a>
+              </div>
+              <div className="info">
+                <a
+                  className="telegram-link"
+                  href="https://telegram.me/share/url?url=https://eggsignal.com&text=EGG%20SIGNAL%20-%20암호화폐%20선동비율%20트래커"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Telegram 공유
+                </a>
+              </div>
             </div>
           </div>
         </div>
