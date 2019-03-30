@@ -48,6 +48,9 @@ exports = module.exports = functions
           contentIds.push(contentId);
         });
 
+      const db = admin.firestore();
+      let batch = db.batch();
+
       await contentIds.reduce(async (promise, contentId) => {
         const link = "https://www.moneynet.co.kr/free_board/" + contentId;
         await promise;
@@ -74,20 +77,16 @@ exports = module.exports = functions
 
         const comments = await $("#comment .xe_content", subHtml).text();
 
-        await admin
-          .firestore()
-          .doc(`communities/moneynet/data/${contentId}`)
-          .set({
-            title,
-            content,
-            comments,
-            timestamp
-          })
-          .then(() => {})
-          .catch(err => {
-            console.error("Failed to scrape moneynet, ", err);
-          });
+        const ref = db.doc(`communities/moneynet/data/${contentId}`);
+
+        batch.set(ref, {
+          title,
+          content,
+          comments,
+          timestamp
+        });
       }, Promise.resolve());
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

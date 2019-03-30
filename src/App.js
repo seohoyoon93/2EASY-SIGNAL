@@ -60,7 +60,7 @@ class App extends Component {
         case "Upbit":
           return `https://upbit.com/exchange?code=CRIX.UPBIT.KRW-${coin}`;
         case "Bitsonic":
-          return `https://bitsonic.co.kr/front/exchange/bsc-${coin}`;
+          return `https://bitsonic.co.kr/front/exchange/${coin}-krw`;
         case "Coinbit":
           return `https://www.coinbit.co.kr/trade/order/krw-${coin}`;
         case "Bithumb":

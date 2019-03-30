@@ -33,17 +33,20 @@ exports = module.exports = functions
         timeout: 0
       });
       const html = await page.content();
-      let contentIds = [];
+      let tempContentIds = [];
       await $("div.gall_listwrap tr.us-post td.gall_tit a", html).each(
         (i, elem) => {
           let contentId = $(elem)
             .attr("href")
             .match(/no=([0-9]+)/)[0]
             .match(/[0-9]+/)[0];
-          contentIds.push(contentId);
+          tempContentIds.push(contentId);
         }
       );
+      let contentIds = tempContentIds.sort((a, b) => b - a).slice(0, 14);
 
+      const db = admin.firestore();
+      let batch = db.batch();
       await contentIds.reduce(async (promise, contentId) => {
         const link =
           "https://gall.dcinside.com/board/view/?id=bitcoins&no=" + contentId;
@@ -61,20 +64,16 @@ exports = module.exports = functions
         content = content + content2;
         const comments = await $("ul.cmt_list li.ub-content p", subHtml).text();
 
-        await admin
-          .firestore()
-          .doc(`communities/dcinside/data/${contentId}`)
-          .set({
-            title,
-            content,
-            comments,
-            timestamp
-          })
-          .then(() => {})
-          .catch(err => {
-            console.error("Failed to scrape dcinside, ", err);
-          });
+        const ref = db.doc(`communities/dcinside/data/${contentId}`);
+
+        batch.set(ref, {
+          title,
+          content,
+          comments,
+          timestamp
+        });
       }, Promise.resolve());
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

@@ -32,7 +32,7 @@ exports = module.exports = functions
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {
           coins.push(doc.data());
-          coinRefs.push(doc.ref);
+          coinRefs.push({ ref: doc.ref, symbol: doc.data().symbol });
         });
       })
       .catch(err => {
@@ -93,7 +93,6 @@ exports = module.exports = functions
         console.log(err);
       });
 
-    await console.log("upbitPrices: ", upbitPrices);
     const remainingCoins = await coins
       .filter(coin => !upbitBases.includes(coin.symbol))
       .map(coin => coin.symbol);
@@ -126,7 +125,6 @@ exports = module.exports = functions
           console.log(err);
         });
     }, Promise.resolve());
-    await console.log("bithumbPrices: ", bithumbPrices);
     const remainingCoins2 = await remainingCoins.filter(
       coin => !bithumbMarkets.includes(coin)
     );
@@ -163,7 +161,6 @@ exports = module.exports = functions
           console.log(err);
         });
     }, Promise.resolve());
-    await console.log("coinbitPrices: ", coinbitPrices);
     const remainingCoins3 = await remainingCoins2.filter(
       coin => !coinbitMarkets.includes(coin)
     );
@@ -200,37 +197,24 @@ exports = module.exports = functions
           console.log(err);
         });
     }, Promise.resolve());
-    await console.log("bitsonicPrices: ", bitsonicPrices);
 
     const prices = await upbitPrices.concat(
       bithumbPrices.concat(coinbitPrices.concat(bitsonicPrices))
     );
 
-    await coinRefs.reduce(async (promise, coinRef) => {
-      await promise;
-      await db.runTransaction(transaction => {
-        return transaction
-          .get(coinRef)
-          .then(doc => {
-            if (!doc.exists) {
-              throw "coin does not exist";
-            }
+    let batch = db.batch();
 
-            let coin = doc.data().symbol;
-            let priceObj = prices.filter(elem => elem.base === coin)[0];
-            transaction.update(coinRef, {
-              price: priceObj.price,
-              priceChange: priceObj.priceChange,
-              updatedAt: Date.now()
-            });
-            return coin;
-          })
-          .then(() => {
-            console.log("updated coinprices");
-          })
-          .catch(err => console.log(err));
+    await coinRefs.reduce(async (promise, coinRef) => {
+      let coin = coinRef.symbol;
+      let priceObj = prices.filter(elem => elem.base === coin)[0];
+      batch.update(coinRef.ref, {
+        price: priceObj.price,
+        priceChange: priceObj.priceChange,
+        updatedAt: Date.now()
       });
     }, Promise.resolve());
+
+    await batch.commit();
 
     await res.send("Done");
   });

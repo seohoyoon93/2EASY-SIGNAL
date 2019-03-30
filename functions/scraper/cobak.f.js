@@ -45,6 +45,9 @@ exports = module.exports = functions
         contentIds.push(contentId);
       });
 
+      const db = admin.firestore();
+      let batch = db.batch();
+
       await contentIds.reduce(async (promise, contentId) => {
         const link = "https://cobak.co.kr/community/1/post/" + contentId;
         await promise;
@@ -57,41 +60,57 @@ exports = module.exports = functions
           const title = await $("div.title___1kaUK", subHtml).text();
           const content = await $("div.cobak-html p", subHtml).text();
           const comments = "";
+          const ref = db.doc(`communities/cobak/data/${contentId}`);
 
-          await admin
-            .firestore()
-            .doc(`communities/cobak/data/${contentId}`)
-            .set({
-              title,
-              content,
-              comments,
-              timestamp
-            })
-            .then(() => {})
-            .catch(err => {
-              console.error("Failed to scrape cobak, ", err);
-            });
+          batch.set(ref, {
+            title,
+            content,
+            comments,
+            timestamp
+          });
+          // await admin
+          //   .firestore()
+          //   .doc(`communities/cobak/data/${contentId}`)
+          //   .set({
+          //     title,
+          //     content,
+          //     comments,
+          //     timestamp
+          //   })
+          //   .then(() => {})
+          //   .catch(err => {
+          //     console.error("Failed to scrape cobak, ", err);
+          //   });
         } else if (uploadTime.indexOf("방금") !== -1) {
           const timestamp = Date.now();
           const title = await $("div.title___1kaUK", subHtml).text();
           const content = await $("div.cobak-html p", subHtml).text();
           const comments = "";
 
-          await admin
-            .firestore()
-            .doc(`communities/cobak/data/${contentId}`)
-            .set({
-              title,
-              content,
-              comments,
-              timestamp
-            })
-            .then(() => {})
-            .catch(err => {
-              console.error("Failed to scrape cobak, ", err);
-            });
+          const ref = db.doc(`communities/cobak/data/${contentId}`);
+
+          batch.set(ref, {
+            title,
+            content,
+            comments,
+            timestamp
+          });
+          // await admin
+          //   .firestore()
+          //   .doc(`communities/cobak/data/${contentId}`)
+          //   .set({
+          //     title,
+          //     content,
+          //     comments,
+          //     timestamp
+          //   })
+          //   .then(() => {})
+          //   .catch(err => {
+          //     console.error("Failed to scrape cobak, ", err);
+          //   });
         }
       }, Promise.resolve());
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

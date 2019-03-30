@@ -57,6 +57,8 @@ exports = module.exports = functions
 
       const html = await mframe.content();
 
+      const db = admin.firestore();
+      let batch = db.batch();
       const article = await $("div.article-board", html)
         .not("#upperArticleList")
         .find("tr")
@@ -85,18 +87,17 @@ exports = module.exports = functions
             const contentId = $(elem)
               .find("div.board-number div.inner_number")
               .text();
+            const ref = db.doc(`communities/bitoka/data/${contentId}`);
 
-            await admin
-              .firestore()
-              .doc(`communities/bitoka/data/${contentId}`)
-              .set({
-                title,
-                content,
-                comments,
-                timestamp
-              });
+            batch.set(ref, {
+              title,
+              content,
+              comments,
+              timestamp
+            });
           }
         });
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

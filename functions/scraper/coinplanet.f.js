@@ -59,6 +59,8 @@ exports = module.exports = functions
       }
       const html = await mframe.content();
 
+      const db = admin.firestore();
+      let batch = db.batch();
       const article = await $("div.article-board", html)
         .not("#upperArticleList")
         .find("tr")
@@ -88,17 +90,17 @@ exports = module.exports = functions
               .find("div.board-number div.inner_number")
               .text();
 
-            await admin
-              .firestore()
-              .doc(`communities/coinplanet/data/${contentId}`)
-              .set({
-                title,
-                content,
-                comments,
-                timestamp
-              });
+            const ref = db.doc(`communities/coinplanet/data/${contentId}`);
+
+            batch.set(ref, {
+              title,
+              content,
+              comments,
+              timestamp
+            });
           }
         });
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

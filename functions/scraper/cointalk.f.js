@@ -34,7 +34,7 @@ exports = module.exports = functions
       });
       const html = await page.content();
 
-      let contentIds = [];
+      let tempContentIds = [];
       await $("#fboardlist tr", html)
         .not(".notice")
         .find("td.sbj a")
@@ -49,10 +49,13 @@ exports = module.exports = functions
               .attr("href")
               .match(/id=([0-9]+)/)[0]
               .match(/[0-9]+/)[0];
-            contentIds.push(contentId);
+            tempContentIds.push(contentId);
           }
         });
 
+      let contentIds = tempContentIds.sort((a, b) => b - a).slice(0, 20);
+      const db = admin.firestore();
+      let batch = db.batch();
       await contentIds.reduce(async (promise, contentId) => {
         const link =
           "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard&wr_id=" +
@@ -72,21 +75,16 @@ exports = module.exports = functions
         content = content2 + content;
 
         const comments = await $("#st-comment p", subHtml).text();
+        const ref = db.doc(`communities/cointalk/data/${contentId}`);
 
-        await admin
-          .firestore()
-          .doc(`communities/cointalk/data/${contentId}`)
-          .set({
-            title,
-            content,
-            comments,
-            timestamp
-          })
-          .then(() => {})
-          .catch(err => {
-            console.error("Failed to scrape cointalk, ", err);
-          });
+        batch.set(ref, {
+          title,
+          content,
+          comments,
+          timestamp
+        });
       }, Promise.resolve());
+      await batch.commit();
     } catch (e) {
       throw e;
     } finally {

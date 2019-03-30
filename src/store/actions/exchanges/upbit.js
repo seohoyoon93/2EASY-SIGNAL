@@ -38,7 +38,7 @@ exports.getCandleSticks = coin => {
     rp(tickerOptions).then(parsedBody => {
       const accTradeVol24h = parsedBody[0].acc_trade_price_24h;
       const lastPrice = parsedBody[0].trade_price;
-      const priceChange = parsedBody[0].signed_change_rate.toFixed(2);
+      const priceChange = (parsedBody[0].signed_change_rate * 100).toFixed(2);
 
       rp(candleOptions).then(parsedBody => {
         if (parsedBody.length === 0) {
