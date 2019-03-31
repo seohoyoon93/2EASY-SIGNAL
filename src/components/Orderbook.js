@@ -73,10 +73,10 @@ class Orderbook extends Component {
             </div>
             <div className="numbers">
               <div>{`매수 ₩${
-                bidTrades ? formatNumber(toSecondDecimalPoint(bidTrades)) : null
+                bidTrades ? formatNumber(toSecondDecimalPoint(bidTrades)) : 0
               }`}</div>
               <div>{`₩${
-                askTrades ? formatNumber(toSecondDecimalPoint(askTrades)) : null
+                askTrades ? formatNumber(toSecondDecimalPoint(askTrades)) : 0
               } 매도`}</div>
             </div>
           </div>
@@ -88,10 +88,10 @@ class Orderbook extends Component {
             </div>
             <div className="numbers">
               <div>{`매수 ${
-                bid ? formatNumber(toSecondDecimalPoint(bid)) : null
+                bid ? formatNumber(toSecondDecimalPoint(bid)) : 0
               }`}</div>
               <div>{`${
-                ask ? formatNumber(toSecondDecimalPoint(ask)) : null
+                ask ? formatNumber(toSecondDecimalPoint(ask)) : 0
               } 매도`}</div>
             </div>
           </div>

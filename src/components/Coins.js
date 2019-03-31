@@ -119,6 +119,7 @@ class Coins extends Component {
       !this.props.isFetching && selectedCoin !== null ? (
         results.map(item => {
           const priceDivClass = item.priceChange >= 0 ? "up" : "down";
+          const sign = item.priceChange > 0 ? "+" : "";
           const selectedDivClass =
             item.id === selectedCoin.id
               ? "coin-summary-content selected"
@@ -147,7 +148,7 @@ class Coins extends Component {
                   className={`coin-summary__price context bold ${priceDivClass}`}
                   data-item={item.symbol}
                 >
-                  {`${item.priceChange}%`}
+                  {`${sign}${item.priceChange}%`}
                   <p className="context-bottom" data-item={item.symbol}>
                     {`₩${formatNumber(item.price)}`}
                   </p>

@@ -15,26 +15,25 @@ export const selectExchange = exchange => {
     try {
       const selectedCoin = getState().coin.selectedCoin;
       dispatch({ type: SELECT_EXCHANGE, exchange });
-      let candlePromise, orderbookPromise, tradesPromise;
-      if (exchange === "Upbit") {
-        candlePromise = await upbit.getCandleSticks(selectedCoin);
-        orderbookPromise = await upbit.getOrderbook(selectedCoin);
-        tradesPromise = await upbit.getTrades(selectedCoin);
-      } else if (exchange === "Bithumb") {
-        candlePromise = await bithumb.getCandleSticks(selectedCoin);
-        orderbookPromise = await bithumb.getOrderbook(selectedCoin);
-        tradesPromise = await bithumb.getTrades(selectedCoin);
-      } else if (exchange === "Bitsonic") {
-        candlePromise = await bitsonic.getCandleSticks(selectedCoin);
-        orderbookPromise = await bitsonic.getOrderbook(selectedCoin);
-        tradesPromise = await bitsonic.getTrades(selectedCoin);
-      } else if (exchange === "Coinbit") {
-        candlePromise = await coinbit.getCandleSticks(selectedCoin);
-        orderbookPromise = await coinbit.getOrderbook(selectedCoin);
-        tradesPromise = await coinbit.getTrades(selectedCoin);
-      }
-      await Promise.all([candlePromise, orderbookPromise, tradesPromise]).then(
-        values => {
+      if (exchange === "Upbit" || exchange === "Bithumb") {
+        let candlePromise, orderbookPromise, tradesPromise;
+        candlePromise =
+          exchange === "Upbit"
+            ? await upbit.getCandleSticks(selectedCoin)
+            : await bithumb.getCandleSticks(selectedCoin);
+        orderbookPromise =
+          exchange === "Upbit"
+            ? await upbit.getOrderbook(selectedCoin)
+            : bithumb.getOrderbook(selectedCoin);
+        tradesPromise =
+          exchange === "Upbit"
+            ? await upbit.getTrades(selectedCoin)
+            : bithumb.getTrades(selectedCoin);
+        await Promise.all([
+          candlePromise,
+          orderbookPromise,
+          tradesPromise
+        ]).then(values => {
           let currentCoin = getState().coin.selectedCoin;
           let currentEx = getState().exchange.selectedExchange;
           if (currentCoin === selectedCoin && currentEx === exchange) {
@@ -54,8 +53,61 @@ export const selectExchange = exchange => {
               aggBids: values[2].aggBids
             });
           }
-        }
-      );
+        });
+      } else if (exchange === "Bitsonic") {
+        bitsonic.getBitsonicData(selectedCoin).then(value => {
+          let currentCoin = getState().coin.selectedCoin;
+          let currentEx = getState().exchange.selectedExchange;
+          if (currentCoin === selectedCoin && currentEx === exchange) {
+            dispatch({
+              type: RECEIVE_CANDLE_DATA,
+              volumeChanges: value.volumeChanges,
+              priceChanges: value.priceChanges
+            });
+            dispatch({
+              type: RECEIVE_ORDERBOOK_DATA,
+              aggOrders: value.aggOrders,
+              bidAsk: value.bidAsk
+            });
+            dispatch({
+              type: RECEIVE_TRADES_DATA,
+              aggAsks: value.aggAsks,
+              aggBids: value.aggBids
+            });
+          }
+        });
+      } else if (exchange === "Coinbit") {
+        let candlePromise, orderbookPromise, tradesPromise;
+        candlePromise = await coinbit.getCandleSticks(selectedCoin);
+        orderbookPromise = await coinbit.getOrderbook(selectedCoin);
+        tradesPromise = await coinbit.getTrades(selectedCoin);
+
+        await Promise.all([
+          candlePromise,
+          orderbookPromise,
+          tradesPromise
+        ]).then(values => {
+          let currentCoin = getState().coin.selectedCoin;
+          let currentEx = getState().exchange.selectedExchange;
+          if (currentCoin === selectedCoin && currentEx === exchange) {
+            dispatch({
+              type: RECEIVE_CANDLE_DATA,
+              volumeChanges: values[0].volumeChanges,
+              priceChanges: values[0].priceChanges
+            });
+            dispatch({
+              type: RECEIVE_ORDERBOOK_DATA,
+              aggOrders: values[1].aggOrders,
+              bidAsk: values[1].bidAsk
+            });
+            dispatch({
+              type: RECEIVE_TRADES_DATA,
+              aggAsks: values[2].aggAsks,
+              aggBids: values[2].aggBids
+            });
+          }
+        });
+      }
     } catch (err) {
       console.log("err: ", err);
     }

@@ -30,7 +30,6 @@ exports.getCandleSticks = coin => {
         let parsedCoinbitHour = JSON.parse(xhr24.responseText);
         if (parsedCoinbitHour.s === "ok") {
           lastPrice = parsedCoinbitHour.c[0];
-          console.log(lastPrice);
           parsedCoinbitHour.t.forEach((elem, i) => {
             accTradeVol24h =
               accTradeVol24h + parseFloat(parsedCoinbitHour.v[i]);
@@ -186,9 +185,7 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const minVolumeChange =
                   lastMinVolume !== 0
-                    ? ((currentMinVolume / lastMinVolume) * 100 - 100).toFixed(
-                        2
-                      )
+                    ? (currentMinVolume / lastMinVolume) * 100 - 100
                     : 0;
                 const hourPriceChange =
                   lastHourPrice !== 0
@@ -196,9 +193,7 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const thirtyMinPriceChange =
                   lastThirtyMinPrice !== 0
-                    ? ((currentPrice / lastThirtyMinPrice) * 100 - 100).toFixed(
-                        2
-                      )
+                    ? (currentPrice / lastThirtyMinPrice) * 100 - 100
                     : 0;
                 const fifteenMinPriceChange =
                   lastFifteenMinPrice !== 0
@@ -210,9 +205,7 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const threeMinPriceChange =
                   lastThreeMinPrice !== 0
-                    ? ((currentPrice / lastThreeMinPrice) * 100 - 100).toFixed(
-                        2
-                      )
+                    ? (currentPrice / lastThreeMinPrice) * 100 - 100
                     : 0;
                 const minPriceChange =
                   lastMinPrice !== 0

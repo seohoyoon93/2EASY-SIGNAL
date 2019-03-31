@@ -257,7 +257,7 @@ exports.getCandleSticks = coin => {
               }
               let lastFourHourVol = 0;
               let currentFourHourVol = 0;
-              let lastFourHourPrice = filledHourData[44];
+              let lastFourHourPrice = filledHourData[44].price;
               for (let i = 0; i < 8; i++) {
                 if (i < 4) {
                   lastFourHourVol += filledHourData[i + 40].volume;
@@ -267,7 +267,7 @@ exports.getCandleSticks = coin => {
               }
               let lastDayVol = 0;
               let todayVol = 0;
-              let lastDayPrice = filledHourData[24];
+              let lastDayPrice = filledHourData[24].price;
               for (let i = 0; i < 48; i++) {
                 if (i < 24) {
                   lastDayVol += filledHourData[i].volume;
@@ -321,7 +321,6 @@ exports.getCandleSticks = coin => {
                 currentPrice,
                 priceChange
               };
-
               resolve({ volumeChanges, priceChanges });
             }
           };

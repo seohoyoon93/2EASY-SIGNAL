@@ -116,6 +116,14 @@ li.coin-summary-content {
     .coin-summary__mention .context-bottom {
       font-weight: normal;
     }
+    .coin-summary__price.context.down:hover,
+    .coin-summary__price.context.down p:hover {
+      background-color: $light-blue;
+    }
+    .coin-summary__price.context.up:hover,
+    .coin-summary__price.context.up p:hover {
+      background-color: $red;
+    }
   }
   &.selected .coin-summary-row {
     background-color: $blue;

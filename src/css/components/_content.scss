@@ -107,8 +107,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  div:first-child {
-    margin-right: 20px;
+  div:last-child {
+    margin-left: 20px;
   }
   h4 {
     font-size: 1.3rem;

@@ -3,7 +3,7 @@ const $ = require("cheerio");
 
 exports = module.exports = {};
 
-exports.getCandleSticks = coin => {
+exports.getBitsonicData = coin => {
   return new Promise((resolve, reject) => {
     const now = new Date();
     const from = Math.floor((now - 7200000) / 60000) * 60;
@@ -24,6 +24,155 @@ exports.getCandleSticks = coin => {
       url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
     })
       .then(function(html) {
+        //getTrades
+        const tradeTable = $(
+          "div.center-flex-table.history-time div.scrollbar-y",
+          html
+        );
+        let asks = [];
+        let bids = [];
+        tradeTable.children().each((i, elem) => {
+          if ($(elem).find("p.text-pink").length > 0) {
+            bids.push(
+              parseInt(
+                $(elem)
+                  .find(".table-item")
+                  .last()
+                  .text()
+                  .match(/\d/g)
+                  .join("")
+              )
+            );
+          } else {
+            asks.push(
+              parseInt(
+                $(elem)
+                  .find(".table-item")
+                  .last()
+                  .text()
+                  .match(/\d/g)
+                  .join("")
+              )
+            );
+          }
+        });
+        const aggAsks = asks.reduce((acc, cur) => acc + cur, 0);
+        const aggBids = bids.reduce((acc, cur) => acc + cur, 0);
+        //getOrderBook
+        const aggAskText = $(html)
+          .find("div#stickyOrderbook div.orderbook-header.orderbook-header-top")
+          .children()
+          .last()
+          .find("p.text-blue")
+          .text()
+          .split(".");
+        const aggAskInt = parseFloat(aggAskText[0].match(/\d/g).join(""));
+        let aggAskBlah = 0;
+        if (aggAskText.length === 2) {
+          aggAskBlah = parseFloat("0." + aggAskText[1].match(/\d/g).join(""));
+        }
+        const aggAsksQty = aggAskInt + aggAskBlah;
+
+        const aggBidsText = $(html)
+          .find(
+            "div#stickyOrderbook div.orderbook-header.orderbook-header-bottom"
+          )
+          .children()
+          .last()
+          .find("p.text-pink")
+          .text()
+          .split(".");
+        const aggBidsInt = parseFloat(aggBidsText[0].match(/\d/g).join(""));
+        let aggBidsBlah = 0;
+        if (aggBidsText.length === 2) {
+          aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""));
+        }
+        const aggBidsQty = aggBidsInt + aggBidsBlah;
+
+        const lowestAskPriceText = $(html)
+          .find("ul.orderbook-flex-list.blue")
+          .last()
+          .children()
+          .eq(1)
+          .find("span")
+          .text()
+          .split(".");
+        const lowestAskPriceInt = parseFloat(
+          lowestAskPriceText[0].match(/\d/g).join("")
+        );
+        let lowestAskPriceBlah = 0;
+        if (lowestAskPriceText.length === 2) {
+          lowestAskPriceBlah = parseFloat(
+            "0." + lowestAskPriceText[1].match(/\d/g).join("")
+          );
+        }
+        const lowestAskPrice = lowestAskPriceInt + lowestAskPriceBlah;
+
+        const lowestAskQuantityText = $(html)
+          .find("ul.orderbook-flex-list.blue")
+          .last()
+          .children()
+          .last()
+          .find("span")
+          .text()
+          .split(".");
+        const lowestAskQuantityInt = parseFloat(
+          lowestAskQuantityText[0].match(/\d/g).join("")
+        );
+        let lowestAskQuantityBlah = 0;
+        if (lowestAskQuantityText.length === 2) {
+          lowestAskQuantityBlah = parseFloat(
+            "0." + lowestAskQuantityText[1].match(/\d/g).join("")
+          );
+        }
+        const lowestAskQuantity = lowestAskQuantityInt + lowestAskQuantityBlah;
+
+        const highestBidPriceText = $(html)
+          .find("ul.orderbook-flex-list.pink")
+          .first()
+          .children()
+          .eq(1)
+          .find("span")
+          .text()
+          .split(".");
+        const highestBidPriceInt = parseFloat(
+          highestBidPriceText[0].match(/\d/g).join("")
+        );
+        let highestBidPriceBlah = 0;
+        if (highestBidPriceText.length === 2) {
+          highestBidPriceBlah = parseFloat(
+            "0." + highestBidPriceText[1].match(/\d/g).join("")
+          );
+        }
+        const highestBidPrice = highestBidPriceInt + highestBidPriceBlah;
+
+        const highestBidQuantityText = $(html)
+          .find("ul.orderbook-flex-list.pink")
+          .first()
+          .children()
+          .last()
+          .find("span")
+          .text()
+          .split(".");
+        const highestBidQuantityInt = parseFloat(
+          highestBidQuantityText[0].match(/\d/g).join("")
+        );
+        let highestBidQuantityBlah = 0;
+        if (highestBidQuantityText.length === 2) {
+          highestBidQuantityBlah = parseFloat(
+            "0." + highestBidQuantityText[1].match(/\d/g).join("")
+          );
+        }
+        const highestBidQuantity =
+          highestBidQuantityInt + highestBidQuantityBlah;
+
+        const aggOrders = { aggAsks: aggAsksQty, aggBids: aggBidsQty };
+        const bidAsk = {
+          highestBidPrice,
+          highestBidQuantity,
+          lowestAskPrice,
+          lowestAskQuantity
+        };
         //success!
 
         const accTradeVol24hText = $(html)
@@ -221,7 +370,14 @@ exports.getCandleSticks = coin => {
               currentPrice: lastPrice,
               priceChange
             };
-            resolve({ volumeChanges, priceChanges });
+            resolve({
+              aggOrders,
+              bidAsk,
+              aggAsks,
+              aggBids,
+              volumeChanges,
+              priceChanges
+            });
           }
         };
         xhr.open(
@@ -232,186 +388,6 @@ exports.getCandleSticks = coin => {
       })
       .catch(function(err) {
         console.log(err);
-      });
-  });
-};
-
-exports.getOrderbook = coin => {
-  return new Promise((resolve, reject) => {
-    rp({
-      method: "GET",
-      url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
-    })
-      .then(function(html) {
-        //success!
-        const aggAskText = $(html)
-          .find("div#stickyOrderbook div.orderbook-header.orderbook-header-top")
-          .children()
-          .last()
-          .find("p.text-blue")
-          .text()
-          .split(".");
-        const aggAskInt = parseFloat(aggAskText[0].match(/\d/g).join(""));
-        let aggAskBlah = 0;
-        if (aggAskText.length === 2) {
-          aggAskBlah = parseFloat("0." + aggAskText[1].match(/\d/g).join(""));
-        }
-        const aggAsks = aggAskInt + aggAskBlah;
-
-        const aggBidsText = $(html)
-          .find(
-            "div#stickyOrderbook div.orderbook-header.orderbook-header-bottom"
-          )
-          .children()
-          .last()
-          .find("p.text-pink")
-          .text()
-          .split(".");
-        const aggBidsInt = parseFloat(aggBidsText[0].match(/\d/g).join(""));
-        let aggBidsBlah = 0;
-        if (aggBidsText.length === 2) {
-          aggBidsBlah = parseFloat("0." + aggBidsText[1].match(/\d/g).join(""));
-        }
-        const aggBids = aggBidsInt + aggBidsBlah;
-
-        const lowestAskPriceText = $(html)
-          .find("ul.orderbook-flex-list.blue")
-          .last()
-          .children()
-          .eq(1)
-          .find("span")
-          .text()
-          .split(".");
-        const lowestAskPriceInt = parseFloat(
-          lowestAskPriceText[0].match(/\d/g).join("")
-        );
-        let lowestAskPriceBlah = 0;
-        if (lowestAskPriceText.length === 2) {
-          lowestAskPriceBlah = parseFloat(
-            "0." + lowestAskPriceText[1].match(/\d/g).join("")
-          );
-        }
-        const lowestAskPrice = lowestAskPriceInt + lowestAskPriceBlah;
-
-        const lowestAskQuantityText = $(html)
-          .find("ul.orderbook-flex-list.blue")
-          .last()
-          .children()
-          .last()
-          .find("span")
-          .text()
-          .split(".");
-        const lowestAskQuantityInt = parseFloat(
-          lowestAskQuantityText[0].match(/\d/g).join("")
-        );
-        let lowestAskQuantityBlah = 0;
-        if (lowestAskQuantityText.length === 2) {
-          lowestAskQuantityBlah = parseFloat(
-            "0." + lowestAskQuantityText[1].match(/\d/g).join("")
-          );
-        }
-        const lowestAskQuantity = lowestAskQuantityInt + lowestAskQuantityBlah;
-
-        const highestBidPriceText = $(html)
-          .find("ul.orderbook-flex-list.pink")
-          .first()
-          .children()
-          .eq(1)
-          .find("span")
-          .text()
-          .split(".");
-        const highestBidPriceInt = parseFloat(
-          highestBidPriceText[0].match(/\d/g).join("")
-        );
-        let highestBidPriceBlah = 0;
-        if (highestBidPriceText.length === 2) {
-          highestBidPriceBlah = parseFloat(
-            "0." + highestBidPriceText[1].match(/\d/g).join("")
-          );
-        }
-        const highestBidPrice = highestBidPriceInt + highestBidPriceBlah;
-
-        const highestBidQuantityText = $(html)
-          .find("ul.orderbook-flex-list.pink")
-          .first()
-          .children()
-          .last()
-          .find("span")
-          .text()
-          .split(".");
-        const highestBidQuantityInt = parseFloat(
-          highestBidQuantityText[0].match(/\d/g).join("")
-        );
-        let highestBidQuantityBlah = 0;
-        if (highestBidQuantityText.length === 2) {
-          highestBidQuantityBlah = parseFloat(
-            "0." + highestBidQuantityText[1].match(/\d/g).join("")
-          );
-        }
-        const highestBidQuantity =
-          highestBidQuantityInt + highestBidQuantityBlah;
-
-        const aggOrders = { aggAsks, aggBids };
-        const bidAsk = {
-          highestBidPrice,
-          highestBidQuantity,
-          lowestAskPrice,
-          lowestAskQuantity
-        };
-        resolve({ aggOrders, bidAsk });
-      })
-      .catch(function(err) {
-        console.log(err);
-      });
-  });
-};
-
-exports.getTrades = coin => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      method: "GET",
-      url: `https://cors-anywhere.herokuapp.com/https://bitsonic.co.kr/front/exchange/${coin}-krw`
-    };
-
-    rp(options)
-      .then(html => {
-        const tradeTable = $(
-          "div.center-flex-table.history-time div.scrollbar-y",
-          html
-        );
-        let asks = [];
-        let bids = [];
-        tradeTable.children().each((i, elem) => {
-          if ($(elem).find("p.text-pink").length > 0) {
-            bids.push(
-              parseInt(
-                $(elem)
-                  .find(".table-item")
-                  .last()
-                  .text()
-                  .match(/\d/g)
-                  .join("")
-              )
-            );
-          } else {
-            asks.push(
-              parseInt(
-                $(elem)
-                  .find(".table-item")
-                  .last()
-                  .text()
-                  .match(/\d/g)
-                  .join("")
-              )
-            );
-          }
-        });
-        const aggAsks = asks.reduce((acc, cur) => acc + cur, 0);
-        const aggBids = bids.reduce((acc, cur) => acc + cur, 0);
-        resolve({ aggAsks, aggBids });
-      })
-      .catch(err => {
-        reject("Bitsonic trade history err: ", err);
       });
   });
 };
