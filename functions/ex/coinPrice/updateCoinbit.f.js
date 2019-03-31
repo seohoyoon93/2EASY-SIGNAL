@@ -58,8 +58,6 @@ exports = module.exports = functions
       .then(doc => {
         coinbitBases = doc.data().bases;
       });
-    
-    const upbitMarkets = await upbitBases.map(base => `KRW-${base}`).join(", ");
 
     const remainingCoins = await coins
       .filter(coin => !upbitBases.includes(coin.symbol))
@@ -69,7 +67,7 @@ exports = module.exports = functions
     );
 
     let bithumbPrices = [];
-   
+
     const remainingCoins2 = await remainingCoins.filter(
       coin => !bithumbMarkets.includes(coin)
     );
@@ -106,9 +104,8 @@ exports = module.exports = functions
           console.log(err);
         });
     }, Promise.resolve());
-  
 
-    const prices = coinbitPrices
+    const prices = coinbitPrices;
 
     let batch = db.batch();
 
@@ -119,8 +116,8 @@ exports = module.exports = functions
         price: item.price,
         priceChange: item.priceChange,
         updatedAt: Date.now()
-      })
-    }, Promise.resolve())
+      });
+    }, Promise.resolve());
 
     await batch.commit();
 

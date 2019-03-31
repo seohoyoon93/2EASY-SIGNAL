@@ -10,7 +10,7 @@ try {
 }
 
 const runtimeOpts = {
-  timeoutSeconds: 30,
+  timeoutSeconds: 25,
   memory: "2GB"
 };
 
@@ -22,9 +22,8 @@ exports = module.exports = functions
     let coins = [];
     let upbitBases = [];
     let bithumbBases = [];
-    let coinbitBases = [];
-    let bitsonicBases = [];
     let coinRefs = [];
+
     await admin
       .firestore()
       .collection("coins")
@@ -52,23 +51,7 @@ exports = module.exports = functions
       .then(doc => {
         bithumbBases = doc.data().bases;
       });
-    await admin
-      .firestore()
-      .doc("exchanges/coinbit")
-      .get()
-      .then(doc => {
-        coinbitBases = doc.data().bases;
-      });
-    await admin
-      .firestore()
-      .doc("exchanges/bitsonic")
-      .get()
-      .then(doc => {
-        bitsonicBases = doc.data().bases;
-      });
-    const upbitMarkets = await upbitBases.map(base => `KRW-${base}`).join(", ");
 
-  
     const remainingCoins = await coins
       .filter(coin => !upbitBases.includes(coin.symbol))
       .map(coin => coin.symbol);
@@ -76,42 +59,22 @@ exports = module.exports = functions
       remainingCoins.includes(base)
     );
 
-   
-    const remainingCoins2 = await remainingCoins.filter(
-      coin => !bithumbMarkets.includes(coin)
-    );
-    const coinbitMarkets = await coinbitBases.filter(base =>
-      remainingCoins2.includes(base)
-    );
-
-    const remainingCoins3 = await remainingCoins2.filter(
-      coin => !coinbitMarkets.includes(coin)
-    );
-
-    const bitsonicMarkets = await bitsonicBases.filter(base =>
-      remainingCoins3.includes(base)
-    );
-
-    let bitsonicPrices = [];
-    await bitsonicMarkets.reduce(async (promise, base) => {
+    let bithumbPrices = [];
+    await bithumbMarkets.reduce(async (promise, base) => {
       await promise;
-      const date = new Date();
-      const now = date.getTime();
-      const to = Math.floor(now / 60000) * 60;
-      const from = Math.floor((to - 86460) / 60) * 60;
-      const bitsonicOptions = {
+      const bithumbTickerOptions = await {
         method: "GET",
-        url: `https://api.bitsonic.co.kr/api/v2/klines?symbol=${base}KRW&interval=1h&endTime=${now}&startTime=${from}`,
+        url: `https://api.bithumb.com/public/ticker/${base}`,
         json: true
       };
-      await rp(bitsonicOptions)
+
+      await rp(bithumbTickerOptions)
         .then(parsedBody => {
-          const lastPrice = parseFloat(parsedBody.result.k[0].c);
-          const price = parseFloat(parsedBody.result.k.reverse()[0].c);
-          const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
-            2
-          );
-          bitsonicPrices.push({
+          const price = parseFloat(parsedBody.data.closing_price);
+          const priceChange = parseFloat(
+            parsedBody.data["24H_fluctate_rate"]
+          ).toFixed(2);
+          bithumbPrices.push({
             base: base,
             price: price,
             priceChange: priceChange
@@ -122,10 +85,10 @@ exports = module.exports = functions
         });
     }, Promise.resolve());
 
-    const prices = bitsonicPrices
+    const prices = bithumbPrices;
 
     let batch = db.batch();
-    
+
     await prices.reduce(async (promise, item) => {
       let ref = coinRefs.filter(elem => elem.symbol === item.base)[0].ref;
 
@@ -133,8 +96,8 @@ exports = module.exports = functions
         price: item.price,
         priceChange: item.priceChange,
         updatedAt: Date.now()
-      })
-    }, Promise.resolve())
+      });
+    }, Promise.resolve());
 
     await batch.commit();
 

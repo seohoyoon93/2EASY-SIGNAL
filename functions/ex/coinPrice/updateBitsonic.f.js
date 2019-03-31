@@ -10,7 +10,7 @@ try {
 }
 
 const runtimeOpts = {
-  timeoutSeconds: 280,
+  timeoutSeconds: 60,
   memory: "2GB"
 };
 
@@ -66,32 +66,6 @@ exports = module.exports = functions
       .then(doc => {
         bitsonicBases = doc.data().bases;
       });
-    const upbitMarkets = await upbitBases.map(base => `KRW-${base}`).join(", ");
-
-    const upbitTickerOptions = await {
-      method: "GET",
-      url: "https://api.upbit.com/v1/ticker",
-      qs: { markets: upbitMarkets },
-      json: true
-    };
-
-    let upbitPrices = [];
-    await rp(upbitTickerOptions)
-      .then(parsedBody => {
-        parsedBody.forEach(item => {
-          const price = item.trade_price;
-          const priceChange = (item.signed_change_rate * 100).toFixed(2);
-          const base = item.market.substring(4);
-          upbitPrices.push({
-            base: base,
-            price: price,
-            priceChange: priceChange
-          });
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
 
     const remainingCoins = await coins
       .filter(coin => !upbitBases.includes(coin.symbol))
@@ -99,31 +73,7 @@ exports = module.exports = functions
     const bithumbMarkets = await bithumbBases.filter(base =>
       remainingCoins.includes(base)
     );
-    let bithumbPrices = [];
-    await bithumbMarkets.reduce(async (promise, base) => {
-      await promise;
-      const bithumbTickerOptions = await {
-        method: "GET",
-        url: `https://api.bithumb.com/public/ticker/${base}`,
-        json: true
-      };
 
-      await rp(bithumbTickerOptions)
-        .then(parsedBody => {
-          const price = parseFloat(parsedBody.data.closing_price);
-          const priceChange = parseFloat(
-            parsedBody.data["24H_fluctate_rate"]
-          ).toFixed(2);
-          bithumbPrices.push({
-            base: base,
-            price: price,
-            priceChange: priceChange
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }, Promise.resolve());
     const remainingCoins2 = await remainingCoins.filter(
       coin => !bithumbMarkets.includes(coin)
     );
@@ -131,35 +81,6 @@ exports = module.exports = functions
       remainingCoins2.includes(base)
     );
 
-    let coinbitPrices = [];
-    await coinbitMarkets.reduce(async (promise, base) => {
-      await promise;
-      const date = new Date();
-      const now = date.getTime();
-      const to = Math.floor(now / 60000) * 60;
-      const from = Math.floor((to - 86460) / 60) * 60;
-      const coinbitTickerOptions = {
-        method: "GET",
-        url: `https://www.coinbit.co.kr/tradingview/history/symbol-${base}/resolution-1/from-${from}/to-${now}`,
-        json: true
-      };
-      await rp(coinbitTickerOptions)
-        .then(parsedBody => {
-          const lastPrice = parsedBody.c[0];
-          const price = parsedBody.c.reverse()[0];
-          const priceChange = (((price - lastPrice) / lastPrice) * 100).toFixed(
-            2
-          );
-          coinbitPrices.push({
-            base: base,
-            price: price,
-            priceChange: priceChange
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    }, Promise.resolve());
     const remainingCoins3 = await remainingCoins2.filter(
       coin => !coinbitMarkets.includes(coin)
     );
@@ -167,6 +88,7 @@ exports = module.exports = functions
     const bitsonicMarkets = await bitsonicBases.filter(base =>
       remainingCoins3.includes(base)
     );
+
     let bitsonicPrices = [];
     await bitsonicMarkets.reduce(async (promise, base) => {
       await promise;
@@ -197,18 +119,16 @@ exports = module.exports = functions
         });
     }, Promise.resolve());
 
-    const prices = await upbitPrices.concat(
-      bithumbPrices.concat(coinbitPrices.concat(bitsonicPrices))
-    );
+    const prices = bitsonicPrices;
 
     let batch = db.batch();
 
-    await coinRefs.reduce(async (promise, coinRef) => {
-      let coin = coinRef.symbol;
-      let priceObj = prices.filter(elem => elem.base === coin)[0];
-      batch.update(coinRef.ref, {
-        price: priceObj.price,
-        priceChange: priceObj.priceChange,
+    await prices.reduce(async (promise, item) => {
+      let ref = coinRefs.filter(elem => elem.symbol === item.base)[0].ref;
+
+      batch.update(ref, {
+        price: item.price,
+        priceChange: item.priceChange,
         updatedAt: Date.now()
       });
     }, Promise.resolve());

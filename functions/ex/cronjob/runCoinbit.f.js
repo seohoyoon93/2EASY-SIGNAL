@@ -16,32 +16,28 @@ const runtimeOpts = {
 
 exports = module.exports = functions
   .runWith(runtimeOpts)
-  .https.onRequest(async (req, res) => {
-
-    const bitsonicFunc = await {
+  .https.onRequest((req, res) => {
+    const coinbitFunc = {
       method: "GET",
-      url: "http://localhost:5000/twoeasy-signal/us-central1/exRunTransactionExCoinPriceBitsonic"
+      url:
+        "https://us-central1-twoeasy-signal.cloudfunctions.net/exCoinPriceUpdateCoinbit"
     };
 
-    await rp(bitsonicFunc)
-    .then(async parsedBody => {
+    rp(coinbitFunc)
+      .then(async parsedBody => {
+        //슬립주기
+        let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await sleep(28000);
 
-      //슬립주기
-      let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-      await sleep(28000);
-
-      await rp(bitsonicFunc)
+        await rp(coinbitFunc)
           .then(parsedBody => {
-
-           res.send("Done");
-    
+            res.send("Done");
           })
           .catch(err => {
             console.log(err);
           });
-
-    })
-    .catch(err => {
-      console.log(err);
-    });
-});
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  });
