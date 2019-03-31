@@ -3,6 +3,7 @@ import { Icon, Dimmer, Loader } from "semantic-ui-react";
 import { connect } from "react-redux";
 
 import BarChart from "./BarChart";
+import { formatNumber, toSecondDecimalPoint } from "../helper";
 
 class Price extends Component {
   constructor(props) {
@@ -18,7 +19,9 @@ class Price extends Component {
   }
   render() {
     const { candleData, selectedExchange, isSearching } = this.props;
-    const priceChange = candleData.priceChanges.priceChange;
+    const priceChange = formatNumber(
+      toSecondDecimalPoint(candleData.priceChanges.priceChange)
+    );
     const priceChangeText =
       priceChange > 0
         ? `+${priceChange}%`
@@ -26,6 +29,15 @@ class Price extends Component {
         ? `${priceChange}%`
         : `${priceChange}%`;
     const priceDivClass = priceChange >= 0 ? "up" : "down";
+    const priceChanges = [
+      candleData.priceChanges.minPriceChange,
+      candleData.priceChanges.threeMinPriceChange,
+      candleData.priceChanges.fiveMinPriceChange,
+      candleData.priceChanges.fifteenMinPriceChange,
+      candleData.priceChanges.thirtyMinPriceChange,
+      candleData.priceChanges.hourPriceChange
+    ];
+    const maxValue = Math.max(...priceChanges);
     let content =
       candleData.isFetching || isSearching ? (
         selectedExchange === "Bitsonic" ? (
@@ -58,72 +70,46 @@ class Price extends Component {
             </div>
             <div>
               <h4>현재시세</h4>
-              <p>{`₩${candleData.priceChanges.currentPrice}`}</p>
+              <p>{`₩${formatNumber(candleData.priceChanges.currentPrice)}`}</p>
             </div>
           </div>
           <div className="charts">
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.minPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={candleData.priceChanges.minPriceChange} />
-              </div>
-              <div className="time">1분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.threeMinPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.priceChanges.threeMinPriceChange}
-                />
-              </div>
-              <div className="time">3분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.fiveMinPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.priceChanges.fiveMinPriceChange}
-                />
-              </div>
-              <div className="time">5분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.fifteenMinPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.priceChanges.fifteenMinPriceChange}
-                />
-              </div>
-              <div className="time">15분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.thirtyMinPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.priceChanges.thirtyMinPriceChange}
-                />
-              </div>
-              <div className="time">30분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.priceChanges.hourPriceChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={candleData.priceChanges.hourPriceChange} />
-              </div>
-              <div className="time">1시간</div>
-            </div>
+            <BarChart
+              percent={candleData.priceChanges.minPriceChange}
+              isPrice={true}
+              text={"1분"}
+              maxValue={maxValue}
+            />
+            <BarChart
+              percent={candleData.priceChanges.threeMinPriceChange}
+              isPrice={true}
+              text={"3분"}
+              maxValue={maxValue}
+            />
+            <BarChart
+              percent={candleData.priceChanges.fiveMinPriceChange}
+              isPrice={true}
+              text={"5분"}
+              maxValue={maxValue}
+            />
+            <BarChart
+              percent={candleData.priceChanges.fifteenMinPriceChange}
+              isPrice={true}
+              text={"15분"}
+              maxValue={maxValue}
+            />
+            <BarChart
+              percent={candleData.priceChanges.thirtyMinPriceChange}
+              isPrice={true}
+              text={"30분"}
+              maxValue={maxValue}
+            />
+            <BarChart
+              percent={candleData.priceChanges.hourPriceChange}
+              isPrice={true}
+              text={"1시간"}
+              maxValue={maxValue}
+            />
           </div>
         </div>
       );

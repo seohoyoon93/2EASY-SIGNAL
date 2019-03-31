@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Icon, Dimmer, Loader } from "semantic-ui-react";
 
+import { formatNumber, toSecondDecimalPoint } from "../helper";
+
 class BidAsk extends Component {
   constructor(props) {
     super(props);
@@ -44,18 +46,32 @@ class BidAsk extends Component {
         <div>
           <div className="best-offer">
             <h4 className="price bid">{`최고 매수 호가 = ${
-              orderbookData ? orderbookData.bidAsk.highestBidPrice : 0
+              orderbookData
+                ? formatNumber(orderbookData.bidAsk.highestBidPrice)
+                : 0
             }`}</h4>
             <p className="amount">{`잔량 ${
-              orderbookData ? orderbookData.bidAsk.highestBidQuantity : 0
+              orderbookData
+                ? formatNumber(
+                    toSecondDecimalPoint(
+                      orderbookData.bidAsk.highestBidQuantity
+                    )
+                  )
+                : 0
             }`}</p>
           </div>
           <div className="best-offer">
             <h4 className="price ask">{`최저 매도 호가 = ${
-              orderbookData ? orderbookData.bidAsk.lowestAskPrice : 0
+              orderbookData
+                ? formatNumber(orderbookData.bidAsk.lowestAskPrice)
+                : 0
             }`}</h4>
             <p className="amount">{`잔량 ${
-              orderbookData ? orderbookData.bidAsk.lowestAskQuantity : 0
+              orderbookData
+                ? formatNumber(
+                    toSecondDecimalPoint(orderbookData.bidAsk.lowestAskQuantity)
+                  )
+                : 0
             }`}</p>
           </div>
         </div>

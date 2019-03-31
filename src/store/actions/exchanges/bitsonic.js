@@ -59,7 +59,7 @@ exports.getCandleSticks = coin => {
           "p.coin-price-subtitle span.PriceNumber",
           html
         ).text();
-        const priceChange = parseFloat(priceChangeText).toFixed(2);
+        const priceChange = parseFloat(priceChangeText);
 
         const lastPrice = lastPriceInt + lastPriceBlah;
 
@@ -153,64 +153,48 @@ exports.getCandleSticks = coin => {
 
             const hourVolumeChange =
               lastHourVolume !== 0
-                ? ((currentHourVolume / lastHourVolume) * 100 - 100).toFixed(2)
+                ? (currentHourVolume / lastHourVolume) * 100 - 100
                 : 0;
             const thirtyMinVolumeChange =
               lastThirtyMinVolume !== 0
-                ? (
-                    (currentThirtyMinVolume / lastThirtyMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
+                ? (currentThirtyMinVolume / lastThirtyMinVolume) * 100 - 100
                 : 0;
             const fifteenMinVolumeChange =
               lastFifteenMinVolume !== 0
-                ? (
-                    (currentFifteenMinVolume / lastFifteenMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
+                ? (currentFifteenMinVolume / lastFifteenMinVolume) * 100 - 100
                 : 0;
             const fiveMinVolumeChange =
               lastFiveMinVolume !== 0
-                ? (
-                    (currentFiveMinVolume / lastFiveMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
+                ? (currentFiveMinVolume / lastFiveMinVolume) * 100 - 100
                 : 0;
             const threeMinVolumeChange =
               lastThreeMinVolume !== 0
-                ? (
-                    (currentThreeMinVolume / lastThreeMinVolume) * 100 -
-                    100
-                  ).toFixed(2)
+                ? (currentThreeMinVolume / lastThreeMinVolume) * 100 - 100
                 : 0;
             const minVolumeChange =
               lastMinVolume !== 0
-                ? ((currentMinVolume / lastMinVolume) * 100 - 100).toFixed(2)
+                ? (currentMinVolume / lastMinVolume) * 100 - 100
                 : 0;
             const hourPriceChange =
-              lastHourPrice !== 0
-                ? ((lastPrice / lastHourPrice) * 100 - 100).toFixed(2)
-                : 0;
+              lastHourPrice !== 0 ? (lastPrice / lastHourPrice) * 100 - 100 : 0;
             const thirtyMinPriceChange =
               lastThirtyMinPrice !== 0
-                ? ((lastPrice / lastThirtyMinPrice) * 100 - 100).toFixed(2)
+                ? (lastPrice / lastThirtyMinPrice) * 100 - 100
                 : 0;
             const fifteenMinPriceChange =
               lastFifteenMinPrice !== 0
-                ? ((lastPrice / lastFifteenMinPrice) * 100 - 100).toFixed(2)
+                ? (lastPrice / lastFifteenMinPrice) * 100 - 100
                 : 0;
             const fiveMinPriceChange =
               lastFiveMinPrice !== 0
-                ? ((lastPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
+                ? (lastPrice / lastFiveMinPrice) * 100 - 100
                 : 0;
             const threeMinPriceChange =
               lastThreeMinPrice !== 0
-                ? ((lastPrice / lastThreeMinPrice) * 100 - 100).toFixed(2)
+                ? (lastPrice / lastThreeMinPrice) * 100 - 100
                 : 0;
             const minPriceChange =
-              lastMinPrice !== 0
-                ? ((lastPrice / lastMinPrice) * 100 - 100).toFixed(2)
-                : 0;
+              lastMinPrice !== 0 ? (lastPrice / lastMinPrice) * 100 - 100 : 0;
 
             const volumeChanges = {
               accTradeVol24h,

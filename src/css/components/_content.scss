@@ -27,6 +27,9 @@
   &.bidask .content {
     height: 80px !important;
   }
+  &.price .content {
+    height: 190px !important;
+  }
   .content {
     position: relative;
     height: 227px;
@@ -61,6 +64,15 @@
       color: #000;
       text-align: center;
       height: 164px;
+      .up {
+        color: $red;
+      }
+      .down {
+        color: $light-blue;
+      }
+      &.price {
+        height: 126px;
+      }
     }
     .time {
       font-weight: normal;
@@ -74,6 +86,9 @@
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
+      &.price {
+        height: 90px;
+      }
     }
     .bar-chart {
       width: 20px;

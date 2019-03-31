@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Icon, Dimmer, Loader } from "semantic-ui-react";
 
+import { formatNumber, toSecondDecimalPoint } from "../helper";
+
 class Orderbook extends Component {
   constructor(props) {
     super(props);
@@ -70,8 +72,12 @@ class Orderbook extends Component {
               <div className="ask bar" style={askTradesWidth} />
             </div>
             <div className="numbers">
-              <div>{`매수 ${bidTrades ? bidTrades.toFixed(2) : null}`}</div>
-              <div>{`${askTrades ? askTrades.toFixed(2) : null} 매도`}</div>
+              <div>{`매수 ₩${
+                bidTrades ? formatNumber(toSecondDecimalPoint(bidTrades)) : null
+              }`}</div>
+              <div>{`₩${
+                askTrades ? formatNumber(toSecondDecimalPoint(askTrades)) : null
+              } 매도`}</div>
             </div>
           </div>
           <h4>현재 호가 비율</h4>
@@ -81,8 +87,12 @@ class Orderbook extends Component {
               <div className="ask bar" style={askWidth} />
             </div>
             <div className="numbers">
-              <div>{`매수 ${bid ? bid.toFixed(2) : null}`}</div>
-              <div>{`${ask ? ask.toFixed(2) : null} 매도`}</div>
+              <div>{`매수 ${
+                bid ? formatNumber(toSecondDecimalPoint(bid)) : null
+              }`}</div>
+              <div>{`${
+                ask ? formatNumber(toSecondDecimalPoint(ask)) : null
+              } 매도`}</div>
             </div>
           </div>
         </div>

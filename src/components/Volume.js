@@ -3,6 +3,7 @@ import { Icon, Dimmer, Loader } from "semantic-ui-react";
 import { connect } from "react-redux";
 
 import BarChart from "./BarChart";
+import { formatNumber, toSecondDecimalPoint } from "../helper";
 
 class Volume extends Component {
   constructor(props) {
@@ -18,6 +19,17 @@ class Volume extends Component {
   }
   render() {
     const { candleData, selectedExchange, isSearching } = this.props;
+    console.log("day: ", candleData.volumeChanges.dayVolumeChange);
+    console.log("four hour: ", candleData.volumeChanges.fourHourVolumeChange);
+    const volumes = [
+      candleData.volumeChanges.minVolumeChange,
+      candleData.volumeChanges.threeMinVolumeChange,
+      candleData.volumeChanges.fiveMinVolumeChange,
+      candleData.volumeChanges.fifteenMinVolumeChange,
+      candleData.volumeChanges.thirtyMinVolumeChange,
+      candleData.volumeChanges.hourVolumeChange
+    ].map(value => Math.abs(value));
+    const maxValue = Math.max(...volumes);
     let content =
       candleData.isFetching || isSearching ? (
         selectedExchange === "Bitsonic" ? (
@@ -44,70 +56,46 @@ class Volume extends Component {
       ) : (
         <div>
           <h4>24H 거래대금</h4>
-          <p>{`₩${Math.floor(candleData.volumeChanges.accTradeVol24h)}`}</p>
+          <p>{`₩${formatNumber(
+            Math.floor(candleData.volumeChanges.accTradeVol24h)
+          )}`}</p>
           <div className="charts">
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.minVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={candleData.volumeChanges.minVolumeChange} />
-              </div>
-              <div className="time">1분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.threeMinVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.volumeChanges.threeMinVolumeChange}
-                />
-              </div>
-              <div className="time">3분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.fiveMinVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.volumeChanges.fiveMinVolumeChange}
-                />
-              </div>
-              <div className="time">5분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.fifteenMinVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.volumeChanges.fifteenMinVolumeChange}
-                />
-              </div>
-              <div className="time">15분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.thirtyMinVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart
-                  options={candleData.volumeChanges.thirtyMinVolumeChange}
-                />
-              </div>
-              <div className="time">30분</div>
-            </div>
-            <div className="chart">
-              <div className="percent">{`${
-                candleData.volumeChanges.hourVolumeChange
-              }%`}</div>
-              <div className="bar-wrapper">
-                <BarChart options={candleData.volumeChanges.hourVolumeChange} />
-              </div>
-              <div className="time">1시간</div>
-            </div>
+            <BarChart
+              percent={candleData.volumeChanges.minVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"1분"}
+            />
+            <BarChart
+              percent={candleData.volumeChanges.threeMinVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"3분"}
+            />
+            <BarChart
+              percent={candleData.volumeChanges.fiveMinVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"5분"}
+            />
+            <BarChart
+              percent={candleData.volumeChanges.fifteenMinVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"15분"}
+            />
+            <BarChart
+              percent={candleData.volumeChanges.thirtyMinVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"30분"}
+            />
+            <BarChart
+              percent={candleData.volumeChanges.hourVolumeChange}
+              isPrice={false}
+              maxValue={maxValue}
+              text={"1시간"}
+            />
           </div>
         </div>
       );

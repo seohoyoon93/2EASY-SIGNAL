@@ -165,38 +165,24 @@ exports.getCandleSticks = coin => {
 
                 const hourVolumeChange =
                   lastHourVolume !== 0
-                    ? (
-                        (currentHourVolume / lastHourVolume) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentHourVolume / lastHourVolume) * 100 - 100
                     : 0;
                 const thirtyMinVolumeChange =
                   lastThirtyMinVolume !== 0
-                    ? (
-                        (currentThirtyMinVolume / lastThirtyMinVolume) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentThirtyMinVolume / lastThirtyMinVolume) * 100 - 100
                     : 0;
                 const fifteenMinVolumeChange =
                   lastFifteenMinVolume !== 0
-                    ? (
-                        (currentFifteenMinVolume / lastFifteenMinVolume) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentFifteenMinVolume / lastFifteenMinVolume) * 100 -
+                      100
                     : 0;
                 const fiveMinVolumeChange =
                   lastFiveMinVolume !== 0
-                    ? (
-                        (currentFiveMinVolume / lastFiveMinVolume) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentFiveMinVolume / lastFiveMinVolume) * 100 - 100
                     : 0;
                 const threeMinVolumeChange =
                   lastThreeMinVolume !== 0
-                    ? (
-                        (currentThreeMinVolume / lastThreeMinVolume) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentThreeMinVolume / lastThreeMinVolume) * 100 - 100
                     : 0;
                 const minVolumeChange =
                   lastMinVolume !== 0
@@ -206,7 +192,7 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const hourPriceChange =
                   lastHourPrice !== 0
-                    ? ((currentPrice / lastHourPrice) * 100 - 100).toFixed(2)
+                    ? (currentPrice / lastHourPrice) * 100 - 100
                     : 0;
                 const thirtyMinPriceChange =
                   lastThirtyMinPrice !== 0
@@ -216,14 +202,11 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const fifteenMinPriceChange =
                   lastFifteenMinPrice !== 0
-                    ? (
-                        (currentPrice / lastFifteenMinPrice) * 100 -
-                        100
-                      ).toFixed(2)
+                    ? (currentPrice / lastFifteenMinPrice) * 100 - 100
                     : 0;
                 const fiveMinPriceChange =
                   lastFiveMinPrice !== 0
-                    ? ((currentPrice / lastFiveMinPrice) * 100 - 100).toFixed(2)
+                    ? (currentPrice / lastFiveMinPrice) * 100 - 100
                     : 0;
                 const threeMinPriceChange =
                   lastThreeMinPrice !== 0
@@ -233,7 +216,7 @@ exports.getCandleSticks = coin => {
                     : 0;
                 const minPriceChange =
                   lastMinPrice !== 0
-                    ? ((currentPrice / lastMinPrice) * 100 - 100).toFixed(2)
+                    ? (currentPrice / lastMinPrice) * 100 - 100
                     : 0;
 
                 const volumeChanges = {
@@ -259,10 +242,7 @@ exports.getCandleSticks = coin => {
                   threeMinPriceChange,
                   minPriceChange,
                   currentPrice,
-                  priceChange: (
-                    ((currentPrice - lastPrice) / lastPrice) *
-                    100
-                  ).toFixed(2)
+                  priceChange: ((currentPrice - lastPrice) / lastPrice) * 100
                 };
                 resolve({ volumeChanges, priceChanges });
               }

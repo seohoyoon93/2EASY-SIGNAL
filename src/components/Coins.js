@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import _ from "lodash";
 import { selectCoin, searchCoin } from "../store/actions/coinActions";
 import firebase from "../config/fbConfig";
+import { formatNumber } from "../helper";
 
 class Coins extends Component {
   constructor(props) {
@@ -148,7 +149,7 @@ class Coins extends Component {
                 >
                   {`${item.priceChange}%`}
                   <p className="context-bottom" data-item={item.symbol}>
-                    {`₩${item.price}`}
+                    {`₩${formatNumber(item.price)}`}
                   </p>
                 </div>
               </div>
@@ -180,7 +181,7 @@ class Coins extends Component {
           <div className={`coin-summary__price context bold ${priceDivClass}`}>
             {`${selectedCoin.priceChange}%`}
             <div className="context-bottom bold">
-              {`₩${selectedCoin.price}`}
+              {`₩${formatNumber(selectedCoin.price)}`}
             </div>
           </div>
         </div>

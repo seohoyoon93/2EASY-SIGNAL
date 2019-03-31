@@ -99,7 +99,6 @@ exports = module.exports = functions
     const bithumbMarkets = await bithumbBases.filter(base =>
       remainingCoins.includes(base)
     );
-
     let bithumbPrices = [];
     await bithumbMarkets.reduce(async (promise, base) => {
       await promise;
