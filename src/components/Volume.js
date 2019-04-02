@@ -3,7 +3,7 @@ import { Icon, Dimmer, Loader } from "semantic-ui-react";
 import { connect } from "react-redux";
 
 import BarChart from "./BarChart";
-import { formatNumber, toSecondDecimalPoint } from "../helper";
+import { formatNumber } from "../helper";
 
 class Volume extends Component {
   constructor(props) {
