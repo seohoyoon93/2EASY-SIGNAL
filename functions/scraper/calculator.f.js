@@ -45,13 +45,13 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
 });
 
 function getCommPromise(community) {
-  const threeHrsAgo = Date.now() - 10800000;
+  const thirtyMinAgo = Date.now() - 1800000;
 
   return new Promise((resolve, reject) => {
     admin
       .firestore()
       .collection(`communities/${community}/data/`)
-      .where("timestamp", ">=", threeHrsAgo)
+      .where("timestamp", ">=", thirtyMinAgo)
       .get()
       .then(querySnapshot => {
         let result = "";
