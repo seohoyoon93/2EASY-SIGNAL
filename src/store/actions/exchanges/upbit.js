@@ -13,25 +13,69 @@ exports.getCandleSticks = coin => {
     const tenMinsAgo = now - 600000;
     const sixMinsAgo = now - 360000;
     const twoMinsAgo = now - 120000;
+    function numToMonth(num) {
+      switch (num) {
+        case "01":
+          return "Jan";
+        case "02":
+          return "Feb";
+        case "03":
+          return "Mar";
+        case "04":
+          return "Apr";
+        case "05":
+          return "May";
+        case "06":
+          return "Jun";
+        case "07":
+          return "Jul";
+        case "08":
+          return "Aug";
+        case "09":
+          return "Sep";
+        case "10":
+          return "Oct";
+        case "11":
+          return "Nov";
+        case "12":
+          return "Dec";
+        default:
+          return "Jan";
+      }
+    }
     function isBeforeTwoHours(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
+      const dateStr = parseDateStr(data.candle_date_time_kst);
+      const candleTime = new Date(dateStr).getTime();
 
       return candleTime >= twoHoursAgo;
     }
     function isBeforeTwoDays(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
+      const dateStr = parseDateStr(data.candle_date_time_kst);
+      const candleTime = new Date(dateStr).getTime();
 
       return candleTime >= twoDaysAgo;
     }
     function notThisHour(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
+      const dateStr = parseDateStr(data.candle_date_time_kst);
+      const candleTime = new Date(dateStr).getTime();
 
       return candleTime < nowHour;
     }
     function notRightNow(data) {
-      const candleTime = new Date(data.candle_date_time_kst).getTime();
+      const dateStr = parseDateStr(data.candle_date_time_kst);
+      const candleTime = new Date(dateStr).getTime();
 
       return candleTime < now;
+    }
+    function parseDateStr(dateStr) {
+      const date = dateStr.split("T");
+      const yr = date[0].split("-")[0];
+      const month = date[0].split("-")[1];
+      const day = date[0].split("-")[2];
+      const hr = date[1].split(":")[0];
+      const min = date[1].split(":")[1];
+      const sec = date[1].split(":")[2];
+      return `${day} ${numToMonth(month)} ${yr} ${hr}:${min}:${sec} UTC+9`;
     }
     const candleOptions = {
       method: "GET",
@@ -59,7 +103,6 @@ exports.getCandleSticks = coin => {
       const lastPrice = parsedBody[0].trade_price;
       const openPrice = parsedBody[0].opening_price;
       const priceChange = parsedBody[0].signed_change_rate * 100;
-
       rp(candleOptions).then(parsedBody => {
         const candleData = parsedBody.filter(notRightNow);
         const minData = candleData.filter(isBeforeTwoHours);
@@ -71,10 +114,10 @@ exports.getCandleSticks = coin => {
         }
         let filledMinData = [];
         for (let i = 0; i < 120; i++) {
-          let item = minData.filter(
-            elem =>
-              new Date(elem.candle_date_time_kst).getTime() === timestamps[i]
-          );
+          let item = minData.filter(function(elem) {
+            const dateStr = parseDateStr(elem.candle_date_time_kst);
+            return new Date(dateStr).getTime() === timestamps[i];
+          });
           let candle;
           if (i === 0) {
             if (item === undefined || item.length === 0) {
@@ -107,7 +150,6 @@ exports.getCandleSticks = coin => {
           }
           filledMinData.push(candle);
         }
-
         let lastHourVolume = 0;
         let currentHourVolume = 0;
         let lastHourPrice = filledMinData[60].price;
@@ -242,10 +284,10 @@ exports.getCandleSticks = coin => {
           }
           let filledHourData = [];
           for (let i = 0; i < 48; i++) {
-            let item = hourData.filter(
-              elem =>
-                new Date(elem.candle_date_time_kst).getTime() === hourstamps[i]
-            );
+            let item = hourData.filter(function(elem) {
+              const dateStr = parseDateStr(elem.candle_date_time_kst);
+              return new Date(dateStr).getTime() === hourstamps[i];
+            });
             let candle;
             if (i === 0) {
               if (item === undefined || item.length === 0) {
