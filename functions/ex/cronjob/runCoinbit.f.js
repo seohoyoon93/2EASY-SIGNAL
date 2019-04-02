@@ -10,7 +10,7 @@ try {
 }
 
 const runtimeOpts = {
-  timeoutSeconds: 50,
+  timeoutSeconds: 60,
   memory: "2GB"
 };
 
