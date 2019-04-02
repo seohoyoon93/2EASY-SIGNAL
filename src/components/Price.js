@@ -61,7 +61,6 @@ class Price extends Component {
           <Loader inverted />
         </Dimmer>
       );
-    console.log(candleData.priceChanges.fourHourPriceChange);
 
     let charts =
       selectedExchange === "Upbit" || selectedExchange === "Bithumb" ? (
