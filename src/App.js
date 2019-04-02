@@ -26,7 +26,7 @@ class App extends Component {
       container: "#kakao-link-btn",
       objectType: "feed",
       content: {
-        title: "EGG SIGNAL",
+        title: "EGG SIGNAL(beta)",
         description: "암호화폐 선동비율 트래커",
         imageUrl:
           "https://firebasestorage.googleapis.com/v0/b/twoeasy-signal.appspot.com/o/kakao-share%403x.png?alt=media&token=b636974a-7f03-418b-8707-70a1c0f613a9",
@@ -85,7 +85,7 @@ class App extends Component {
         <div className="header">
           <div className="header-top">
             <h1>
-              SIGNAL <span>by Eastern Golden Egg</span>
+              SIGNAL <span>by Eastern Golden Egg(beta)</span>
             </h1>
             <div className="visitors">
               <p>누적 방문자수</p>
