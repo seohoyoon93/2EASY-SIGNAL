@@ -3,6 +3,8 @@ const admin = require("firebase-admin");
 const chromium = require("chrome-aws-lambda");
 const puppeteer = require("puppeteer-core");
 const $ = require("cheerio");
+const request = require("request");
+const constants = require("../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -19,7 +21,6 @@ exports = module.exports = functions
   .runWith(runtimeOpts)
   .https.onRequest(async (req, res) => {
     let browser = null;
-    // launch browser with puppeteer and open a new page
     browser = await puppeteer.launch({
       headless: chromium.headless,
       args: chromium.args,
@@ -61,7 +62,7 @@ exports = module.exports = functions
 
       const db = admin.firestore();
       let batch = db.batch();
-      const article = await $("div.article-board", html)
+      await $("div.article-board", html)
         .not("#upperArticleList")
         .find("tr")
         .each(async (i, elem) => {
@@ -102,6 +103,9 @@ exports = module.exports = functions
         });
       await batch.commit();
     } catch (e) {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: { text: `Coinplanet scraper error: ${e}` }
+      });
       throw e;
     } finally {
       if (browser !== null) {

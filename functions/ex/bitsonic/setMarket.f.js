@@ -1,6 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const config = functions.config().firebase;
+const request = require("request");
+const constants = require("../../constants");
 try {
   admin.initializeApp(config);
 } catch (e) {
@@ -143,6 +145,9 @@ exports = module.exports = functions.https.onRequest((req, res) => {
       res.send("Done");
     })
     .catch(err => {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: { text: `Bitsonic set markets db writing error: ${err}` }
+      });
       console.error("Error updating bitsonic");
       res.status(500).send(err);
     });

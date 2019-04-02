@@ -1,7 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const $ = require("cheerio");
 const rp = require("request-promise");
+const request = require("request");
+const constants = require("../../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -35,6 +36,11 @@ exports = module.exports = functions
         });
       })
       .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: {
+            text: `Getting coins error when updating Coinbit coin price: ${err}`
+          }
+        });
         console.log(err);
       });
     await admin
@@ -65,8 +71,6 @@ exports = module.exports = functions
     const bithumbMarkets = await bithumbBases.filter(base =>
       remainingCoins.includes(base)
     );
-
-    let bithumbPrices = [];
 
     const remainingCoins2 = await remainingCoins.filter(
       coin => !bithumbMarkets.includes(coin)
@@ -101,6 +105,11 @@ exports = module.exports = functions
           });
         })
         .catch(err => {
+          request.post(constants.SLACK_WEBHOOK_URL, {
+            json: {
+              text: `Error getting Coinbit orderbook when updating Coinbit coin price: ${err}`
+            }
+          });
           console.log(err);
         });
     }, Promise.resolve());
@@ -119,7 +128,13 @@ exports = module.exports = functions
       });
     }, Promise.resolve());
 
-    await batch.commit();
-
-    await res.send("Done");
+    await batch
+      .commit()
+      .then(() => res.send("Done"))
+      .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: { text: `Error updating Coinbit coin price db writing: ${err}` }
+        });
+        console.log(err);
+      });
   });

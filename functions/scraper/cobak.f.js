@@ -3,6 +3,8 @@ const admin = require("firebase-admin");
 const chromium = require("chrome-aws-lambda");
 const puppeteer = require("puppeteer-core");
 const $ = require("cheerio");
+const request = require("request");
+const constants = require("../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -68,19 +70,6 @@ exports = module.exports = functions
             comments,
             timestamp
           });
-          // await admin
-          //   .firestore()
-          //   .doc(`communities/cobak/data/${contentId}`)
-          //   .set({
-          //     title,
-          //     content,
-          //     comments,
-          //     timestamp
-          //   })
-          //   .then(() => {})
-          //   .catch(err => {
-          //     console.error("Failed to scrape cobak, ", err);
-          //   });
         } else if (uploadTime.indexOf("방금") !== -1) {
           const timestamp = Date.now();
           const title = await $("div.title___1kaUK", subHtml).text();
@@ -95,23 +84,13 @@ exports = module.exports = functions
             comments,
             timestamp
           });
-          // await admin
-          //   .firestore()
-          //   .doc(`communities/cobak/data/${contentId}`)
-          //   .set({
-          //     title,
-          //     content,
-          //     comments,
-          //     timestamp
-          //   })
-          //   .then(() => {})
-          //   .catch(err => {
-          //     console.error("Failed to scrape cobak, ", err);
-          //   });
         }
       }, Promise.resolve());
       await batch.commit();
     } catch (e) {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: { text: `Cobak Scraper error: ${e}` }
+      });
       throw e;
     } finally {
       if (browser !== null) {

@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const request = require("request");
+const constants = require("../constants");
 const config = functions.config().firebase;
 const helper = require("./helper");
 
@@ -41,6 +43,9 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
     })
     .then(() => {})
     .catch(err => console.log(err));
+  await request.post(constants.SLACK_WEBHOOK_URL, {
+    json: { text: `Success on scraper calculator!` }
+  });
   await res.send("Done");
 });
 
@@ -67,6 +72,11 @@ function getCommPromise(community) {
         resolve(result);
       })
       .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: {
+            text: `Error on scraper calculator when getting db data: ${err}`
+          }
+        });
         reject(err);
       });
   });

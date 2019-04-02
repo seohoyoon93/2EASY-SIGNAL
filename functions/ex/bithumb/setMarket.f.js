@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const config = functions.config().firebase;
 const admin = require("firebase-admin");
 const request = require("request");
+const constants = require("../../constants");
 try {
   admin.initializeApp(config);
 } catch (e) {
@@ -16,6 +17,9 @@ exports = module.exports = functions.https.onRequest((req, res) => {
     },
     (err, response, result) => {
       if (err) {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: { text: `Bithumb ticker api request error: ${err}` }
+        });
         console.log(err);
         return;
       }
@@ -34,6 +38,9 @@ exports = module.exports = functions.https.onRequest((req, res) => {
           res.send("Done!");
         })
         .catch(err => {
+          request.post(constants.SLACK_WEBHOOK_URL, {
+            json: { text: `Bithumb set market db writing error: ${err}` }
+          });
           console.error("Error updating bithumb");
           res.status(500).send(err);
         });

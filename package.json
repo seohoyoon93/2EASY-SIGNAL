@@ -25,7 +25,7 @@
     "build": "sh -ac '. .env.${REACT_APP_ENV}; react-scripts build'",
     "build:dev": "REACT_APP_ENV=dev npm run build && cp -a build/. dist/ && mv dist/robots.dev.txt dist/robots.txt",
     "build:staging": "REACT_APP_ENV=staging npm run build && cp -a build/. dist/ && mv dist/robots.dev.txt dist/robots.txt",
-    "build:prod": "REACT_APP_ENV=prod npm run build && rm dist/robots.txt",
+    "build:prod": "REACT_APP_ENV=prod npm run build && cp -a build/. dist/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

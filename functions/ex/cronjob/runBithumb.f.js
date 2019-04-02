@@ -1,7 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const $ = require("cheerio");
 const rp = require("request-promise");
+const request = require("request");
+const constants = require("../../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -10,8 +11,7 @@ try {
 }
 
 const runtimeOpts = {
-  timeoutSeconds: 60,
-  memory: "2GB"
+  timeoutSeconds: 60
 };
 
 exports = module.exports = functions
@@ -30,14 +30,24 @@ exports = module.exports = functions
         await sleep(28000);
 
         await rp(bithumbFunc)
-          .then(parsedBody => {
+          .then(() => {
             res.send("Done");
           })
           .catch(err => {
+            request.post(constants.SLACK_WEBHOOK_URL, {
+              json: {
+                text: `Error calling cron job for the second time for Bithumb: ${err}`
+              }
+            });
             console.log(err);
           });
       })
       .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: {
+            text: `Error calling cron job for the first time for Bithumb: ${err}`
+          }
+        });
         console.log(err);
       });
   });

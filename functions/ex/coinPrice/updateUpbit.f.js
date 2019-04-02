@@ -1,7 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const $ = require("cheerio");
 const rp = require("request-promise");
+const request = require("request");
+const constants = require("../../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -23,18 +24,23 @@ exports = module.exports = functions
     let upbitBases = [];
     let coinRefs = [];
     await admin
-    .firestore()
-    .collection("coins")
-    .get()
-    .then(querySnapshot => {
-      querySnapshot.forEach(doc => {
-        coins.push(doc.data());
-        coinRefs.push({ ref: doc.ref, symbol: doc.data().symbol });
+      .firestore()
+      .collection("coins")
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          coins.push(doc.data());
+          coinRefs.push({ ref: doc.ref, symbol: doc.data().symbol });
+        });
+      })
+      .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: {
+            text: `Getting coins error when updating Upbit coin price: ${err}`
+          }
+        });
+        console.log(err);
       });
-    })
-    .catch(err => {
-      console.log(err);
-    });
     await admin
       .firestore()
       .doc("exchanges/upbit")
@@ -66,14 +72,17 @@ exports = module.exports = functions
         });
       })
       .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: {
+            text: `Error getting Upbit ticker when updating Upbit coin price: ${err}`
+          }
+        });
         console.log(err);
       });
 
-    const prices = await upbitPrices
+    const prices = await upbitPrices;
 
     let batch = db.batch();
-
-
 
     await prices.reduce(async (promise, item) => {
       let ref = coinRefs.filter(elem => elem.symbol === item.base)[0].ref;
@@ -82,10 +91,16 @@ exports = module.exports = functions
         price: item.price,
         priceChange: item.priceChange,
         updatedAt: Date.now()
-      })
-    }, Promise.resolve())
+      });
+    }, Promise.resolve());
 
-    await batch.commit();
-
-    await res.send("Done");
+    await batch
+      .commit()
+      .then(() => res.send("Done"))
+      .catch(err => {
+        request.post(constants.SLACK_WEBHOOK_URL, {
+          json: { text: `Error updating Upbit coin price db writing: ${err}` }
+        });
+        console.log(err);
+      });
   });

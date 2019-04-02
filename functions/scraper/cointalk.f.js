@@ -3,6 +3,8 @@ const admin = require("firebase-admin");
 const chromium = require("chrome-aws-lambda");
 const puppeteer = require("puppeteer-core");
 const $ = require("cheerio");
+const request = require("request");
+const constants = require("../constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -86,6 +88,9 @@ exports = module.exports = functions
       }, Promise.resolve());
       await batch.commit();
     } catch (e) {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: { text: `Cointalk scraper error: ${e}` }
+      });
       throw e;
     } finally {
       if (browser !== null) {

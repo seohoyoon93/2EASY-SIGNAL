@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const request = require("request");
+const constants = require("constants");
 const config = functions.config().firebase;
 try {
   admin.initializeApp(config);
@@ -23,6 +25,9 @@ exports = module.exports = functions.https.onCall((data, context) => {
     })
     .then(() => {})
     .catch(err => {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: { text: `Counting visitor failed: ${err}` }
+      });
       console.log("Count failed: ", err);
     });
 });
