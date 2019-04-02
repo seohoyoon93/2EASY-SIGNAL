@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "twoeasy-signal"
+    "dev": "eggsignal-dev-656d8",
+    "staging": "eggsignal-staging",
+    "prod": "twoeasy-signal"
   }
 }
