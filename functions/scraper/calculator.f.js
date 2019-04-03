@@ -42,10 +42,14 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
       timestamp: timestamp
     })
     .then(() => {})
-    .catch(err => console.log(err));
-  await request.post(constants.SLACK_WEBHOOK_URL, {
-    json: { text: `Success on scraper calculator!` }
-  });
+    .catch(err => {
+      request.post(constants.SLACK_WEBHOOK_URL, {
+        json: {
+          text: `Error on scraper calculator when setting db data: ${err}`
+        }
+      });
+      console.log(err);
+    });
   await res.send("Done");
 });
 
