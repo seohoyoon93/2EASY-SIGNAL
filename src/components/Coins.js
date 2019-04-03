@@ -6,6 +6,9 @@ import { selectCoin, searchCoin } from "../store/actions/coinActions";
 import firebase from "../config/fbConfig";
 import { formatNumber } from "../helper";
 
+const ASC = 1;
+const DESC = -1;
+const NOT_SELECTED = 0;
 class Coins extends Component {
   constructor(props) {
     super(props);
@@ -13,7 +16,10 @@ class Coins extends Component {
       coins: [],
       results: [],
       isListHidden: true,
-      selectedCoin: null
+      selectedCoin: null,
+      nameSortOrder: NOT_SELECTED,
+      mentionSortOrder: DESC,
+      priceSortOrder: NOT_SELECTED
     };
   }
 
@@ -117,8 +123,89 @@ class Coins extends Component {
     this.setState({ isListHidden: true });
   };
 
+  handleSortByName = (e, data) => {
+    const currentResults = this.state.results;
+    let sortedResults;
+    if (
+      this.state.nameSortOrder === NOT_SELECTED ||
+      this.state.nameSortOrder === DESC
+    ) {
+      sortedResults = currentResults.sort(sortByNameAsc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: ASC,
+        mentionSortOrder: NOT_SELECTED,
+        priceSortOrder: NOT_SELECTED
+      });
+    } else {
+      sortedResults = currentResults.sort(sortByNameDesc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: DESC,
+        mentionSortOrder: NOT_SELECTED,
+        priceSortOrder: NOT_SELECTED
+      });
+    }
+  };
+
+  handleSortByPriceChange = (e, data) => {
+    const currentResults = this.state.results;
+    let sortedResults;
+    if (
+      this.state.priceSortOrder === NOT_SELECTED ||
+      this.state.priceSortOrder === ASC
+    ) {
+      sortedResults = currentResults.sort(sortByPriceChangeDesc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: NOT_SELECTED,
+        mentionSortOrder: NOT_SELECTED,
+        priceSortOrder: DESC
+      });
+    } else {
+      sortedResults = currentResults.sort(sortByPriceChangeAsc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: NOT_SELECTED,
+        mentionSortOrder: NOT_SELECTED,
+        priceSortOrder: ASC
+      });
+    }
+  };
+
+  handleSortByMentions = (e, data) => {
+    const currentResults = this.state.results;
+    let sortedResults;
+    if (
+      this.state.mentionSortOrder === NOT_SELECTED ||
+      this.state.mentionSortOrder === ASC
+    ) {
+      sortedResults = currentResults.sort(sortListByMentionsDesc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: NOT_SELECTED,
+        mentionSortOrder: DESC,
+        priceSortOrder: NOT_SELECTED
+      });
+    } else {
+      sortedResults = currentResults.sort(sortListByMentionsAsc);
+      this.setState({
+        results: sortedResults,
+        nameSortOrder: NOT_SELECTED,
+        mentionSortOrder: ASC,
+        priceSortOrder: NOT_SELECTED
+      });
+    }
+  };
+
   render() {
-    const { results, selectedCoin } = this.state;
+    const {
+      results,
+      selectedCoin,
+      nameSortOrder,
+      mentionSortOrder,
+      priceSortOrder
+    } = this.state;
     const rows =
       !this.props.isFetching && selectedCoin !== null ? (
         results.map(item => {
@@ -199,6 +286,31 @@ class Coins extends Component {
     const searchDivClass = this.state.isListHidden
       ? "search-coin hidden"
       : "search-coin";
+
+    const nameSortOrderIcon =
+      nameSortOrder === NOT_SELECTED ? (
+        <div className="not-selected" />
+      ) : nameSortOrder === ASC ? (
+        <Icon name="triangle down" />
+      ) : (
+        <Icon name="triangle up" />
+      );
+    const mentionSortOrderIcon =
+      mentionSortOrder === NOT_SELECTED ? (
+        <div className="not-selected" />
+      ) : mentionSortOrder === DESC ? (
+        <Icon name="triangle down" />
+      ) : (
+        <Icon name="triangle up" />
+      );
+    const priceSortOrderIcon =
+      priceSortOrder === NOT_SELECTED ? (
+        <div className="not-selected" />
+      ) : priceSortOrder === DESC ? (
+        <Icon name="triangle down" />
+      ) : (
+        <Icon name="triangle up" />
+      );
     return (
       <div className="coins">
         <div className={searchDivClass}>
@@ -211,11 +323,27 @@ class Coins extends Component {
           />
           <div className="coin-summary-list">
             <div className="coin-summary-header">
-              <div className="coin-summary__name">이름(심볼)</div>
-              <div className="coin-summary__mention">
+              <button
+                className="coin-summary__name"
+                onClick={this.handleSortByName}
+              >
+                이름(심볼)
+                {nameSortOrderIcon}
+              </button>
+              <button
+                className="coin-summary__mention"
+                onClick={this.handleSortByMentions}
+              >
                 최근 커뮤니티 언급비율
-              </div>
-              <div className="coin-summary__price">전일대비/시세</div>
+                {mentionSortOrderIcon}
+              </button>
+              <button
+                className="coin-summary__price"
+                onClick={this.handleSortByPriceChange}
+              >
+                전일대비/시세
+                {priceSortOrderIcon}
+              </button>
             </div>
             {results.length === 0 ? (
               <div className="no-match">일치하는 검색 결과가 없습니다.</div>
@@ -243,21 +371,42 @@ class Coins extends Component {
   }
 }
 
+const sortByNameAsc = (a, b) => {
+  return a.symbol < b.symbol ? -1 : a.symbol > b.symbol ? 1 : 0;
+};
+const sortByNameDesc = (a, b) => {
+  return a.symbol > b.symbol ? -1 : a.symbol < b.symbol ? 1 : 0;
+};
+
+const sortByPriceChangeAsc = (a, b) => {
+  return a.priceChange - b.priceChange;
+};
+const sortByPriceChangeDesc = (a, b) => {
+  return b.priceChange - a.priceChange;
+};
+
+const sortListByMentionsDesc = (a, b) => {
+  if (a.mentions === b.mentions) {
+    return sortByNameAsc(a, b);
+  } else {
+    return b.mentions - a.mentions;
+  }
+};
+const sortListByMentionsAsc = (a, b) => {
+  if (a.mentions === b.mentions) {
+    return sortByNameAsc(a, b);
+  } else {
+    return a.mentions - b.mentions;
+  }
+};
+
 const sortByMentions = obj => {
   let list = Object.keys(obj).map(key => {
     return obj[key];
   });
   list.sort((a, b) => {
     if (a.mentions === b.mentions) {
-      let symbolA = a.symbol;
-      let symbolB = b.symbol;
-      if (symbolA < symbolB) {
-        return -1;
-      } else if (symbolA > symbolB) {
-        return 1;
-      } else {
-        return 0;
-      }
+      return sortByNameAsc(a, b);
     } else {
       return b.mentions - a.mentions;
     }

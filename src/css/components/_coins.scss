@@ -89,6 +89,18 @@
     padding: 0 14px;
     height: 25px;
   }
+  button {
+    color: white;
+    display: flex;
+  }
+  button.coin-summary__mention,
+  button.coin-summary__price {
+    justify-content: flex-end;
+  }
+  .not-selected {
+    width: 15.3px;
+    height: 11px;
+  }
   .coin-summary-rows {
     height: calc(100% - 25px);
     overflow-y: auto;
