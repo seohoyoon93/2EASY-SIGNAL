@@ -80,6 +80,7 @@
   .coin-summary-rows {
     height: calc(100% - 25px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background-color: #666b88;
   }
   ::-webkit-scrollbar {
