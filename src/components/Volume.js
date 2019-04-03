@@ -18,7 +18,7 @@ class Volume extends Component {
     }));
   }
   render() {
-    const { candleData, selectedExchange, isSearching } = this.props;
+    const { candleData, selectedExchange } = this.props;
     const volumes = [
       candleData.volumeChanges.minVolumeChange,
       candleData.volumeChanges.threeMinVolumeChange,
@@ -143,15 +143,14 @@ class Volume extends Component {
         </div>
       );
 
-    let content =
-      candleData.isFetching || isSearching ? (
-        loadingContent
-      ) : (
-        <div>
-          {tradeVolContent}
-          {charts}
-        </div>
-      );
+    let content = candleData.isFetching ? (
+      loadingContent
+    ) : (
+      <div>
+        {tradeVolContent}
+        {charts}
+      </div>
+    );
     return (
       <div className="volume content-wrapper">
         <div className="content-header" onClick={this.handleClick}>
@@ -173,8 +172,7 @@ class Volume extends Component {
 const mapStateToProps = state => {
   return {
     candleData: state.exchange.candleData,
-    selectedExchange: state.exchange.selectedExchange,
-    isSearching: state.coin.isSearching
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 

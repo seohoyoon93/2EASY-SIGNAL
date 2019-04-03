@@ -79,15 +79,15 @@ class Coins extends Component {
     );
   }
 
+  resetComponent = () =>
+    this.setState({ results: sortByMentions(this.state.coins) });
+
   handleClick = (e, data) => {
     this.setState({ isListHidden: !this.state.isListHidden }, () => {
       document.getElementsByClassName("prompt")[0].focus();
       this.props.searchCoin();
     });
   };
-
-  resetComponent = () =>
-    this.setState({ results: sortByMentions(this.state.coins) });
 
   handleSearchChange = (e, { value }) => {
     if (value.length < 1) return this.resetComponent();
@@ -111,6 +111,10 @@ class Coins extends Component {
         nameKo: this.state.selectedCoin.nameKo
       });
     });
+  };
+
+  handleCloseClick = (e, data) => {
+    this.setState({ isListHidden: true });
   };
 
   render() {
@@ -198,6 +202,9 @@ class Coins extends Component {
     return (
       <div className="coins">
         <div className={searchDivClass}>
+          <button onClick={this.handleCloseClick} className="close-btn">
+            Close
+          </button>
           <Search
             loading={this.props.isFetching}
             onSearchChange={this.handleSearchChange}

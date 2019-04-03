@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "semantic-ui-react";
 
 const ExchangeList = props => {
-  const { exchanges, selectedExchange, isSearching } = props;
+  const { exchanges, selectedExchange } = props;
   let btns;
   if (exchanges.length === 1) {
     btns = (
@@ -14,7 +14,7 @@ const ExchangeList = props => {
     );
   } else {
     btns =
-      exchanges.length > 0 && !isSearching ? (
+      exchanges.length > 0 ? (
         exchanges.map(exchange => {
           const divClass = selectedExchange === exchange.name ? "selected" : "";
           return (

@@ -35,6 +35,18 @@
   left: -10px;
   right: 0;
   z-index: 999;
+  .close-btn {
+    position: absolute;
+    top: 12px;
+    left: 4px;
+    text-decoration: underline;
+    font-size: 1.2rem;
+    color: $gray;
+  }
+  .close-btn:hover {
+    cursor: pointer;
+    color: #000;
+  }
   .transparent-background {
     height: 100%;
     width: calc(100% + 20px);

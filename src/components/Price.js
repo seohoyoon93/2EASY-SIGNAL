@@ -18,7 +18,7 @@ class Price extends Component {
     }));
   }
   render() {
-    const { candleData, selectedExchange, isSearching } = this.props;
+    const { candleData, selectedExchange } = this.props;
     const priceChange = formatNumber(
       toSecondDecimalPoint(candleData.priceChanges.priceChange)
     );
@@ -143,37 +143,32 @@ class Price extends Component {
         </div>
       );
 
-    let content =
-      candleData.isFetching || isSearching ? (
-        loadingContent
-      ) : (
-        <div>
-          {selectedExchange === "Coinbit" ? (
-            <div className="price-info">
-              <div>
-                <h4>현재시세</h4>
-                <p>{`₩${formatNumber(
-                  candleData.priceChanges.currentPrice
-                )}`}</p>
-              </div>
+    let content = candleData.isFetching ? (
+      loadingContent
+    ) : (
+      <div>
+        {selectedExchange === "Coinbit" ? (
+          <div className="price-info">
+            <div>
+              <h4>현재시세</h4>
+              <p>{`₩${formatNumber(candleData.priceChanges.currentPrice)}`}</p>
             </div>
-          ) : (
-            <div className="price-info">
-              <div>
-                <h4>전일대비</h4>
-                <p className={priceDivClass}>{priceChangeText}</p>
-              </div>
-              <div>
-                <h4>현재시세</h4>
-                <p>{`₩${formatNumber(
-                  candleData.priceChanges.currentPrice
-                )}`}</p>
-              </div>
+          </div>
+        ) : (
+          <div className="price-info">
+            <div>
+              <h4>전일대비</h4>
+              <p className={priceDivClass}>{priceChangeText}</p>
             </div>
-          )}
-          {charts}
-        </div>
-      );
+            <div>
+              <h4>현재시세</h4>
+              <p>{`₩${formatNumber(candleData.priceChanges.currentPrice)}`}</p>
+            </div>
+          </div>
+        )}
+        {charts}
+      </div>
+    );
     return (
       <div className="price content-wrapper">
         <div className="content-header" onClick={this.handleClick}>
@@ -195,8 +190,7 @@ class Price extends Component {
 const mapStateToProps = state => {
   return {
     candleData: state.exchange.candleData,
-    selectedExchange: state.exchange.selectedExchange,
-    isSearching: state.coin.isSearching
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 

@@ -17,12 +17,7 @@ class Orderbook extends Component {
     }));
   }
   render() {
-    const {
-      orderbookData,
-      tradesData,
-      selectedExchange,
-      isSearching
-    } = this.props;
+    const { orderbookData, tradesData, selectedExchange } = this.props;
     let ask = orderbookData ? orderbookData.aggOrders.aggAsks : 1;
     let bid = orderbookData ? orderbookData.aggOrders.aggBids : 1;
 
@@ -41,7 +36,7 @@ class Orderbook extends Component {
       width: `${Math.round((bidTrades / totalTrades) * 100)}%`
     };
     let content =
-      orderbookData.isFetching || tradesData.isFetching || isSearching ? (
+      orderbookData.isFetching || tradesData.isFetching ? (
         selectedExchange === "Bitsonic" ? (
           <Dimmer active inverted>
             <Loader inverted>
@@ -119,8 +114,7 @@ const mapStateToProps = state => {
   return {
     orderbookData: state.exchange.orderbookData,
     tradesData: state.exchange.tradesData,
-    selectedExchange: state.exchange.selectedExchange,
-    isSearching: state.coin.isSearching
+    selectedExchange: state.exchange.selectedExchange
   };
 };
 

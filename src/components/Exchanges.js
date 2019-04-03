@@ -65,12 +65,7 @@ class Exchanges extends Component {
     );
   }
   render() {
-    const {
-      exchanges,
-      selectedExchange,
-      selectedCoinNameKo,
-      isSearching
-    } = this.props;
+    const { exchanges, selectedExchange, selectedCoinNameKo } = this.props;
     const announcementLink = (function(exchange) {
       switch (exchange) {
         case "Upbit":
@@ -91,7 +86,6 @@ class Exchanges extends Component {
         <ExchangeList
           exchanges={exchanges}
           selectedExchange={selectedExchange}
-          isSearching={isSearching}
           handleClick={this.handleClick}
         />
         <div className="exchanges-lower-section">
@@ -130,8 +124,7 @@ const mapStateToProps = state => {
     selectedExchange: state.exchange.selectedExchange,
     exchanges: state.coin.exchanges,
     selectedCoin: state.coin.selectedCoin,
-    selectedCoinNameKo: state.coin.selectedCoinNameKo,
-    isSearching: state.coin.isSearching
+    selectedCoinNameKo: state.coin.selectedCoinNameKo
   };
 };
 
