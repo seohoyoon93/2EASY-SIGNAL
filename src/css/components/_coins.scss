@@ -92,6 +92,8 @@
   button {
     color: white;
     display: flex;
+    outline: none;
+    cursor: pointer;
   }
   button.coin-summary__mention,
   button.coin-summary__price {
