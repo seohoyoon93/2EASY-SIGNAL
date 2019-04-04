@@ -24,11 +24,11 @@ export const selectExchange = exchange => {
         orderbookPromise =
           exchange === "Upbit"
             ? await upbit.getOrderbook(selectedCoin)
-            : bithumb.getOrderbook(selectedCoin);
+            : await bithumb.getOrderbook(selectedCoin);
         tradesPromise =
           exchange === "Upbit"
             ? await upbit.getTrades(selectedCoin)
-            : bithumb.getTrades(selectedCoin);
+            : await bithumb.getTrades(selectedCoin);
         await Promise.all([
           candlePromise,
           orderbookPromise,

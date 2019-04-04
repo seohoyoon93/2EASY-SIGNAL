@@ -25,7 +25,8 @@ exports.getCandleSticks = coin => {
     };
 
     rp(tickerOptions).then(parsedBody => {
-      const accTradeVol24h = parsedBody.data.volume_1day;
+      const accTradeVol24h =
+        parsedBody.data.volume_1day * parsedBody.data.average_price;
       const lastPrice = parseFloat(parsedBody.data.closing_price);
       const openPrice = parseFloat(parsedBody.data.opening_price);
       const priceChange = parseFloat(parsedBody.data["24H_fluctate_rate"]);
