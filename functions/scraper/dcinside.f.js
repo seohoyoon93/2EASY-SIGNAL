@@ -15,7 +15,7 @@ try {
 const url = "https://gall.dcinside.com/board/lists?id=bitcoins";
 const runtimeOpts = {
   timeoutSeconds: 200,
-  memory: "2GB"
+  memory: "1GB"
 };
 
 exports = module.exports = functions

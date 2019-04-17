@@ -14,7 +14,7 @@ try {
 
 const runtimeOpts = {
   timeoutSeconds: 110,
-  memory: "2GB"
+  memory: "1GB"
 };
 
 exports = module.exports = functions

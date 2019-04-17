@@ -12,7 +12,7 @@ try {
 
 const runtimeOpts = {
   timeoutSeconds: 25,
-  memory: "2GB"
+  memory: "128MB"
 };
 
 const db = admin.firestore();

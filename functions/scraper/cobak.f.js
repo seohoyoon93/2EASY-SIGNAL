@@ -16,7 +16,7 @@ const url = "https://cobak.co.kr/community/1";
 
 const runtimeOpts = {
   timeoutSeconds: 110,
-  memory: "2GB"
+  memory: "1GB"
 };
 
 exports = module.exports = functions

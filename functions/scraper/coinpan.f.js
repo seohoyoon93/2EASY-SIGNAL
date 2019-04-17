@@ -16,7 +16,7 @@ const url = "https://coinpan.com/free";
 const cred = require("../config/coinpan_credentials");
 const runtimeOpts = {
   timeoutSeconds: 110,
-  memory: "2GB"
+  memory: "1GB"
 };
 
 exports = module.exports = functions

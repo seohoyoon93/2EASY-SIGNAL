@@ -12,7 +12,7 @@ try {
 
 const runtimeOpts = {
   timeoutSeconds: 60,
-  memory: "2GB"
+  memory: "256MB"
 };
 
 const db = admin.firestore();
@@ -146,7 +146,9 @@ exports = module.exports = functions
 
     await batch
       .commit()
-      .then(() => res.send("Done"))
+      .then(() => {
+        res.send("Done");
+      })
       .catch(err => {
         request.post(constants.SLACK_WEBHOOK_URL, {
           json: {
