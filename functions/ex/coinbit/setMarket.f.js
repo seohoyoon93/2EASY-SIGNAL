@@ -46,22 +46,38 @@ exports = module.exports = functions.https.onRequest((req, res) => {
     "OMG"
   ];
   admin
-    .firestore()
-    .doc("exchanges/coinbit")
+    .database()
+    .ref("exchanges/coinbit")
     .set({
       name: "Coinbit",
       link: "https://www.coinbit.co.kr",
       bases: bases
     })
     .then(() => {
-      console.log("Successfully updated coinbit!");
+      console.log("realtime db update for coinbit");
       res.send("Done");
     })
     .catch(err => {
-      request.post(constants.SLACK_WEBHOOK_URL, {
-        json: { text: `Coinbit set market db writing error: ${err}` }
-      });
       console.error("Error updating coinbit");
       res.status(500).send(err);
     });
+  // admin
+  //   .firestore()
+  //   .doc("exchanges/coinbit")
+  //   .set({
+  //     name: "Coinbit",
+  //     link: "https://www.coinbit.co.kr",
+  //     bases: bases
+  //   })
+  //   .then(() => {
+  //     console.log("Successfully updated coinbit!");
+  //     res.send("Done");
+  //   })
+  //   .catch(err => {
+  //     request.post(constants.SLACK_WEBHOOK_URL, {
+  //       json: { text: `Coinbit set market db writing error: ${err}` }
+  //     });
+  //     console.error("Error updating coinbit");
+  //     res.status(500).send(err);
+  //   });
 });

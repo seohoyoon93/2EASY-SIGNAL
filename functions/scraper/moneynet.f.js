@@ -50,8 +50,9 @@ exports = module.exports = functions
           contentIds.push(contentId);
         });
 
-      const db = admin.firestore();
-      let batch = db.batch();
+      // const db = admin.firestore();
+      // let batch = db.batch();
+      const db = admin.database();
 
       await contentIds.reduce(async (promise, contentId) => {
         const link = "https://www.moneynet.co.kr/free_board/" + contentId;
@@ -79,16 +80,22 @@ exports = module.exports = functions
 
         const comments = await $("#comment .xe_content", subHtml).text();
 
-        const ref = db.doc(`communities/moneynet/data/${contentId}`);
-
-        batch.set(ref, {
+        await db.ref(`communities/moneynet/${contentId}`).set({
           title,
           content,
           comments,
           timestamp
         });
+        // const ref = db.doc(`communities/moneynet/data/${contentId}`);
+
+        // batch.set(ref, {
+        //   title,
+        //   content,
+        //   comments,
+        //   timestamp
+        // });
       }, Promise.resolve());
-      await batch.commit();
+      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Moneynet scraper error: ${e}` }
@@ -100,5 +107,5 @@ exports = module.exports = functions
       }
     }
 
-    return res.send("Done");
+    await res.send("Done");
   });

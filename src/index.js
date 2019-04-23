@@ -6,17 +6,19 @@ import * as serviceWorker from "./serviceWorker";
 import { createStore, applyMiddleware, compose } from "redux";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
-import { reduxFirestore, getFirestore } from "redux-firestore";
-import { reactReduxFirebase, getFirebase } from "react-redux-firebase";
+// import { reduxFirestore, getFirestore } from "redux-firestore";
+// import { reactReduxFirebase, getFirebase } from "react-redux-firebase";
+// import { reactReduxFirebase } from "react-redux-firebase";
 import rootReducer from "./store/reducers/rootReducer";
 import firebase from "./config/fbConfig";
 
 const store = createStore(
   rootReducer,
   compose(
-    applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
-    reduxFirestore(firebase),
-    reactReduxFirebase(firebase)
+    // applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
+    applyMiddleware(thunk)
+    // reduxFirestore(firebase),
+    // reactReduxFirebase(firebase)
   )
 );
 const hitCounter = firebase.functions().httpsCallable("countVisitors");

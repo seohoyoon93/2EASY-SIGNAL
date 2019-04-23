@@ -15,7 +15,8 @@ const runtimeOpts = {
   memory: "128MB"
 };
 
-const db = admin.firestore();
+// const db = admin.firestore();
+const db = admin.database();
 
 exports = module.exports = functions
   .runWith(runtimeOpts)
@@ -25,14 +26,19 @@ exports = module.exports = functions
     let bithumbBases = [];
     let coinRefs = [];
 
-    await admin
-      .firestore()
-      .collection("coins")
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          coins.push(doc.data());
-          coinRefs.push({ ref: doc.ref, symbol: doc.data().symbol });
+    // await admin
+    //   .firestore()
+    //   .collection("coins")
+    //   .get()
+    db.ref("coins")
+      .once("value")
+      .then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          coins.push(childSnapshot.val());
+          coinRefs.push({
+            ref: `coins/${childSnapshot.key}`,
+            symbol: childSnapshot.val().symbol
+          });
         });
       })
       .catch(err => {
@@ -43,19 +49,27 @@ exports = module.exports = functions
         });
         console.log(err);
       });
-    await admin
-      .firestore()
-      .doc("exchanges/upbit")
-      .get()
-      .then(doc => {
-        upbitBases = doc.data().bases;
+
+    // await admin
+    // .firestore()
+    // .doc("exchanges/upbit")
+    // .get()
+    await db
+      .ref("exchanges/upbit")
+      .once("value")
+      .then(snapshot => {
+        upbitBases = snapshot.val().bases;
       });
-    await admin
-      .firestore()
-      .doc("exchanges/bithumb")
-      .get()
-      .then(doc => {
-        bithumbBases = doc.data().bases;
+
+    // await admin
+    //   .firestore()
+    //   .doc("exchanges/bithumb")
+    //   .get()
+    await db
+      .ref("exchanges/bithumb")
+      .once("value")
+      .then(snapshot => {
+        bithumbBases = snapshot.val().bases;
       });
 
     const remainingCoins = await coins
@@ -96,29 +110,36 @@ exports = module.exports = functions
         });
     }, Promise.resolve());
 
-    const prices = bithumbPrices;
+    const prices = await bithumbPrices;
 
-    let batch = db.batch();
+    // let batch = db.batch();
 
     await prices.reduce(async (promise, item) => {
       let ref = coinRefs.filter(elem => elem.symbol === item.base)[0].ref;
-
-      batch.update(ref, {
+      db.ref(ref).update({
         price: item.price,
         priceChange: item.priceChange,
         updatedAt: Date.now()
       });
+
+      // batch.update(ref, {
+      //   price: item.price,
+      //   priceChange: item.priceChange,
+      //   updatedAt: Date.now()
+      // });
     }, Promise.resolve());
 
-    await batch
-      .commit()
-      .then(() => {
-        res.send("Done");
-      })
-      .catch(err => {
-        request.post(constants.SLACK_WEBHOOK_URL, {
-          json: { text: `Error updating Bithumb coin price db writing: ${err}` }
-        });
-        console.log(err);
-      });
+    await res.send("done");
+
+    // await batch
+    //   .commit()
+    //   .then(() => {
+    //     res.send("Done");
+    //   })
+    //   .catch(err => {
+    //     request.post(constants.SLACK_WEBHOOK_URL, {
+    //       json: { text: `Error updating Bithumb coin price db writing: ${err}` }
+    //     });
+    //     console.log(err);
+    //   });
   });

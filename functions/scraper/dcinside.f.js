@@ -47,8 +47,9 @@ exports = module.exports = functions
       );
       let contentIds = tempContentIds.sort((a, b) => b - a).slice(0, 14);
 
-      const db = admin.firestore();
-      let batch = db.batch();
+      // const db = admin.firestore();
+      // let batch = db.batch();
+      const db = admin.database();
       await contentIds.reduce(async (promise, contentId) => {
         const link =
           "https://gall.dcinside.com/board/view/?id=bitcoins&no=" + contentId;
@@ -66,16 +67,22 @@ exports = module.exports = functions
         content = content + content2;
         const comments = await $("ul.cmt_list li.ub-content p", subHtml).text();
 
-        const ref = db.doc(`communities/dcinside/data/${contentId}`);
-
-        batch.set(ref, {
+        await db.ref(`communities/dcinside/${contentId}`).set({
           title,
           content,
           comments,
           timestamp
         });
+        // const ref = db.doc(`communities/dcinside/data/${contentId}`);
+
+        // batch.set(ref, {
+        //   title,
+        //   content,
+        //   comments,
+        //   timestamp
+        // });
       }, Promise.resolve());
-      await batch.commit();
+      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Dcinside scraper error: ${e}` }
@@ -87,5 +94,5 @@ exports = module.exports = functions
       }
     }
 
-    return res.send("Done");
+    await res.send("Done");
   });

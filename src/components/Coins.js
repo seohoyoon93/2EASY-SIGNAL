@@ -24,20 +24,23 @@ class Coins extends Component {
   }
 
   async componentDidMount() {
-    const db = firebase.firestore();
+    // const db = firebase.firestore();
+    const db = firebase.database();
 
     const coinsPromise = new Promise((resolve, reject) => {
       let coinObj = {};
-      db.collection("coins")
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            const id = doc.id;
-            const nameEn = doc.data().nameEn;
-            const nameKo = doc.data().nameKo;
-            const symbol = doc.data().symbol;
-            const price = doc.data().price;
-            const priceChange = doc.data().priceChange;
+      db.ref("coins")
+        .once("value")
+        // db.collection("coins")
+        //   .get()
+        .then(snapshot => {
+          snapshot.forEach(childSnapshot => {
+            const id = childSnapshot.key;
+            const nameEn = childSnapshot.val().nameEn;
+            const nameKo = childSnapshot.val().nameKo;
+            const symbol = childSnapshot.val().symbol;
+            const price = childSnapshot.val().price;
+            const priceChange = childSnapshot.val().priceChange;
 
             coinObj[symbol] = {
               id,
@@ -55,12 +58,17 @@ class Coins extends Component {
         });
     });
     const mentionsPromise = new Promise((resolve, reject) => {
-      db.collection("mentions")
-        .orderBy("timestamp", "desc")
-        .get()
-        .then(querySnapshot => {
-          let latestMention = querySnapshot.docs[0];
-          resolve(latestMention.data());
+      // db.collection("mentions")
+      //   .orderBy("timestamp", "desc")
+      //   .get()
+      db.ref("mentions")
+        .orderByChild("timestamp")
+        .limitToLast(1)
+        .once("value")
+        .then(snapshot => {
+          // let latestMention = snapshot.docs[0];
+          // resolve(latestMention.data());
+          resolve(snapshot.val()[Object.keys(snapshot.val())[0]]);
         })
         .catch(err => {
           reject(err);

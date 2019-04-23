@@ -47,11 +47,14 @@ class App extends Component {
     });
 
     firebase
-      .firestore()
-      .doc("views/count")
-      .get()
-      .then(doc => {
-        this.setState({ visitors: doc.data().count });
+      // .firestore()
+      // .doc("views/count")
+      // .get()
+      .database()
+      .ref("views/count")
+      .once("value")
+      .then(snapshot => {
+        this.setState({ visitors: snapshot.val() });
       })
       .catch(err => {
         console.log("error retrieving count data");

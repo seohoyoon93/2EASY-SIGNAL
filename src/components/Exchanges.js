@@ -16,15 +16,20 @@ class Exchanges extends Component {
     this.handleClick = this.handleClick.bind(this);
   }
   async componentDidMount() {
-    const db = firebase.firestore();
+    // const db = firebase.firestore();
+    const db = firebase.database();
 
     const mentionsPromise = new Promise((resolve, reject) => {
-      db.collection("mentions")
-        .orderBy("timestamp", "desc")
-        .get()
-        .then(querySnapshot => {
-          let latestMention = querySnapshot.docs[0];
-          resolve(latestMention.data());
+      // db.collection("mentions")
+      //   .orderBy("timestamp", "desc")
+      //   .get()
+      db.ref("mentions")
+        .orderByChild("timestamp")
+        .limitToLast(1)
+        .once("value")
+        .then(snapshot => {
+          // let latestMention = snapshot.docs[0];
+          resolve(snapshot.val()[Object.keys(snapshot.val())[0]]);
         })
         .catch(err => {
           reject(err);

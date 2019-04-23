@@ -47,8 +47,9 @@ exports = module.exports = functions
         contentIds.push(contentId);
       });
 
-      const db = admin.firestore();
-      let batch = db.batch();
+      // const db = admin.firestore();
+      // let batch = db.batch();
+      const db = admin.database();
 
       await contentIds.reduce(async (promise, contentId) => {
         const link = "https://cobak.co.kr/community/1/post/" + contentId;
@@ -62,9 +63,15 @@ exports = module.exports = functions
           const title = await $("div.title___1kaUK", subHtml).text();
           const content = await $("div.cobak-html p", subHtml).text();
           const comments = "";
-          const ref = db.doc(`communities/cobak/data/${contentId}`);
+          // const ref = db.doc(`communities/cobak/data/${contentId}`);
 
-          batch.set(ref, {
+          // batch.set(ref, {
+          //   title,
+          //   content,
+          //   comments,
+          //   timestamp
+          // });
+          await db.ref(`communities/cobak/${contentId}`).set({
             title,
             content,
             comments,
@@ -76,17 +83,23 @@ exports = module.exports = functions
           const content = await $("div.cobak-html p", subHtml).text();
           const comments = "";
 
-          const ref = db.doc(`communities/cobak/data/${contentId}`);
-
-          batch.set(ref, {
+          // const ref = db.doc(`communities/cobak/data/${contentId}`);
+          await db.ref(`communities/cobak/${contentId}`).set({
             title,
             content,
             comments,
             timestamp
           });
+
+          // batch.set(ref, {
+          //   title,
+          //   content,
+          //   comments,
+          //   timestamp
+          // });
         }
       }, Promise.resolve());
-      await batch.commit();
+      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Cobak Scraper error: ${e}` }

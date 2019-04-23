@@ -26,8 +26,10 @@ exports = module.exports = functions.https.onRequest((req, res) => {
       const obj = JSON.parse(result);
       const bases = Object.keys(obj.data).filter(base => base !== "date");
       admin
-        .firestore()
-        .doc("exchanges/bithumb")
+        .database()
+        .ref("exchanges/bithumb")
+        // .firestore()
+        // .doc("exchanges/bithumb")
         .set({
           name: "Bithumb",
           link: "https://www.bithumb.com/",

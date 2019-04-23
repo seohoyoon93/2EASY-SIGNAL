@@ -32,9 +32,7 @@ exports = module.exports = functions.https.onRequest((req, res) => {
     "DEAL",
     "GXC",
     "LTC",
-    "ARBI",
     "DRC",
-    "UUNIO",
     "BNB",
     "CLB",
     "RVN",
@@ -133,8 +131,10 @@ exports = module.exports = functions.https.onRequest((req, res) => {
     "IUC"
   ];
   admin
-    .firestore()
-    .doc("exchanges/bitsonic")
+    .database()
+    .ref("exchanges/bitsonic")
+    // .firestore()
+    // .doc("exchanges/bitsonic")
     .set({
       name: "Bitsonic",
       link: "https://bitsonic.co.kr",

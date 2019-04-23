@@ -90,7 +90,6 @@ const coins = [
   { nameEn: "Golem", symbol: "GNT", nameKo: "골렘" },
   { nameEn: "Ignis ", symbol: "IGNIS", nameKo: "이그니스" },
   { nameEn: "Bitcoin Gold", symbol: "BTG", nameKo: "비트코인골드" },
-  { nameEn: "Lisk", symbol: "LSK", nameKo: "리스크" },
   { nameEn: "Monero", symbol: "XMR", nameKo: "모네로" },
   { nameEn: "Augur", symbol: "REP", nameKo: "어거" },
   { nameEn: "Dash", symbol: "DASH", nameKo: "대시" },
@@ -110,7 +109,6 @@ const coins = [
   { nameEn: "Game X Coin", symbol: "GXC", nameKo: "게임엑스코인" },
   { nameEn: "Cloudbric", symbol: "CLB", nameKo: "클라우드브릭" },
   { nameEn: "RealTract", symbol: "RET", nameKo: "리얼트랙트" },
-  { nameEn: "UUNIO", symbol: "UUNIO", nameKo: "유니오" },
   { nameEn: "Deal Coin", symbol: "DEAL", nameKo: "딜" },
   {
     nameEn: "Contents Neutrality Network",
@@ -119,7 +117,6 @@ const coins = [
   },
   { nameEn: "Ravencoin", symbol: "RVN", nameKo: "레이븐코인" },
   { nameEn: "Dexter", symbol: "DXR", nameKo: "덱스터" },
-  { nameEn: "Arbi Token", symbol: "ARBI", nameKo: "아비토큰" },
   { nameEn: "Zper", symbol: "ZPR", nameKo: "지퍼" },
   { nameEn: "Horizen", symbol: "ZEN", nameKo: "호라이즌" },
   { nameEn: "Holo", symbol: "HOT", nameKo: "홀로" },
@@ -231,7 +228,6 @@ const coins = [
   { nameEn: "Sun Chain", symbol: "SUNC", nameKo: "썬체인" },
   { nameEn: "TudaToken", symbol: "TUDA", nameKo: "튜다" },
   { nameEn: "Frontier", symbol: "FRNT", nameKo: "프론티어" },
-  { nameEn: "Lisk", symbol: "LISK", nameKo: "리스크" },
   { nameEn: "Kin", symbol: "KIN", nameKo: "킨" },
   { nameEn: "Maximine Coin", symbol: "MXM", nameKo: "맥시마인 코인" },
   { nameEn: "Revain", symbol: "R", nameKo: "리베인" },
@@ -239,16 +235,19 @@ const coins = [
   { nameEn: "Nxt", symbol: "NXT", nameKo: "엔엑스티" },
   { nameEn: "Nexo", symbol: "NEXO", nameKo: "넥소" },
   { nameEn: "Next", symbol: "NET", nameKo: "넥스트" },
-  { nameEn: "Blockmason Link", symbol: "BLINK", nameKo: "블록메이슨링크" }
+  { nameEn: "Blockmason Link", symbol: "BLINK", nameKo: "블록메이슨링크" },
+  { nameEn: "TTC Protocol", symbol: "TTC", nameKo: "티티씨프로토콜" },
+  { nameEn: "Ankr Network", symbol: "ANKR", nameKo: "앵커" }
 ];
 
 exports = module.exports = functions.https.onRequest(async (req, res) => {
   await coins.reduce(async (promise, coin) => {
-    await promise;
-    await admin
-      .firestore()
-      .collection("coins")
-      .add({
+    admin
+      .database()
+      .ref("coins/" + coin.symbol)
+      // .firestore()
+      // .collection("coins")
+      .update({
         nameEn: coin.nameEn,
         nameKo: coin.nameKo,
         symbol: coin.symbol

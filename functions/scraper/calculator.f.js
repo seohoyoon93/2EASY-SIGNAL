@@ -35,8 +35,10 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
   const coins = await helper.countCoinNickname(totalText);
   const timestamp = Date.now();
   await admin
-    .firestore()
-    .doc(`mentions/${timestamp}`)
+    // .firestore()
+    // .doc(`mentions/${timestamp}`)
+    .database()
+    .ref(`mentions/${timestamp}`)
     .set({
       mentions: coins,
       timestamp: timestamp
@@ -58,19 +60,24 @@ function getCommPromise(community) {
 
   return new Promise((resolve, reject) => {
     admin
-      .firestore()
-      .collection(`communities/${community}/data/`)
-      .where("timestamp", ">=", thirtyMinAgo)
-      .get()
-      .then(querySnapshot => {
+      // .firestore()
+      // .collection(`communities/${community}/data/`)
+      // .where("timestamp", ">=", thirtyMinAgo)
+      // .get()
+      .database()
+      .ref(`communities/${community}`)
+      .orderByChild("timestamp")
+      .startAt(thirtyMinAgo)
+      .once("value")
+      .then(snapshot => {
         let result = "";
-        querySnapshot.forEach(doc => {
+        snapshot.forEach(childSnapshot => {
           const text =
-            doc.data().title +
+            childSnapshot.val().title +
             " " +
-            doc.data().content +
+            childSnapshot.val().content +
             " " +
-            doc.data().comments;
+            childSnapshot.val().comments;
           result += " " + text;
         });
         resolve(result);

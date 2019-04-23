@@ -60,8 +60,9 @@ exports = module.exports = functions
       }
       const html = await mframe.content();
 
-      const db = admin.firestore();
-      let batch = db.batch();
+      // const db = admin.firestore();
+      // let batch = db.batch();
+      const db = admin.database();
       await $("div.article-board", html)
         .not("#upperArticleList")
         .find("tr")
@@ -91,17 +92,23 @@ exports = module.exports = functions
               .find("div.board-number div.inner_number")
               .text();
 
-            const ref = db.doc(`communities/coinplanet/data/${contentId}`);
-
-            batch.set(ref, {
+            await db.ref(`communities/coinplanet/${contentId}`).set({
               title,
               content,
               comments,
               timestamp
             });
+            // const ref = db.doc(`communities/coinplanet/data/${contentId}`);
+
+            // batch.set(ref, {
+            //   title,
+            //   content,
+            //   comments,
+            //   timestamp
+            // });
           }
         });
-      await batch.commit();
+      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Coinplanet scraper error: ${e}` }
@@ -113,5 +120,5 @@ exports = module.exports = functions
       }
     }
 
-    return res.send("Done");
+    await res.send("Done");
   });

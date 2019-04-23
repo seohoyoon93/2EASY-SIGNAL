@@ -27,8 +27,10 @@ exports = module.exports = functions.https.onRequest((req, res) => {
         bases.push(base);
       });
       admin
-        .firestore()
-        .doc("exchanges/upbit")
+        .database()
+        .ref("exchanges/upbit")
+        // .firestore()
+        // .doc("exchanges/upbit")
         .set({
           name: "Upbit",
           link: "https://www.upbit.com",
