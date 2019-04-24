@@ -43,7 +43,8 @@ exports = module.exports = functions.https.onRequest((req, res) => {
     "TUSD",
     "BTG",
     "SNT",
-    "OMG"
+    "OMG",
+    "EDR"
   ];
   admin
     .database()
