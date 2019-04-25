@@ -57,8 +57,6 @@ exports = module.exports = functions
             .match(/[0-9]+/)[0];
           contentIds.push(contentId);
         });
-      // const db = admin.firestore();
-      // let batch = db.batch();
       const db = admin.database();
       await contentIds.reduce(async (promise, contentId) => {
         const link = "https://coinpan.com/free/" + contentId;
@@ -76,22 +74,13 @@ exports = module.exports = functions
         const content = await $("div.read_body .xe_content", subHtml).text();
         const comments = await $("#comment .xe_content", subHtml).text();
 
-        // const ref = db.doc(`communities/coinpan/data/${contentId}`);
         await db.ref(`communities/coinpan/${contentId}`).set({
           title,
           content,
           comments,
           timestamp
         });
-
-        // batch.set(ref, {
-        //   title,
-        //   content,
-        //   comments,
-        //   timestamp
-        // });
       }, Promise.resolve());
-      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Coinpan scaper error: ${e}` }

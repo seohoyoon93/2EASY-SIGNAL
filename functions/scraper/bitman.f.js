@@ -56,9 +56,7 @@ exports = module.exports = functions
       }
 
       const html = await mframe.content();
-      // const db = admin.firestore();
       const db = admin.database();
-      // let batch = db.batch();
 
       await $("div.article-board", html)
         .not("#upperArticleList")
@@ -89,23 +87,14 @@ exports = module.exports = functions
               .find("div.board-number div.inner_number")
               .text();
 
-            // const ref = db.doc(`communities/bitman/data/${contentId}`);
             db.ref(`communities/bitman/${contentId}`).set({
               title,
               content,
               comments,
               timestamp
             });
-
-            // batch.set(ref, {
-            //   title,
-            //   content,
-            //   comments,
-            //   timestamp
-            // });
           }
         });
-      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Bitman scraping error: ${e}` }

@@ -35,8 +35,6 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
   const coins = await helper.countCoinNickname(totalText);
   const timestamp = Date.now();
   await admin
-    // .firestore()
-    // .doc(`mentions/${timestamp}`)
     .database()
     .ref(`mentions/${timestamp}`)
     .set({
@@ -60,10 +58,6 @@ function getCommPromise(community) {
 
   return new Promise((resolve, reject) => {
     admin
-      // .firestore()
-      // .collection(`communities/${community}/data/`)
-      // .where("timestamp", ">=", thirtyMinAgo)
-      // .get()
       .database()
       .ref(`communities/${community}`)
       .orderByChild("timestamp")

@@ -47,8 +47,6 @@ exports = module.exports = functions
       );
       let contentIds = tempContentIds.sort((a, b) => b - a).slice(0, 14);
 
-      // const db = admin.firestore();
-      // let batch = db.batch();
       const db = admin.database();
       await contentIds.reduce(async (promise, contentId) => {
         const link =
@@ -73,16 +71,7 @@ exports = module.exports = functions
           comments,
           timestamp
         });
-        // const ref = db.doc(`communities/dcinside/data/${contentId}`);
-
-        // batch.set(ref, {
-        //   title,
-        //   content,
-        //   comments,
-        //   timestamp
-        // });
       }, Promise.resolve());
-      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Dcinside scraper error: ${e}` }

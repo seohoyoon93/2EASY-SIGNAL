@@ -245,8 +245,6 @@ exports = module.exports = functions.https.onRequest(async (req, res) => {
     admin
       .database()
       .ref("coins/" + coin.symbol)
-      // .firestore()
-      // .collection("coins")
       .update({
         nameEn: coin.nameEn,
         nameKo: coin.nameKo,

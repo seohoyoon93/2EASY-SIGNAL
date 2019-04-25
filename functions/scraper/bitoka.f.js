@@ -58,8 +58,6 @@ exports = module.exports = functions
 
       const html = await mframe.content();
 
-      // const db = admin.firestore();
-      // let batch = db.batch();
       const db = admin.database();
       await $("div.article-board", html)
         .not("#upperArticleList")
@@ -96,17 +94,8 @@ exports = module.exports = functions
               comments,
               timestamp
             });
-            // const ref = db.doc(`communities/bitoka/data/${contentId}`);
-
-            // batch.set(ref, {
-            //   title,
-            //   content,
-            //   comments,
-            //   timestamp
-            // });
           }
         });
-      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Bitoka scraping error: ${e}` }

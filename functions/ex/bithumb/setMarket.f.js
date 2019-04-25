@@ -28,8 +28,6 @@ exports = module.exports = functions.https.onRequest((req, res) => {
       admin
         .database()
         .ref("exchanges/bithumb")
-        // .firestore()
-        // .doc("exchanges/bithumb")
         .set({
           name: "Bithumb",
           link: "https://www.bithumb.com/",

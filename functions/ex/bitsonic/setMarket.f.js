@@ -133,8 +133,6 @@ exports = module.exports = functions.https.onRequest((req, res) => {
   admin
     .database()
     .ref("exchanges/bitsonic")
-    // .firestore()
-    // .doc("exchanges/bitsonic")
     .set({
       name: "Bitsonic",
       link: "https://bitsonic.co.kr",

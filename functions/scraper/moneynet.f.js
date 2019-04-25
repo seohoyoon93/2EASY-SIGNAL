@@ -50,8 +50,6 @@ exports = module.exports = functions
           contentIds.push(contentId);
         });
 
-      // const db = admin.firestore();
-      // let batch = db.batch();
       const db = admin.database();
 
       await contentIds.reduce(async (promise, contentId) => {
@@ -86,16 +84,7 @@ exports = module.exports = functions
           comments,
           timestamp
         });
-        // const ref = db.doc(`communities/moneynet/data/${contentId}`);
-
-        // batch.set(ref, {
-        //   title,
-        //   content,
-        //   comments,
-        //   timestamp
-        // });
       }, Promise.resolve());
-      // await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Moneynet scraper error: ${e}` }

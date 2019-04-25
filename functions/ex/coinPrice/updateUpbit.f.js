@@ -15,7 +15,6 @@ const runtimeOpts = {
   memory: "128MB"
 };
 
-// const db = admin.firestore();
 const db = admin.database();
 
 exports = module.exports = functions
@@ -25,10 +24,6 @@ exports = module.exports = functions
     let upbitBases = [];
     let coinRefs = [];
 
-    // await admin
-    //   .firestore()
-    //   .collection("coins")
-    //   .get()
     db.ref("coins")
       .once("value")
       .then(snapshot => {
@@ -48,10 +43,7 @@ exports = module.exports = functions
         });
         console.log(err);
       });
-    // await admin
-    //   .firestore()
-    //   .doc("exchanges/upbit")
-    //   .get()
+
     await db
       .ref("exchanges/upbit")
       .once("value")
@@ -92,7 +84,6 @@ exports = module.exports = functions
 
     const prices = await upbitPrices;
 
-    // let batch = db.batch();
     await prices.reduce(async (promise, item) => {
       let ref = coinRefs.filter(elem => elem.symbol === item.base)[0].ref;
       db.ref(ref).update({
@@ -100,20 +91,6 @@ exports = module.exports = functions
         priceChange: item.priceChange,
         updatedAt: Date.now()
       });
-      // batch.update(ref, {
-      //   price: item.price,
-      //   priceChange: item.priceChange,
-      //   updatedAt: Date.now()
-      // });
     }, Promise.resolve());
     await res.send("done");
-    // await batch
-    //   .commit()
-    //   .then(() => res.send("Done"))
-    //   .catch(err => {
-    //     request.post(constants.SLACK_WEBHOOK_URL, {
-    //       json: { text: `Error updating Upbit coin price db writing: ${err}` }
-    //     });
-    //     console.log(err);
-    //   });
   });

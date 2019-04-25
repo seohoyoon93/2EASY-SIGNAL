@@ -56,8 +56,7 @@ exports = module.exports = functions
         });
 
       let contentIds = tempContentIds.sort((a, b) => b - a).slice(0, 20);
-      const db = admin.firestore();
-      let batch = db.batch();
+      const db = admin.database();
       await contentIds.reduce(async (promise, contentId) => {
         const link =
           "http://cointalk.co.kr/bbs/board.php?bo_table=freeboard&wr_id=" +
@@ -77,16 +76,14 @@ exports = module.exports = functions
         content = content2 + content;
 
         const comments = await $("#st-comment p", subHtml).text();
-        const ref = db.doc(`communities/cointalk/data/${contentId}`);
 
-        batch.set(ref, {
+        await db.ref(`communities/cointalk/${contentId}`).set({
           title,
           content,
           comments,
           timestamp
         });
       }, Promise.resolve());
-      await batch.commit();
     } catch (e) {
       request.post(constants.SLACK_WEBHOOK_URL, {
         json: { text: `Cointalk scraper error: ${e}` }
